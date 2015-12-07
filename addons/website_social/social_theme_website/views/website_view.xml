@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <!-- Cambia la firma del pie de la pagina web -->
+        <template id="website.layout_footer_copyright" inherit_id="website.layout" name="Footer Copyright">
+            <xpath expr="//footer" position="inside">
+                <div class="container mt16 mb8">
+                    <div class="pull-right" t-ignore="true" t-if="not editable">
+			<a style="font-weight:bold; color: black" href="http://sistema.social">
+	                   Sistema 
+			   <font color="#E50B09">S</font><font color="#F68804">o</font><font color="#F7E502">c</font><font color="#A0EE04">i</font><font color="#04A309">a</font><font color="#0A63BD">l</font>
+	                </a>
+                    </div>
+                    <div class="pull-left text-muted">
+                        Copyright &amp;copy; <span t-field="res_company.name">Company name</span>
+                    </div>
+                </div>
+            </xpath>
+        </template>
+    </data>
+</openerp>
