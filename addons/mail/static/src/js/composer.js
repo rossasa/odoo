@@ -1,10 +1,11 @@
-odoo.define('mail.ChatComposer', function (require) {
+odoo.define('mail.composer', function (require) {
 "use strict";
 
 var chat_manager = require('mail.chat_manager');
 
 var core = require('web.core');
 var data = require('web.data');
+var dom_utils = require('web.dom_utils');
 var Model = require('web.Model');
 var session = require('web.session');
 var Widget = require('web.Widget');
@@ -23,6 +24,7 @@ var accented_letters_mapping = {
     'oe': 'œ',
     'u': '[ùúûűü]',
     'y': '[ýÿ]',
+    ' ': '[()\\[\\]]',
 };
 
 // The MentionManager allows the Composer to register listeners. For each
@@ -218,7 +220,8 @@ var MentionManager = Widget.extend({
      */
     generate_links: function (s) {
         var self = this;
-        var mention_link = "<a href='#' class='%s' data-oe-id='%s' data-oe-model='%s'>%s%s</a>";
+        var base_href = session.url("/web");
+        var mention_link = "<a href='%s' class='%s' data-oe-id='%s' data-oe-model='%s' target='_blank'>%s%s</a>";
         _.each(this.listeners, function (listener) {
             var selection = listener.selection;
             if (selection.length) {
@@ -229,7 +232,8 @@ var MentionManager = Widget.extend({
                     var match = matches[i];
                     var end_index = match.index + match[0].length;
                     var match_name = match[0].substring(1);
-                    var processed_text = _.str.sprintf(mention_link, listener.redirect_classname, selection[i].id, listener.model, listener.delimiter, match_name);
+                    var href = base_href + _.str.sprintf("#model=%s&id=%s", listener.model, selection[i].id);
+                    var processed_text = _.str.sprintf(mention_link, href, listener.redirect_classname, selection[i].id, listener.model, listener.delimiter, match_name);
                     var subtext = s.substring(start_index, end_index).replace(match[0], processed_text);
                     substrings.push(subtext);
                     start_index = end_index;
@@ -307,11 +311,11 @@ var MentionManager = Widget.extend({
 
 });
 
-var Composer = Widget.extend({
+var BasicComposer = Widget.extend({
     template: "mail.ChatComposer",
 
     events: {
-        "keydown .o_composer_input": "on_keydown",
+        "keydown .o_composer_input textarea": "on_keydown",
         "keyup .o_composer_input": "on_keyup",
         "change input.o_form_input_file": "on_attachment_change",
         "click .o_composer_button_send": "send_message",
@@ -327,6 +331,7 @@ var Composer = Widget.extend({
             input_max_height: 150,
             input_min_height: 28,
             mention_fetch_limit: 8,
+            send_text: _('Send'),
         });
         this.context = this.options.context;
 
@@ -349,6 +354,10 @@ var Composer = Widget.extend({
             model: 'mail.channel',
             redirect_classname: 'o_channel_redirect',
         });
+
+        // Emojis
+        this.emoji_container_classname = 'o_composer_emoji';
+
         this.PartnerModel = new Model('res.partner');
         this.ChannelModel = new Model('mail.channel');
     },
@@ -358,11 +367,11 @@ var Composer = Widget.extend({
 
         this.$attachment_button = this.$(".o_composer_button_add_attachment");
         this.$attachments_list = this.$('.o_composer_attachments_list');
-        this.$input = this.$('.o_composer_input');
+        this.$input = this.$('.o_composer_input textarea');
         this.$input.focus(function () {
             self.trigger('input_focused');
         });
-        this.resize_input();
+        dom_utils.autoresize(this.$input, {parent: this, min_height: this.options.input_min_height});
 
         // Attachments
         $(window).on(this.fileupload_id, this.on_attachment_loaded);
@@ -381,7 +390,7 @@ var Composer = Widget.extend({
                 return self.$emojis;
             },
             html: true,
-            container: '.o_composer_emoji',
+            container: '.' + self.emoji_container_classname,
             trigger: 'focus',
         });
 
@@ -391,10 +400,14 @@ var Composer = Widget.extend({
         return this._super();
     },
 
+    toggle: function(state) {
+        this.$el.toggle(state);
+    },
+
     preprocess_message: function () {
         // Return a deferred as this function is extended with asynchronous
         // behavior for the chatter composer
-        var value = this.$input.val().replace(/\n|\r/g, '<br/>');
+        var value = _.escape(this.$input.val()).replace(/\n|\r/g, '<br/>');
         return $.when({
             content: this.mention_manager.generate_links(value),
             attachment_ids: _.pluck(this.get('attachment_ids'), 'id'),
@@ -413,25 +426,11 @@ var Composer = Widget.extend({
 
             // Empty input, selected partners and attachments
             self.$input.val('');
-            self.resize_input();
             self.mention_manager.reset_selections();
             self.set('attachment_ids', []);
 
             self.$input.focus();
         });
-    },
-
-    /**
-     * Resizes the textarea according to its scrollHeight
-     * @param {Boolean} [force_resize] if not true, only reset the size if empty
-     */
-    resize_input: function (force_resize) {
-        if (this.$input.val() === '') {
-            this.$input.css('height', this.options.input_min_height);
-        } else if (force_resize) {
-            var height = this.$input.prop('scrollHeight') + this.options.input_baseline;
-            this.$input.css('height', Math.min(this.options.input_max_height, height));
-        }
     },
 
     // Events
@@ -448,8 +447,8 @@ var Composer = Widget.extend({
     /**
      * Send the message on ENTER, but go to new line on SHIFT+ENTER
      */
-    prevent_send: function (event) {
-        return event.shiftKey;
+    should_send: function (event) {
+        return !event.shiftKey;
     },
 
     on_keydown: function (event) {
@@ -470,11 +469,12 @@ var Composer = Widget.extend({
             case $.ui.keyCode.ENTER:
                 if (this.mention_manager.is_open()) {
                     event.preventDefault();
-                } else if (!this.prevent_send(event)) {
-                    event.preventDefault();
-                    this.send_message();
                 } else {
-                    this.resize_input(true);
+                    var send_message = event.ctrlKey || this.should_send(event);
+                    if (send_message) {
+                        event.preventDefault();
+                        this.send_message();
+                    }
                 }
                 break;
         }
@@ -500,7 +500,6 @@ var Composer = Widget.extend({
             // Otherwise, check if a mention is typed
             default:
                 this.mention_manager.detect_delimiter();
-                this.resize_input();
         }
     },
 
@@ -651,6 +650,39 @@ var Composer = Widget.extend({
     },
 });
 
-return Composer;
+var ExtendedComposer = BasicComposer.extend({
+    init: function (parent, options) {
+        options = _.defaults(options || {}, {
+            input_min_height: 120,
+        });
+        this._super(parent, options);
+        this.extended = true;
+        this.emoji_container_classname = 'o_extended_composer_emoji';
+    },
+
+    start: function () {
+        this.$subject_input = this.$(".o_composer_subject input");
+        return this._super.apply(this, arguments);
+    },
+
+    preprocess_message: function () {
+        var self = this;
+        return this._super().then(function (message) {
+            var subject = self.$subject_input.val();
+            self.$subject_input.val("");
+            message.subject = subject;
+            return message;
+        });
+    },
+
+    should_send: function () {
+        return false;
+    },
+});
+
+return {
+    BasicComposer: BasicComposer,
+    ExtendedComposer: ExtendedComposer,
+};
 
 });
