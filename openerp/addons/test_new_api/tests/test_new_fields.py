@@ -3,7 +3,7 @@
 #
 from datetime import date, datetime
 
-from openerp.exceptions import AccessError
+from openerp.exceptions import AccessError, except_orm
 from openerp.tests import common
 from openerp.tools import mute_logger
 

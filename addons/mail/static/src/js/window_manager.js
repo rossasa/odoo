@@ -39,11 +39,12 @@ function open_chat (session) {
     var chat_session = _.findWhere(chat_sessions, {id: session.id});
     if (!chat_session) {
         var prefix = !session.is_chat ? "#" : "";
+        var options = { input_less: session.mass_mailing };
         chat_session = {
             id: session.id,
             uuid: session.uuid,
             name: session.name,
-            window: new ExtendedChatWindow(web_client, session.id, prefix + session.name, session.is_folded, session.unread_counter),
+            window: new ExtendedChatWindow(web_client, session.id, prefix + session.name, session.is_folded, session.unread_counter, options),
         };
         chat_session.window.on("close_chat_session", null, function () {
             close_chat(chat_session);
@@ -301,7 +302,7 @@ core.bus.on('web_client_ready', null, function () {
 
     chat_manager.bus.on('anyone_listening', null, function (channel, query) {
         _.each(chat_sessions, function (session) {
-            if (channel.id === session.id && session.window.thread.is_at_bottom()) {
+            if (channel.id === session.id && session.window.thread.is_at_bottom() && !session.window.is_hidden) {
                 query.is_displayed = true;
             }
         });
