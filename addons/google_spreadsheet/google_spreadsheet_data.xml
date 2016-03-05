@@ -4,7 +4,7 @@
       <record id="google_spreadsheet_template" model="google.drive.config">
             <field name="name">Base Spreadsheet Template</field>
             <field name="model_id" ref="base.model_res_partner"/>
-            <field name="google_drive_template_url">https://docs.google.com/spreadsheet/ccc?key=1KUlSSzZMzkEEzyroyZ2NerRt1RVCspkG9VQIh2V6dnM</field>
+            <field name="google_drive_template_url">https://docs.google.com/spreadsheets/d/1AmZZMYkFUHYRFVN3Y7F9SMBSA4Xuk7awavVJdkoe_vo</field>
             <field name="name_template">Reporting %(name)s</field>
             <field name="active" eval="0" />
         </record>
