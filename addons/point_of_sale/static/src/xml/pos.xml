@@ -238,6 +238,12 @@
     <t t-name="ProductScreenWidget">
         <div class="product-screen screen">
             <table class="layout-table">
+                <tr >
+                    <td>
+                        <div class="selection-area">
+                        </div>
+                    </td>
+                </tr>
 
                 <tr class="header-row">
                     <td class="header-cell">
