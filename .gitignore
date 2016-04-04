@@ -2,6 +2,7 @@
 _build/
 
 # dotfiles
+server.conf
 .*
 !.gitignore
 !.mailmap
