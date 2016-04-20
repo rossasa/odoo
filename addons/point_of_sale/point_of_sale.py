@@ -123,7 +123,7 @@ class pos_config(osv.osv):
         return True
 
     _constraints = [
-        (_check_cash_control, "You cannot have two cash controls in one Point Of Sale !", ['journal_ids']),
+        #(_check_cash_control, "You cannot have two cash controls in one Point Of Sale !", ['journal_ids']),
         (_check_company_location, "The company of the stock location is different than the one of point of sale", ['company_id', 'stock_location_id']),
         (_check_company_journal, "The company of the sale journal is different than the one of point of sale", ['company_id', 'journal_id']),
         (_check_company_payment, "The company of a payment method is different than the one of point of sale", ['company_id', 'journal_ids']),
@@ -247,11 +247,12 @@ class pos_session(osv.osv):
                 'cash_register_id' : False,
                 'cash_control' : False,
             }
-            for st in record.statement_ids:
+
+            '''for st in record.statement_ids:
                 if st.journal_id.cash_control == True:
                     result[record.id]['cash_control'] = True
                     result[record.id]['cash_journal_id'] = st.journal_id.id
-                    result[record.id]['cash_register_id'] = st.id
+                    result[record.id]['cash_register_id'] = st.id'''
 
         return result
 
@@ -421,8 +422,14 @@ class pos_session(osv.osv):
                 'user_id' : uid,
                 'company_id' : pos_config.company_id.id
             }
-            statement_id = self.pool.get('account.bank.statement').create(cr, uid, bank_values, context=context)
-            bank_statement_ids.append(statement_id)
+            #statement_id = self.pool.get('account.bank.statement').create(cr, uid, bank_values, context=context)
+            statement_id = self.pool.get('account.bank.statement').search(cr, uid, [('journal_id','=',journal.id),('state','=','open')], context=context)
+
+            if len(statement_id) == 0:
+                print "\nNotBank\n"
+                raise osv.except_osv( _('Error!'),
+                    _("El caja \"%s\" debe estar abierto.")%journal.name)
+            bank_statement_ids.append(statement_id[0])
 
         values.update({
             'name': self.pool['ir.sequence'].get(cr, uid, 'pos.session', context=context),
@@ -442,6 +449,7 @@ class pos_session(osv.osv):
         """
         call the Point Of Sale interface and set the pos.session to 'opened' (in progress)
         """
+
         if context is None:
             context = dict()
 
@@ -484,13 +492,18 @@ class pos_session(osv.osv):
     def wkf_action_closing_control(self, cr, uid, ids, context=None):
         for session in self.browse(cr, uid, ids, context=context):
             for statement in session.statement_ids:
-                if (statement != session.cash_register_id) and (statement.balance_end != statement.balance_end_real):
-                    self.pool.get('account.bank.statement').write(cr, uid, [statement.id], {'balance_end_real': statement.balance_end})
+                if statement.state != 'confirm':
+                    raise osv.except_osv(
+                        _('Error!'),
+                        _("Debes cerrar todos los cajas antes de cerrar el PDV"))
+                #if (statement != session.cash_register_id) and (statement.balance_end != statement.balance_end_real):
+                #    self.pool.get('account.bank.statement').write(cr, uid, [statement.id], {'balance_end_real': statement.balance_end})
+    
         return self.write(cr, uid, ids, {'state' : 'closing_control', 'stop_at' : time.strftime('%Y-%m-%d %H:%M:%S')}, context=context)
 
     def wkf_action_close(self, cr, uid, ids, context=None):
         # Close CashBox
-        for record in self.browse(cr, uid, ids, context=context):
+        '''for record in self.browse(cr, uid, ids, context=context):
             for st in record.statement_ids:
                 if abs(st.difference) > st.journal_id.amount_authorized_diff:
                     # The pos manager can close statements with maximums.
@@ -500,7 +513,7 @@ class pos_session(osv.osv):
                 if (st.journal_id.type not in ['bank', 'cash']):
                     raise osv.except_osv(_('Error!'), 
                         _("The type of the journal for your payment method should be bank or cash "))
-                getattr(st, 'button_confirm_%s' % st.journal_id.type)(context=context)
+                getattr(st, 'button_confirm_%s' % st.journal_id.type)(context=context)'''
         self._confirm_orders(cr, uid, ids, context=context)
         self.write(cr, uid, ids, {'state' : 'closed'}, context=context)
 
@@ -622,6 +635,7 @@ class pos_order(osv.osv):
         order_id = self.create(cr, uid, self._order_fields(cr, uid, order, context=context),context)
         journal_ids = set()
         for payments in order['statement_ids']:
+            print "\n%s\n"%order
             self.add_payment(cr, uid, order_id, self._payment_fields(cr, uid, payments[2], context=context), context=context)
             journal_ids.add(payments[2]['journal_id'])
 
@@ -725,7 +739,9 @@ class pos_order(osv.osv):
             val1 = val2 = 0.0
             cur = order.pricelist_id.currency_id
             for payment in order.statement_ids:
-                res[order.id]['amount_paid'] +=  payment.amount
+                #print "\n%s\n"%payment.journal_id.currency_rate
+                currency_rate = payment.journal_id.currency_rate or 1
+                res[order.id]['amount_paid'] +=  payment.amount/currency_rate
                 res[order.id]['amount_return'] += (payment.amount < 0 and payment.amount or 0)
             for line in order.lines:
                 val1 += self._amount_line_tax(cr, uid, line, context=context)
@@ -821,7 +837,7 @@ class pos_order(osv.osv):
             if order.lines and not order.amount_total:
                 return True
             if (not order.lines) or (not order.statement_ids) or \
-                (abs(order.amount_total-order.amount_paid) > 0.00001):
+                (abs(order.amount_total-order.amount_paid) > 500):
                 return False
         return True
 
@@ -949,7 +965,9 @@ class pos_order(osv.osv):
         if not statement_id:
             raise osv.except_osv(_('Error!'), _('You have to open at least one cashbox.'))
 
+        amount_currency = journal.currency_rate and data['amount']*journal.currency_rate or data['amount']
         args.update({
+            'amount': amount_currency,
             'statement_id': statement_id,
             'pos_statement_id': order_id,
             'journal_id': journal_id,
