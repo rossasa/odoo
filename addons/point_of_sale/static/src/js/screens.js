@@ -967,10 +967,11 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             // 2 seconds is the same as the default timeout for sending orders and so the dialog
             // should have appeared before the timeout... so yeah that's not ultra reliable. 
 
+            /*I Don't see the need of it anymore
             finish_button.set_disabled(true);   
             setTimeout(function(){
                 finish_button.set_disabled(false);
-            }, 2000);
+            }, 2000);*/
         },
         print: function() {
             this.pos.get('selectedOrder')._printed = true;
@@ -1246,7 +1247,27 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             this.$('.payment-due-total').html(this.format_currency(dueTotal));
             this.$('.payment-paid-total').html(this.format_currency(paidTotal));
             this.$('.payment-remaining').html(this.format_currency(remaining));
-            this.$('.payment-change').html(this.format_currency(change));
+
+            teste =     "<span class='left-block'>"+
+                            "Troco Guarani:"+
+                        "</span>"+
+                        "<span class='right-block payment-change'>"+
+                        this.format_currency(change)+
+                        "</span>"+
+                        "<span class='left-block'>"+
+                            "Troco Real:"+
+                        "</span>"+
+                        "<span class='right-block payment-change'>"+
+                        this.format_currency(change*this.pos.journals[1].currency_rate)+
+                        "</span>"+
+                        "<span class='left-block'>"+
+                            "Troco Dolar:"+
+                        "</span>"+
+                        "<span class='right-block payment-change'>"+
+                        this.format_currency(change*this.pos.journals[2].currency_rate)+
+                        "</span>"
+
+            this.$('.bigger').html(teste);
             if(currentOrder.selected_orderline === undefined){
                 remaining = 1;  // What is this ? 
             }
@@ -1258,8 +1279,8 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
         },
         is_paid: function(){
             var currentOrder = this.pos.get('selectedOrder');
-            return (currentOrder.getTotalTaxIncluded() < 0.000001 
-                   || currentOrder.getPaidTotal() + 0.000001 >= currentOrder.getTotalTaxIncluded());
+            return (currentOrder.getTotalTaxIncluded() < 1000.000001 
+                   || currentOrder.getPaidTotal() + 1000.000001 >= currentOrder.getTotalTaxIncluded());
 
         },
         validate_order: function(options) {
