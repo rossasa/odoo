@@ -499,7 +499,7 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
             var pushed = new $.Deferred();
 
             this.flush_mutex.exec(function(){
-                var flushed = self._flush_orders(self.db.get_orders());
+                var flushed = self._flush_orders(self.db.get_orders(),{timeout:30000, promissory:true});
 
                 flushed.always(function(ids){
                     pushed.resolve();
@@ -563,6 +563,26 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
             return invoiced;
         },
 
+        push_and_make_promissory: function(order) {
+            var self = this;
+
+            if(order){
+                this.proxy.log('push_order',order.export_as_JSON());
+                this.db.add_order(order.export_as_JSON());
+            }
+            
+            var pushed = new $.Deferred();
+
+            this.flush_mutex.exec(function(){
+                var flushed = self._flush_orders(self.db.get_orders(),{timeout:30000, promissory:true});
+
+                flushed.always(function(ids){
+                    pushed.resolve();
+                });
+            });
+            return pushed;
+        },
+
         // wrapper around the _save_to_server that updates the synch status widget
         _flush_orders: function(orders, options) {
             var self = this;
@@ -604,6 +624,7 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
             return posOrderModel.call('create_from_ui',
                 [_.map(orders, function (order) {
                     order.to_invoice = options.to_invoice || false;
+                    order.promissory = options.promissory || false;
                     return order;
                 })],
                 undefined,

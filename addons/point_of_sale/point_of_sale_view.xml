@@ -26,6 +26,7 @@
                         <field name="name"/>
                         <field name="date_order"/>
                         <field name="session_id" required="1"/>
+                        <field name="promissory"/>
                         <field name="partner_id" on_change="onchange_partner_id(partner_id, context)" domain="[('customer', '=', True)]" context="{'search_default_customer':1}" attrs="{'readonly': [('state','=','invoiced')]}"/>
                     </group>
                     <notebook colspan="4">
@@ -1020,6 +1021,46 @@
             </field>
         </record>
 
+
+    <!--record id="action_asset_contract_prn_contract" model="ir.actions.act_window">
+        <field name="name">Print Contract</field>
+        <field name="res_model">pos.order</field>
+        <field name="src_model">pos.order</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="multi">True</field>
+
+        <field name="key2">client_action_multi</field>
+        <field name="code">self.act_new_sub_menu(cr, uid, context.get('active_ids'), context=context)</field>
+        <field name="multi">True</field>
+    </record-->
+    <!--act_window name="Generar Facturas y Consiliar"
+        res_model="pos.order"
+        src_model="pos.order"
+        key2="client_action_multi" 
+        view_mode="form" target="new" 
+        view_type="form"
+        id="act_new_sub_menu" 
+        code="self.act_new_sub_menu(cr, uid, context.get('active_ids'), context=context)"
+        /-->
+
+   <record id="id_for_the_action" model="ir.actions.server">
+    <field name="name">Generar Facturas y Consiliar</field>
+    <field name="type">ir.actions.server</field>
+    <field name="model_id" ref="model_pos_order"/>
+    <field name="state">code</field>
+    <field name="code">self.act_new_sub_menu(cr, uid, context.get('active_ids'), context=context)</field>
+</record>
+<record id="id_of_the_action_value" model="ir.values">
+    <field name="name">Name for action value</field>
+    <field name="action_id" ref="id_for_the_action"/>
+    <field name="value" eval="'ir.actions.server,' + str(ref('id_for_the_action'))"/>
+    <field name="key">action</field>
+    <field name="model_id" ref="model_pos_order"/>
+    <field name="model">pos.order</field>
+    <field name="key2">client_action_multi</field>
+</record>
 
     </data>
 </openerp>

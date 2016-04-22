@@ -425,11 +425,11 @@ class pos_session(osv.osv):
             #statement_id = self.pool.get('account.bank.statement').create(cr, uid, bank_values, context=context)
             statement_id = self.pool.get('account.bank.statement').search(cr, uid, [('journal_id','=',journal.id),('state','=','open')], context=context)
 
-            if len(statement_id) == 0:
-                print "\nNotBank\n"
-                raise osv.except_osv( _('Error!'),
-                    _("El caja \"%s\" debe estar abierto.")%journal.name)
-            bank_statement_ids.append(statement_id[0])
+            if journal.type == 'cash':
+                if len(statement_id) == 0:
+                    raise osv.except_osv( _('Error!'),
+                        _("El caja \"%s\" debe estar abierto.")%journal.name)
+                bank_statement_ids.append(statement_id[0])
 
         values.update({
             'name': self.pool['ir.sequence'].get(cr, uid, 'pos.session', context=context),
@@ -570,6 +570,9 @@ class pos_order(osv.osv):
     _description = "Point of Sale"
     _order = "id desc"
 
+
+
+
     def _amount_line_tax(self, cr, uid, line, context=None):
         account_tax_obj = self.pool['account.tax']
         taxes_ids = [tax for tax in line.product_id.taxes_id if tax.company_id.id == line.order_id.company_id.id]
@@ -681,14 +684,31 @@ class pos_order(osv.osv):
 
         for tmp_order in orders_to_save:
             to_invoice = tmp_order['to_invoice']
+            print "\n%s\n"%tmp_order
+            promissory = tmp_order['promissory']
             order = tmp_order['data']
             order_id = self._process_order(cr, uid, order, context=context)
             order_ids.append(order_id)
 
-            try:
-                self.signal_workflow(cr, uid, [order_id], 'paid')
-            except Exception as e:
-                _logger.error('Could not fully process the POS Order: %s', tools.ustr(e))
+            if promissory:
+                print "\nTry generate promissory\n"
+                
+                #self.action_invoice(cr, uid, [order_id], context)
+                #order_obj = self.browsere(cr, uid, order_id, context)
+                promissory = self.pool['account.promissory_note'].create(cr, uid, {
+                    'partner_id': 1,
+                    'value': order['amount_total']
+                    })
+                self.write(cr, uid, [order_id], {
+                    'state':'promissory',
+                    'promissory': promissory
+                    })
+            else:
+                try:
+                    self.signal_workflow(cr, uid, [order_id], 'paid')
+                except Exception as e:
+                    _logger.error('Could not fully process the POS Order: %s', tools.ustr(e))
+
 
             if to_invoice:
                 self.action_invoice(cr, uid, [order_id], context)
@@ -696,6 +716,30 @@ class pos_order(osv.osv):
                 self.pool['account.invoice'].signal_workflow(cr, uid, [order_obj.invoice_id.id], 'invoice_open')
 
         return order_ids
+
+    def act_new_sub_menu(self, cr, uid, ids, context=None):
+        print "\nTESTE OK\n"
+        invoice_lines = []
+        for order in self.browse(cr, uid, ids, context=context):
+            partner_id = order.partner_id
+            for line in order.lines:
+                invoice_lines.append((0,0,{
+                    'product_id': line.product_id.id,
+                    'quantity': line.qty,
+                    'price_unit': line.price_unit,
+                    'name': line.product_id.name
+                    }))
+        print "\n%s\n"%partner_id
+        invoice_obj = self.pool.get('account.invoice')
+        invoice_obj.create(cr, uid, {
+            'journal_id': 1,
+            'account_id': partner_id.property_account_receivable.id,
+            'partner_id': partner_id.id,
+            'invoice_line': invoice_lines,
+            })
+
+        self.write(cr, uid, ids, {'state':'invoiced'}, context=None)
+        return True
 
     def write(self, cr, uid, ids, vals, context=None):
         res = super(pos_order, self).write(cr, uid, ids, vals, context=context)
@@ -764,6 +808,7 @@ class pos_order(osv.osv):
         'statement_ids': fields.one2many('account.bank.statement.line', 'pos_statement_id', 'Payments', states={'draft': [('readonly', False)]}, readonly=True),
         'pricelist_id': fields.many2one('product.pricelist', 'Pricelist', required=True, states={'draft': [('readonly', False)]}, readonly=True),
         'partner_id': fields.many2one('res.partner', 'Customer', change_default=True, select=1, states={'draft': [('readonly', False)], 'paid': [('readonly', False)]}),
+        'promissory': fields.many2one('account.promissory_note', 'Promissory', states={'promissory': [('invisible', False)], 'invoiced': [('invisible', False)]}),        
         'sequence_number': fields.integer('Sequence Number', help='A session-unique sequence number for the order'),
 
         'session_id' : fields.many2one('pos.session', 'Session', 
@@ -775,6 +820,7 @@ class pos_order(osv.osv):
 
         'state': fields.selection([('draft', 'New'),
                                    ('cancel', 'Cancelled'),
+                                   ('promissory', 'Pagare'),
                                    ('paid', 'Paid'),
                                    ('done', 'Posted'),
                                    ('invoiced', 'Invoiced')],
