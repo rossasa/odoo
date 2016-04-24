@@ -926,7 +926,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
         template: 'ReceiptScreenWidget',
 
         show_numpad:     false,
-        show_leftpane:   false,
+        show_leftpane:   true,
 
         show: function(){
             this._super();

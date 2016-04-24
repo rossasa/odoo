@@ -499,7 +499,7 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
             var pushed = new $.Deferred();
 
             this.flush_mutex.exec(function(){
-                var flushed = self._flush_orders(self.db.get_orders(),{timeout:30000, promissory:true});
+                var flushed = self._flush_orders(self.db.get_orders());
 
                 flushed.always(function(ids){
                     pushed.resolve();
@@ -805,6 +805,19 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
             }else if(this.get_discount() > 0){             // we don't merge discounted orderlines
                 return false;
             }else if(this.price !== orderline.price){
+                return false;
+            }else{ 
+                return true;
+            }
+        },
+        can_be_merged_without_price: function(orderline){
+            if( this.get_product().id !== orderline.get_product().id){    //only orderline of the same product can be merged
+                return false;
+            }else if(!this.get_unit() || !this.get_unit().groupable){
+                return false;
+            }else if(this.get_product_type() !== orderline.get_product_type()){
+                return false;
+            }else if(this.get_discount() > 0){             // we don't merge discounted orderlines
                 return false;
             }else{ 
                 return true;

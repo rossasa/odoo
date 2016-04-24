@@ -1114,7 +1114,7 @@ td {
     text-align: left;
     width: 300px;
     background-color: white;
-    margin: 20px;
+    margin: 30px;
     padding: 15px;
     font-size: 14px;
     padding-bottom:30px;
@@ -1357,6 +1357,7 @@ td {
 .pos .clientlist-screen .client-details-box{
     position: relative;
     font-size: 16px;
+    left: 90px;
 }
 .pos .clientlist-screen .client-details-left{
     width: 50%;
@@ -1368,7 +1369,7 @@ td {
 }
 .pos .clientlist-screen .client-detail{
     line-height: 24px;
-    display: inline-flex;
+    display: inline-grid;
 }
 .pos .clientlist-screen .client-detail > .label{
     font-weight: bold;

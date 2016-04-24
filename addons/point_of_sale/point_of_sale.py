@@ -1567,6 +1567,9 @@ class res_partner(osv.osv):
         """ create or modify a partner from the point of sale ui.
             partner contains the partner's fields. """
 
+        #Remove the ruc if this field is clean
+        if partner['ruc'] == '':
+                partner.pop('ruc', None)
         #image is a dataurl, get the data after the comma
         if partner.get('image',False):
             img =  partner['image'].split(',')[1]
