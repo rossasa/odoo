@@ -70,6 +70,18 @@ function openerp_pos_widgets(instance, module){ //module is instance.point_of_sa
         clickAppendNewChar: function(event) {
             var newChar;
             newChar = event.currentTarget.innerText || event.currentTarget.textContent;
+            var mode = this.state.get('mode');
+            console.log(mode);
+            if ( mode == "quantity" ){
+                $('.selected .info #quantity').addClass('mode-selected');
+            } 
+            if ( mode == "price" ){
+                $('.selected .info #price').addClass('mode-selected');
+            } 
+            if ( mode == "discount" ){
+                $('.selected .info #discount').addClass('mode-selected');
+            }
+            
             return this.state.appendNewChar(newChar);
         },
         clickChangeMode: function(event) {
@@ -80,6 +92,24 @@ function openerp_pos_widgets(instance, module){ //module is instance.point_of_sa
             var mode = this.state.get('mode');
             $('.selected-mode').removeClass('selected-mode');
             $(_.str.sprintf('.mode-button[data-mode="%s"]', mode), this.$el).addClass('selected-mode');
+
+            console.log(mode);
+            if ( mode == "quantity" ){
+                $('.selected .info #price').removeClass('mode-selected');
+                $('.selected .info #discount').removeClass('mode-selected');
+                $('.selected .info #quantity').addClass('mode-selected');
+            } 
+            if ( mode == "price" ){
+                $('.selected .info #quantity').removeClass('mode-selected');
+                $('.selected .info #discount').removeClass('mode-selected');
+                $('.selected .info #price').addClass('mode-selected');
+            } 
+            if ( mode == "discount" ){
+                $('.selected .info #quantity').removeClass('mode-selected');
+                $('.selected .info #price').removeClass('mode-selected');
+                $('.selected .info #discount').addClass('mode-selected');
+            }
+            
         },
     });
 
@@ -172,11 +202,22 @@ function openerp_pos_widgets(instance, module){ //module is instance.point_of_sa
                 var mode = this.numpad_state.get('mode');
                 if( mode === 'quantity'){
                     order.getSelectedLine().set_quantity(val);
+                    $('.selected .info #price').removeClass('mode-selected');
+                    $('.selected .info #discount').removeClass('mode-selected');
+                    $('.selected .info #quantity').addClass('mode-selected');
+                    console.log(val);
+
                 }else if( mode === 'discount'){
                     order.getSelectedLine().set_discount(val);
+                    $('.selected .info #quantity').removeClass('mode-selected');
+                    $('.selected .info #price').removeClass('mode-selected');
+                    $('.selected .info #discount').addClass('mode-selected');
                 }else if( mode === 'price'){
                     order.getSelectedLine().set_unit_price(val);
-                }
+                    $('.selected .info #quantity').removeClass('mode-selected');
+                    $('.selected .info #discount').removeClass('mode-selected');
+                    $('.selected .info #price').addClass('mode-selected');
+                }            
         	}
         },
         change_selected_order: function() {
@@ -214,6 +255,7 @@ function openerp_pos_widgets(instance, module){ //module is instance.point_of_sa
                 el_node.addEventListener('click',this.line_click_handler);
 
             orderline.node = el_node;
+
             return el_node;
         },
         remove_orderline: function(order_line){

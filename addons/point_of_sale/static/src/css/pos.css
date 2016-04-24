@@ -584,6 +584,8 @@ td {
     font-size: 14px;
 }
 
+
+
 /*  ********* The right pane contains the screens and headers ********* */
 
 .pos .rightpane {
@@ -1498,6 +1500,8 @@ td {
     border-radius: 3px;
 }
 
+
+
 .submit-kitchen-button {
     float: left;
     background: rgb(61, 235, 82);
@@ -1509,6 +1513,13 @@ td {
 }
 
 /*  ********* The OrderLineWidget  ********* */
+
+.pos .mode-selected {
+    background-color: #0072C5;
+    color: white;
+    border-radius: 3px;
+    font-weight: bold;
+}
 
 .pos .order .orderline{
     width:100%;
@@ -1562,7 +1573,7 @@ td {
     margin-left:10px;
 }
 .pos .order .orderline .info-list em{
-    color: #777;
+    /*color: #777;*/
     font-weight: bold;
     font-style:normal;
 }
@@ -1923,3 +1934,4 @@ td {
 .pos .not-supported-browser img{
     border-collapse: separate;
 }
+

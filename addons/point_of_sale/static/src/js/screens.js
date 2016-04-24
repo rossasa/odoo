@@ -994,7 +994,6 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
         }
     });
 
-
     module.PaymentScreenWidget = module.ScreenWidget.extend({
         template: 'PaymentScreenWidget',
         back_screen: 'products',

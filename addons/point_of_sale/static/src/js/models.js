@@ -751,6 +751,7 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
                 }
             }
             this.trigger('change',this);
+            $('.selected .info #quantity').addClass('mode-selected');
         },
         // return the quantity of product
         get_quantity: function(){
@@ -1081,6 +1082,7 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
             line.order = this;
             this.get('orderLines').add(line);
             this.selectLine(this.getLastOrderline());
+            $('.selected .info #quantity').addClass('mode-selected');
         },
         addProduct: function(product, options){
             if(this._printed){
@@ -1110,6 +1112,7 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
                 this.get('orderLines').add(line);
             }
             this.selectLine(this.getLastOrderline());
+            $('.selected .info #quantity').addClass('mode-selected');
         },
         removeOrderline: function( line ){
             this.get('orderLines').remove(line);
@@ -1418,12 +1421,30 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
                 buffer: "0",
                 mode: newMode
             });
+            if ( newMode == "quantity" ){
+                $('.selected .info #price').removeClass('mode-selected');
+                $('.selected .info #discount').removeClass('mode-selected');
+                $('.selected .info #quantity').addClass('mode-selected');
+            } 
+            if ( newMode == "price" ){
+                $('.selected .info #quantity').removeClass('mode-selected');
+                $('.selected .info #discount').removeClass('mode-selected');
+                $('.selected .info #price').addClass('mode-selected');
+            } 
+            if ( newMode == "discount" ){
+                $('.selected .info #quantity').removeClass('mode-selected');
+                $('.selected .info #price').removeClass('mode-selected');
+                $('.selected .info #discount').addClass('mode-selected');
+            }
         },
         reset: function() {
             this.set({
                 buffer: "0",
                 mode: "quantity"
             });
+            $('.selected .info #price').removeClass('mode-selected');
+            $('.selected .info #discount').removeClass('mode-selected');
+            $('.selected .info #quantity').addClass('mode-selected');
         },
         resetValue: function(){
             this.set({buffer:'0'});

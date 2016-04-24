@@ -790,12 +790,14 @@ color #0072C5
             <ul class="info-list">
                 <t t-if="line.get_quantity_str() !== '1' || line.selected ">
                     <li class="info">
-                        <em>
+                        <em id="quantity">
                             <t t-esc="line.get_quantity_str()" />
                         </em>
                         <t t-esc="line.get_unit().name" />
                         at
-                        <t t-esc="widget.format_currency(line.get_unit_price(),'Product Price')" />
+                        <span id="price">
+                            <t t-esc="widget.format_currency(line.get_unit_price(),'Product Price')" />
+                        </span>
                         /
                         <t t-esc="line.get_unit().name" />
                     </li>
@@ -803,7 +805,7 @@ color #0072C5
                 <t t-if="line.get_discount_str() !== '0'">
                     <li class="info">
                         With a 
-                        <em>
+                        <em id="discount">
                             <t t-esc="line.get_discount_str()" />%
                         </em>
                         discount
