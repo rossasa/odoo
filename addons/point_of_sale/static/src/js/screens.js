@@ -551,7 +551,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             this._super(parent, options);
         },
 
-        show_leftpane: false,
+        show_leftpane: true,
 
         auto_back: true,
 
@@ -1395,6 +1395,14 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             options = options || {};
 
             var currentOrder = this.pos.get('selectedOrder');
+            console.log(currentOrder.get_client());
+            if(currentOrder.get_client() == null){
+                this.pos_widget.screen_selector.show_popup('error',{
+                    'message': _t('Empty User'),
+                    'comment': _t('There must be a client, to pay with promissory note'),
+                });
+                return;
+            }
 
             if(currentOrder.get('orderLines').models.length === 0){
                 this.pos_widget.screen_selector.show_popup('error',{
