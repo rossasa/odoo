@@ -1316,9 +1316,9 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                 }
             }
 
-            if(!this.is_paid()){
+            /*if(!this.is_paid()){
                 return;
-            }
+            }*/
 
             // The exact amount must be paid if there is no cash payment method defined.
             if (Math.abs(currentOrder.getTotalTaxIncluded() - currentOrder.getPaidTotal()) > 0.00001) {

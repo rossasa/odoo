@@ -1936,3 +1936,7 @@ td {
     border-collapse: separate;
 }
 
+select:focus {
+    background-color: red;
+    color: white;
+}
