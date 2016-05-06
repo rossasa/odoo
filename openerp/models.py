@@ -829,6 +829,7 @@ class BaseModel(object):
 
     def __export_xml_id(self):
         """ Return a valid xml_id for the record ``self``. """
+        print "Entrou em __export_xml_id"
         if not self._is_an_ordinary_table():
             raise Exception(
                 "You can not export the column ID of model %s, because the "
@@ -853,6 +854,7 @@ class BaseModel(object):
                 'module': '__export__',
                 'name': name,
             })
+            print "Exporting XML ID"
             return '__export__.' + name
 
     @api.multi
@@ -862,6 +864,7 @@ class BaseModel(object):
             :param fields: list of lists of fields to traverse
             :return: list of lists of corresponding values
         """
+        print "Entrou em __export_rows"
         lines = []
         for record in self:
             # main line of record, initially empty
@@ -3793,6 +3796,14 @@ class BaseModel(object):
                 record._cache.update(record._convert_to_cache(new_vals, update=True))
             for key in new_vals:
                 self._fields[key].determine_inverse(self)
+        # This is to avoid loop
+        if self._name not in ['ir.model.data']:
+            xml_id = self.__export_xml_id().split(".")
+            xml_id_record = self.env['ir.model.data'].search([
+                ('module','=',xml_id[0]),
+                ('name','=',xml_id[1])
+                ])
+            xml_id_record.synchronized = False
 
         return True
 
@@ -4097,6 +4108,10 @@ class BaseModel(object):
         record._cache.update(record._convert_to_cache(new_vals))
         for key in new_vals:
             self._fields[key].determine_inverse(record)
+
+        #Create an external id for this record
+        if self._name not in ['ir.model.data']:
+            self.__export_xml_id()
 
         return record
 
