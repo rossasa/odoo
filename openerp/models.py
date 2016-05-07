@@ -829,7 +829,7 @@ class BaseModel(object):
 
     def __export_xml_id(self):
         """ Return a valid xml_id for the record ``self``. """
-        print "Entrou em __export_xml_id"
+        #print "Entrou em __export_xml_id"
         if not self._is_an_ordinary_table():
             raise Exception(
                 "You can not export the column ID of model %s, because the "
@@ -854,7 +854,7 @@ class BaseModel(object):
                 'module': '__export__',
                 'name': name,
             })
-            print "Exporting XML ID"
+            #print "Exporting XML ID"
             return '__export__.' + name
 
     @api.multi
@@ -864,7 +864,7 @@ class BaseModel(object):
             :param fields: list of lists of fields to traverse
             :return: list of lists of corresponding values
         """
-        print "Entrou em __export_rows"
+        #print "Entrou em __export_rows"
         lines = []
         for record in self:
             # main line of record, initially empty
@@ -938,9 +938,16 @@ class BaseModel(object):
         fields_to_export = map(fix_import_export_id_paths, fields_to_export)
         if raw_data:
             self = self.with_context(export_raw_data=True)
+        print "export_data"
+        print self._name
+        print fields_to_export
+        print self.__export_rows(fields_to_export)
         return {'datas': self.__export_rows(fields_to_export)}
 
     def import_data(self, cr, uid, fields, datas, mode='init', current_module='', noupdate=False, context=None, filename=None):
+        print "import_data"
+        print fields
+        print datas
         """
         .. deprecated:: 7.0
             Use :meth:`~load` instead
@@ -1024,6 +1031,9 @@ class BaseModel(object):
         return position, 0, 0, 0
 
     def load(self, cr, uid, fields, data, context=None):
+        print "load"
+        print fields
+        print data
         """
         Attempts to load the data matrix, and returns a list of ids (or
         ``False`` if there was an error and no id could be generated) and a
@@ -3771,6 +3781,15 @@ class BaseModel(object):
         for field in itertools.chain(MAGIC_COLUMNS, ('parent_left', 'parent_right')):
             vals.pop(field, None)
 
+        #print vals
+        #if 'xml_id' in vals:
+        #    xml_id = vals['xml_id']
+        #    _id = vals['_id']
+        #    vals.pop('xml_id', None)
+        #    vals.pop('_id', None)
+        #else:
+        #    xml_id = False
+
         # split up fields into old-style and pure new-style ones
         old_vals, new_vals, unknown = {}, {}, []
         for key, val in vals.iteritems():
@@ -3796,6 +3815,19 @@ class BaseModel(object):
                 record._cache.update(record._convert_to_cache(new_vals, update=True))
             for key in new_vals:
                 self._fields[key].determine_inverse(self)
+
+        #print xml_id
+        #print self.env.ref(xml_id)
+        #if xml_id and not self.env.ref(xml_id):
+         #   xml_id = xml_id.split('.')
+         #   self.env['ir.model.data'].create({
+         #       'model': self._name,
+        #        'res_id': self.id,
+        #        'module': xml_id[0],
+        #        'name': xml_id[1],
+         #       '_id': _id,
+        #        'synchronized': True
+        #        })
         # This is to avoid loop
         if self._name not in ['ir.model.data']:
             xml_id = self.__export_xml_id().split(".")
