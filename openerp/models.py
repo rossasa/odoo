@@ -941,7 +941,7 @@ class BaseModel(object):
         print "export_data"
         print self._name
         print fields_to_export
-        print self.__export_rows(fields_to_export)
+        #print self.__export_rows(fields_to_export)
         return {'datas': self.__export_rows(fields_to_export)}
 
     def import_data(self, cr, uid, fields, datas, mode='init', current_module='', noupdate=False, context=None, filename=None):
@@ -1032,8 +1032,8 @@ class BaseModel(object):
 
     def load(self, cr, uid, fields, data, context=None):
         print "load"
-        print fields
-        print data
+        #print fields
+        #print data
         """
         Attempts to load the data matrix, and returns a list of ids (or
         ``False`` if there was an error and no id could be generated) and a
@@ -3771,6 +3771,11 @@ class BaseModel(object):
           .. note:: Values marked as ``_`` in the list above are ignored and
                     can be anything, generally ``0`` or ``False``.
         """
+
+        if 'synchronized' in vals:
+            synchronized = True
+            vals.pop('synchronized', None)
+
         if not self:
             return True
 
@@ -3828,14 +3833,21 @@ class BaseModel(object):
          #       '_id': _id,
         #        'synchronized': True
         #        })
-        # This is to avoid loop
-        if self._name not in ['ir.model.data']:
+        # This is to avoid loop and errors
+        #print "Contexto: %s"%self.env.context
+        if self._name not in [
+            'ir.model.data',
+            'ir.module.module', 
+            'ir.model.fields', 
+            'ir.model.data.sync'
+            ] and 'synchronized' not in self.env.context:
             xml_id = self.__export_xml_id().split(".")
             xml_id_record = self.env['ir.model.data'].search([
                 ('module','=',xml_id[0]),
                 ('name','=',xml_id[1])
                 ])
             xml_id_record.synchronized = False
+            xml_id_record.send_this_to_couch()
 
         return True
 
