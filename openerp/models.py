@@ -3673,6 +3673,23 @@ class BaseModel(object):
         # recompute new-style fields
         recs.recompute()
 
+        dont_sync_models = ['ir.model.data', 'ir.model.data.sync']
+
+        # This is to avoid and unnecessary models
+        model_obj = self.pool.get()
+        for model in model_obj.search([('osv_memory','=',True)]):
+            print model.name
+            dont_sync_models.append(model.name)
+
+        if self._name not in dont_sync_models and 'synchronized' not in self.env.context:
+            xml_id = self.__export_xml_id().split(".")
+            xml_id_record = self.env['ir.model.data'].sudo().search([
+                ('module','=',xml_id[0]),
+                ('name','=',xml_id[1])
+                ])
+            xml_id_record.unlinked = True
+            xml_id_record.sudo().send_this_to_couch()
+
         return True
 
     #
@@ -3680,6 +3697,7 @@ class BaseModel(object):
     #
     @api.multi
     def write(self, vals):
+        print "write(%s)"%vals
         """ write(vals)
 
         Updates all records in the current set with the provided values.
@@ -3795,24 +3813,25 @@ class BaseModel(object):
                 self._fields[key].determine_inverse(self)
 
         # This is to avoid loop and errors
-        #print "Contexto: %s"%self.env.context
-        if self._name not in [
-            'ir.model.data',
-            'ir.module.module',
-            'ir.model.fields',
-            'ir.model.data.sync'
-            ] and 'synchronized' not in self.env.context:
+        dont_sync_models = ['ir.model.data', 'ir.model.data.sync']
+
+        # This is to avoid and unnecessary models
+        for model in self.env['ir.model'].search([('osv_memory','=',True)]):
+            dont_sync_models.append(model.name)
+
+        if self._name not in dont_sync_models and 'synchronized' not in self.env.context:
             xml_id = self.__export_xml_id().split(".")
-            xml_id_record = self.env['ir.model.data'].search([
+            xml_id_record = self.env['ir.model.data'].sudo().search([
                 ('module','=',xml_id[0]),
                 ('name','=',xml_id[1])
                 ])
             xml_id_record.synchronized = False
-            xml_id_record.send_this_to_couch()
+            xml_id_record.sudo().send_this_to_couch()
 
         return True
 
     def _write(self, cr, user, ids, vals, context=None):
+        print "_write(%s)"%vals
         # low-level implementation of write()
         if not context:
             context = {}
@@ -4065,6 +4084,7 @@ class BaseModel(object):
     @api.model
     @api.returns('self', lambda value: value.id)
     def create(self, vals):
+        print "create(%s)"%vals
         """ create(vals) -> record
 
         Creates a new record for the model.
@@ -4115,9 +4135,21 @@ class BaseModel(object):
             self._fields[key].determine_inverse(record)
 
         #Create an external id for this record
-        if self._name not in ['ir.model.data']:
-            self.__export_xml_id()
+        #if record._name not in ['ir.model.data']:
+        dont_sync_models = ['ir.model.data', 'ir.model.data.sync']
+        for model in self.env['ir.model'].search([('osv_memory','=',True)]):
+            dont_sync_models.append(model.name)
 
+        if self._name not in dont_sync_models and 'synchronized' not in self.env.context:
+            #xml_id_record = record.__export_xml_id()
+            xml_id = record.__export_xml_id().split(".")
+            xml_id_record = self.env['ir.model.data'].sudo().search([
+                ('module','=',xml_id[0]),
+                ('name','=',xml_id[1])
+                ])
+            xml_id_record.synchronized = False
+            xml_id_record.sudo().send_this_to_couch()
+        #print "self.id: %s\nrecord.id: %s"%(self.id, record.id)
         return record
 
     def _create(self, cr, user, vals, context=None):
