@@ -3794,6 +3794,23 @@ class BaseModel(object):
             for key in new_vals:
                 self._fields[key].determine_inverse(self)
 
+        # This is to avoid loop and errors
+        dont_sync_models = ['ir.model.data', 'ir.model.data.sync']
+
+        # This is to avoid and unnecessary models
+        for model in self.env['ir.model'].search([('osv_memory','=',True)]):
+            dont_sync_models.append(model.name)
+
+        if self._name not in dont_sync_models and 'synchronized' not in self.env.context:
+            xml_id = self.__export_xml_id().split(".")
+            xml_id_record = self.env['ir.model.data'].sudo().search([
+                ('module','=',xml_id[0]),
+                ('name','=',xml_id[1])
+                ])
+            xml_id_record.synchronized = False
+            xml_id_record.sudo().send_this_to_couch()
+        print "WritE"
+
         return True
 
     def _write(self, cr, user, ids, vals, context=None):
@@ -4097,6 +4114,22 @@ class BaseModel(object):
         record._cache.update(record._convert_to_cache(new_vals))
         for key in new_vals:
             self._fields[key].determine_inverse(record)
+
+        #Create an external id for this record
+        #if record._name not in ['ir.model.data']:
+        dont_sync_models = ['ir.model.data', 'ir.model.data.sync']
+        for model in self.env['ir.model'].search([('osv_memory','=',True)]):
+            dont_sync_models.append(model.name)
+
+        if self._name not in dont_sync_models and 'synchronized' not in self.env.context:
+            #xml_id_record = record.__export_xml_id()
+            xml_id = record.__export_xml_id().split(".")
+            xml_id_record = self.env['ir.model.data'].sudo().search([
+                ('module','=',xml_id[0]),
+                ('name','=',xml_id[1])
+                ])
+            xml_id_record.synchronized = False
+            xml_id_record.sudo().send_this_to_couch()
 
         return record
 
