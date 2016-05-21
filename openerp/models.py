@@ -3805,7 +3805,7 @@ class BaseModel(object):
                 self._fields[key].determine_inverse(self)
         
         # This is to avoid loop and errors
-        dont_sync_models = ['ir.model.data', 'ir.model.data.sync']
+        dont_sync_models = ['ir.model.data', 'ir.model.data.sync','ir.model.data.sync.queue']
 
         # This is to avoid and unnecessary models
         for model in self.env['ir.model'].search([('osv_memory','=',True)]):
@@ -3820,15 +3820,12 @@ class BaseModel(object):
                     self = self.with_context(lista=postponed)
 
         if original_document:
-            #print "context: %s"%self._context['lista']
             for xmlid_complete_name in reversed(self._context['lista']):
-                print "sending %s"%xmlid_complete_name
-                xmlid_split = xmlid_complete_name.split('.')
-                xml_id_record = self.env['ir.model.data'].search([
-                    ('module','=',xmlid_split[0]),
-                    ('name','=',xmlid_split[1])
-                    ])
-                self.env['ir.model.data.sync'].create_couch(xml_id_record)
+                if not self.env['ir.model.data.sync.queue'].search([('name','=',xmlid_complete_name)]):
+                    self.env['ir.model.data.sync.queue'].create({
+                        'name': xmlid_complete_name
+                        })
+                    print "write %s"%xmlid_complete_name
 
         return True
 
@@ -4146,28 +4143,24 @@ class BaseModel(object):
             self._fields[key].determine_inverse(record)
 
         #Create an external id for this record
-        dont_sync_models = ['ir.model.data', 'ir.model.data.sync']
+        dont_sync_models = ['ir.model.data', 'ir.model.data.sync','ir.model.data.sync.queue']
         for model in self.env['ir.model'].search([('osv_memory','=',True)]):
             dont_sync_models.append(model.name)
 
         if self._name not in dont_sync_models and 'synchronized' not in self.env.context:
             if self.env['ir.module.module'].search([('name','=','connector_sync'),('state','=','installed')]):
-                #xml_id_record.write({'synchronized': False})
                 xml_id = record.__export_xml_id()
                 postponed = self._context['lista']
                 postponed.append(xml_id)
                 self = self.with_context(lista=postponed)
 
         if original_document:
-            #print "context: %s"%self._context['lista']
             for xmlid_complete_name in reversed(self._context['lista']):
-                print "creating %s"%xmlid_complete_name
-                xmlid_split = xmlid_complete_name.split('.')
-                xml_id_record = self.env['ir.model.data'].search([
-                    ('module','=',xmlid_split[0]),
-                    ('name','=',xmlid_split[1])
-                    ])
-                self.env['ir.model.data.sync'].create_couch(xml_id_record)
+                if not self.env['ir.model.data.sync.queue'].search([('name','=',xmlid_complete_name)]):
+                    self.env['ir.model.data.sync.queue'].create({
+                        'name': xmlid_complete_name
+                        })
+                    print "create %s"%xmlid_complete_name
         return record
 
     def _create(self, cr, user, vals, context=None):
