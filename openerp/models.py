@@ -844,19 +844,19 @@ class BaseModel(object):
         else:
             postfix = 0
             name = '%s_%s' % (self._table, self.id)
-            while ir_model_data.search([('module', '=', '__export__'), ('name', '=', name)]):
+            while ir_model_data.search([('module', '=', 'export__'), ('name', '=', name)]):
                 postfix += 1
                 name = '%s_%s_%s' % (self._table, self.id, postfix)
             ir_model_data.create({
                 'model': self._name,
                 'res_id': self.id,
-                'module': '__export__',
+                'module': 'export__',
                 'name': name,
             })
-            return '__export__.' + name
+            return 'export__.' + name
 
     @api.multi
-    def __export_rows(self, fields):
+    def __export_rows(self, fields, sync=False):
         """ Export fields of the records in ``self``.
 
             :param fields: list of lists of fields to traverse
@@ -901,6 +901,17 @@ class BaseModel(object):
                             current[i] = ','.join(xml_ids) or False
                             continue
 
+                        # This is to optimize the sincronizador
+                        if sync==True:
+                            if field.type == 'many2one':
+                                current[i] = value.__export_xml_id() or False
+                                continue
+                            elif field.type == 'many2many':
+                                xml_ids = [r.__export_xml_id() for r in value]
+                                current[i] = xml_ids or False
+                                continue
+
+
                         # recursively export the fields that follow name
                         fields2 = [(p[1:] if p and p[0] == name else []) for p in fields]
                         lines2 = value.__export_rows(fields2)
@@ -923,7 +934,7 @@ class BaseModel(object):
         return lines
 
     @api.multi
-    def export_data(self, fields_to_export, raw_data=False):
+    def export_data(self, fields_to_export, raw_data=False, sync=False):
         """ Export fields for selected objects
 
             :param fields_to_export: list of fields
@@ -935,7 +946,7 @@ class BaseModel(object):
         fields_to_export = map(fix_import_export_id_paths, fields_to_export)
         if raw_data:
             self = self.with_context(export_raw_data=True)
-        return {'datas': self.__export_rows(fields_to_export)}
+        return {'datas': self.__export_rows(fields_to_export, sync=sync)}
 
     def import_data(self, cr, uid, fields, datas, mode='init', current_module='', noupdate=False, context=None, filename=None):
         """
@@ -3593,6 +3604,7 @@ class BaseModel(object):
         :raise UserError: if the record is default property for other records
 
         """
+
         if not ids:
             return True
         if isinstance(ids, (int, long)):
@@ -3682,14 +3694,14 @@ class BaseModel(object):
     @api.multi
     def write(self, vals):
         #print "write(%s,%s)"%(vals, self._context)
-        if not 'first' in self._context:
+        '''if not 'first' in self._context:
             original_document = True
             self = self.with_context(first=True,lista=[])
             print "Primeiro ------------------"
         else:
             print "Outros"
             original_document = False
-            postponed = []
+            postponed = []'''
         """ write(vals)
 
         Updates all records in the current set with the provided values.
@@ -3780,13 +3792,24 @@ class BaseModel(object):
 
         # split up fields into old-style and pure new-style ones
         old_vals, new_vals, unknown = {}, {}, []
+        vals_sync = {}
         for key, val in vals.iteritems():
             field = self._fields.get(key)
+
+            # Change the database id by the xml id in relation fields
+            '''if field.type == 'many2one':
+                vals_sync[key] = self.env[field._column_obj].search([('id','=',val)]).get_external_id().values()[0]
+            elif field.type == 'many2many':
+                vals_sync[key] = self.env[field._column_obj].search([('id','in',val[0][2])]).get_external_id().values()
+            else:
+                vals_sync[key] = val'''
+
             if field:
                 if field.column or field.inherited:
                     old_vals[key] = val
                 if field.inverse and not field.inherited:
                     new_vals[key] = val
+                    print "new_vals[%s]  %s"%(key,val)
             else:
                 unknown.append(key)
 
@@ -3803,34 +3826,32 @@ class BaseModel(object):
                 record._cache.update(record._convert_to_cache(new_vals, update=True))
             for key in new_vals:
                 self._fields[key].determine_inverse(self)
-        
+
         # This is to avoid loop and errors
         dont_sync_models = ['ir.model.data', 'ir.model.data.sync','ir.model.data.sync.queue']
 
-        # This is to avoid and unnecessary models
-        for model in self.env['ir.model'].search([('osv_memory','=',True)]):
-            dont_sync_models.append(model.name)
-
-        if self._name not in dont_sync_models and 'synchronized' not in self.env.context:
+        if self._name not in dont_sync_models \
+        and not self._transient \
+        and 'synchronized' not in self.env.context:
             for record in self:
-                if self.env['ir.module.module'].search([('name','=','connector_sync'),('state','=','installed')]):
+                if self._name == 'im_chat.message':
+                    vals_sync['res_xmlid'] = self.env['ir.model.data'].search([
+                        ('model','=',record.model),
+                        ('res_id','=', record.res_id)
+                        ]).get_external_id().values()[0]
+                    vals_sync.pop('res_id', None)
+                xml_id = record.get_external_id().values()[0]
+                if not xml_id:
                     xml_id = record.__export_xml_id()
-                    postponed = self._context['lista']
-                    postponed.append(xml_id)
-                    self = self.with_context(lista=postponed)
-
-        if original_document:
-            for xmlid_complete_name in reversed(self._context['lista']):
-                if not self.env['ir.model.data.sync.queue'].search([('name','=',xmlid_complete_name)]):
-                    self.env['ir.model.data.sync.queue'].create({
-                        'name': xmlid_complete_name
-                        })
-                    print "write %s"%xmlid_complete_name
+                #self.env['ir.model.data.sync.queue'].create({
+                #'name': xml_id,
+                #'vals': vals_sync,
+                #'method': 'write'
+                #})
 
         return True
 
     def _write(self, cr, user, ids, vals, context=None):
-        #print "_write(%s, %s)"%(vals, context)
         # low-level implementation of write()
         if not context:
             context = {}
@@ -4084,14 +4105,14 @@ class BaseModel(object):
     @api.returns('self', lambda value: value.id)
     def create(self, vals):
         #print "create(%s -- %s)"%(vals, self._context)
-        if not 'first' in self._context:
-            original_document = True
-            self = self.with_context(first=True,lista=[])
-            print "Primeiro"
-        else:
-            print "Outros"
-            original_document = False
-            postponed = []
+        #if not 'first' in self._context:
+        #    original_document = True
+        #    self = self.with_context(first=True,lista=[])
+        #    print "Primeiro"
+        #else:
+        #    print "Outros"
+        #    original_document = False
+        #    postponed = []
 
         """ create(vals) -> record
 
@@ -4121,8 +4142,18 @@ class BaseModel(object):
 
         # split up fields into old-style and pure new-style ones
         old_vals, new_vals, unknown = {}, {}, []
+        vals_sync = {}
         for key, val in vals.iteritems():
             field = self._fields.get(key)
+
+            # Change the database id by the xml id in relation fields
+            '''if field.type == 'many2one':
+                vals_sync[key] = self.env[field._column_obj].search([('id','=',val)]).get_external_id().values()[0]
+            elif field.type == 'many2many':
+                vals_sync[key] = self.env[field._column_obj].search([('id','in',val[0][2])]).get_external_id().values()
+            else:
+                vals_sync[key] = val'''
+
             if field:
                 if field.column or field.inherited:
                     old_vals[key] = val
@@ -4144,23 +4175,31 @@ class BaseModel(object):
 
         #Create an external id for this record
         dont_sync_models = ['ir.model.data', 'ir.model.data.sync','ir.model.data.sync.queue']
-        for model in self.env['ir.model'].search([('osv_memory','=',True)]):
-            dont_sync_models.append(model.name)
 
-        if self._name not in dont_sync_models and 'synchronized' not in self.env.context:
-            if self.env['ir.module.module'].search([('name','=','connector_sync'),('state','=','installed')]):
-                xml_id = record.__export_xml_id()
-                postponed = self._context['lista']
-                postponed.append(xml_id)
-                self = self.with_context(lista=postponed)
+        if not self._transient \
+        and self._name not in dont_sync_models \
+        and 'synchronized' not in self.env.context:
+            if self._name == 'im_chat.message':
+                vals_sync['res_xmlid'] = self.env['ir.model.data'].search([
+                    ('model','=',record.model),
+                    ('res_id','=', record.res_id)
+                    ]).get_external_id().values()[0]
+                vals_sync.pop('res_id', None)
+            xml_id = record.__export_xml_id()
+            #self.env['ir.model.data.sync.queue'].create({
+            #'name': xml_id,
+            #'vals': vals_sync,
+            #'method': 'create'
+            #})
+                #postponed = self._context['lista']
+                #postponed.append(xml_id)
+                #self = self.with_context(lista=postponed)
 
-        if original_document:
-            for xmlid_complete_name in reversed(self._context['lista']):
-                if not self.env['ir.model.data.sync.queue'].search([('name','=',xmlid_complete_name)]):
-                    self.env['ir.model.data.sync.queue'].create({
-                        'name': xmlid_complete_name
-                        })
-                    print "create %s"%xmlid_complete_name
+        #if original_document:
+        #if not self.env['ir.model.data.sync.queue'].search([('name','=',xmlid_complete_name)]):            
+        #        for xmlid_complete_name in reversed(self._context['lista']):
+        
+        #            print "create %s"%xmlid_complete_name
         return record
 
     def _create(self, cr, user, vals, context=None):
