@@ -2891,7 +2891,6 @@ class BaseModel(object):
                 if line2:
                     cr.execute(line2)
                     cr.commit()
-                    print "Teste"
 
     #
     # Update objects that uses this one to update their _inherits fields
@@ -3688,20 +3687,67 @@ class BaseModel(object):
 
         return True
 
+    @api.multi
+    def get_vals_sync(self, vals):
+        vals_sync = {'odoo_model': self._name}
+        dependences = []
+        for key, val in vals.iteritems():
+            field = self._fields.get(key)
+
+            # Change the database id by the xml id in relation fields
+            if field.type == 'many2one':
+                vals_sync[key] = {
+                    'type': 'many2one',
+                    'relation': field._column_obj,
+                    'value': val
+                    }
+            elif field.type == 'one2many':                   
+                field_value = []
+                if val:
+                    for field_line in val:
+                        field_value.append(field_line[2])
+                vals_sync[key] = {
+                    'type': 'one2many',
+                    'relation': field._column_obj,
+                    'value': field_value
+                    }
+            elif field.type == 'many2many':
+                if not val:
+                    field_value = []
+                elif type(val[0]) == list:
+                    field_value = val[0]
+                else:
+                    field_value = val[0][2]
+                vals_sync[key] = {
+                    'type': 'many2many',
+                    'relation': field._column_obj,
+                    'value': field_value
+                    }
+            elif field.type == 'reference':                       
+                vals_sync[key] = {
+                    'type': 'reference',
+                    'relation': field._column_obj,
+                    'value': val
+                    }
+            else:
+                vals_sync[key] = val
+        return vals_sync
+
     #
     # TODO: Validate
     #
     @api.multi
     def write(self, vals):
-        #print "write(%s,%s)"%(vals, self._context)
-        '''if not 'first' in self._context:
-            original_document = True
-            self = self.with_context(first=True,lista=[])
-            print "Primeiro ------------------"
-        else:
-            print "Outros"
-            original_document = False
-            postponed = []'''
+        # This is to avoid loop and errors
+        dont_sync_models = ['ir.model.data', 'ir.model.data.sync','ir.model.data.sync.queue']
+        if self._name not in dont_sync_models:
+            if not 'first' in self._context:
+                original_document = True
+                sequence = self.env.ref('connector_sync.config').last_sync_sequence
+                sequence = sequence + 1
+                self.env.ref('connector_sync.config').last_sync_sequence = sequence
+                self = self.with_context(first=True,sequence=sequence)
+
         """ write(vals)
 
         Updates all records in the current set with the provided values.
@@ -3792,24 +3838,14 @@ class BaseModel(object):
 
         # split up fields into old-style and pure new-style ones
         old_vals, new_vals, unknown = {}, {}, []
-        vals_sync = {}
         for key, val in vals.iteritems():
             field = self._fields.get(key)
-
-            # Change the database id by the xml id in relation fields
-            '''if field.type == 'many2one':
-                vals_sync[key] = self.env[field._column_obj].search([('id','=',val)]).get_external_id().values()[0]
-            elif field.type == 'many2many':
-                vals_sync[key] = self.env[field._column_obj].search([('id','in',val[0][2])]).get_external_id().values()
-            else:
-                vals_sync[key] = val'''
 
             if field:
                 if field.column or field.inherited:
                     old_vals[key] = val
                 if field.inverse and not field.inherited:
                     new_vals[key] = val
-                    print "new_vals[%s]  %s"%(key,val)
             else:
                 unknown.append(key)
 
@@ -3827,27 +3863,27 @@ class BaseModel(object):
             for key in new_vals:
                 self._fields[key].determine_inverse(self)
 
-        # This is to avoid loop and errors
-        dont_sync_models = ['ir.model.data', 'ir.model.data.sync','ir.model.data.sync.queue']
-
-        if self._name not in dont_sync_models \
-        and not self._transient \
+        if not self._transient \
+        and self._name not in dont_sync_models \
         and 'synchronized' not in self.env.context:
+            vals_sync = self.get_vals_sync(vals)
+            count = 0 #TODO: Remove this count 
             for record in self:
+                count += 1
+                print "count %s"%count
                 if self._name == 'im_chat.message':
                     vals_sync['res_xmlid'] = self.env['ir.model.data'].search([
                         ('model','=',record.model),
                         ('res_id','=', record.res_id)
                         ]).get_external_id().values()[0]
                     vals_sync.pop('res_id', None)
-                xml_id = record.get_external_id().values()[0]
-                if not xml_id:
-                    xml_id = record.__export_xml_id()
-                #self.env['ir.model.data.sync.queue'].create({
-                #'name': xml_id,
-                #'vals': vals_sync,
-                #'method': 'write'
-                #})
+                xml_id = self.env['ir.model.data.sync'].create_external_id(record._name, record.id)
+                self.env['ir.model.data.sync.queue'].create({
+                #'method': 'write',
+                'name': xml_id,
+                'vals': vals_sync,
+                'sequence': self._context['sequence'],
+                })
 
         return True
 
@@ -4104,15 +4140,15 @@ class BaseModel(object):
     @api.model
     @api.returns('self', lambda value: value.id)
     def create(self, vals):
-        #print "create(%s -- %s)"%(vals, self._context)
-        #if not 'first' in self._context:
-        #    original_document = True
-        #    self = self.with_context(first=True,lista=[])
-        #    print "Primeiro"
-        #else:
-        #    print "Outros"
-        #    original_document = False
-        #    postponed = []
+        dont_sync_models = ['ir.model.data', 'ir.model.data.sync','ir.model.data.sync.queue']
+
+        if self._name not in dont_sync_models:
+            if not 'first' in self._context:
+                original_document = True
+                sequence = self.env.ref('connector_sync.config').last_sync_sequence
+                sequence = sequence + 1
+                self.env.ref('connector_sync.config').last_sync_sequence = sequence
+                self = self.with_context(first=True,sequence=sequence)
 
         """ create(vals) -> record
 
@@ -4142,17 +4178,8 @@ class BaseModel(object):
 
         # split up fields into old-style and pure new-style ones
         old_vals, new_vals, unknown = {}, {}, []
-        vals_sync = {}
         for key, val in vals.iteritems():
             field = self._fields.get(key)
-
-            # Change the database id by the xml id in relation fields
-            '''if field.type == 'many2one':
-                vals_sync[key] = self.env[field._column_obj].search([('id','=',val)]).get_external_id().values()[0]
-            elif field.type == 'many2many':
-                vals_sync[key] = self.env[field._column_obj].search([('id','in',val[0][2])]).get_external_id().values()
-            else:
-                vals_sync[key] = val'''
 
             if field:
                 if field.column or field.inherited:
@@ -4162,8 +4189,10 @@ class BaseModel(object):
             else:
                 unknown.append(key)
 
+
         if unknown:
             _logger.warning("%s.create() with unknown fields: %s", self._name, ', '.join(sorted(unknown)))
+
 
         # create record with old-style fields
         record = self.browse(self._create(old_vals))
@@ -4173,37 +4202,30 @@ class BaseModel(object):
         for key in new_vals:
             self._fields[key].determine_inverse(record)
 
-        #Create an external id for this record
-        dont_sync_models = ['ir.model.data', 'ir.model.data.sync','ir.model.data.sync.queue']
 
         if not self._transient \
         and self._name not in dont_sync_models \
         and 'synchronized' not in self.env.context:
+            vals_sync = self.get_vals_sync(vals)
+            xml_id = self.env['ir.model.data.sync'].create_external_id(record._name, record.id)
+
             if self._name == 'im_chat.message':
                 vals_sync['res_xmlid'] = self.env['ir.model.data'].search([
                     ('model','=',record.model),
                     ('res_id','=', record.res_id)
                     ]).get_external_id().values()[0]
                 vals_sync.pop('res_id', None)
-            xml_id = record.__export_xml_id()
-            #self.env['ir.model.data.sync.queue'].create({
-            #'name': xml_id,
-            #'vals': vals_sync,
-            #'method': 'create'
-            #})
-                #postponed = self._context['lista']
-                #postponed.append(xml_id)
-                #self = self.with_context(lista=postponed)
+            self.env['ir.model.data.sync.queue'].create({
+            #'method': 'create',
+            'name': xml_id,
+            #'dependences': dependences,
+            'vals': vals_sync,
+            'sequence': self._context['sequence'],
+            })
 
-        #if original_document:
-        #if not self.env['ir.model.data.sync.queue'].search([('name','=',xmlid_complete_name)]):            
-        #        for xmlid_complete_name in reversed(self._context['lista']):
-        
-        #            print "create %s"%xmlid_complete_name
         return record
 
     def _create(self, cr, user, vals, context=None):
-        #print "_create(%s, %s)"%(vals, context)
         # low-level implementation of create()
         if not context:
             context = {}
