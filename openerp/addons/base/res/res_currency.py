@@ -43,8 +43,10 @@ class res_currency(osv.osv):
         if context is None:
             context = {}
         res = {}
-
-        date = context.get('date') or time.strftime('%Y-%m-%d')
+        context_date = context.get('date')
+        if context_date:
+            context_date = context_date+time.strftime(' %H:%M:%S')
+        date = context_date or time.strftime('%Y-%m-%d %H:%M:%S')
         for id in ids:
             cr.execute('SELECT rate FROM res_currency_rate '
                        'WHERE currency_id = %s '
@@ -53,6 +55,7 @@ class res_currency(osv.osv):
                        (id, date))
             if cr.rowcount:
                 res[id] = cr.fetchone()[0]
+
             elif not raise_on_no_rate:
                 res[id] = 0
             else:
@@ -223,7 +226,9 @@ class res_currency(osv.osv):
         to_currency = self.browse(cr, uid, to_currency.id, context=ctx)
 
         if from_currency.rate == 0 or to_currency.rate == 0:
-            date = context.get('date', time.strftime('%Y-%m-%d'))
+            if context_date:
+                context_date = context_date+time.strftime(' %H:%M:%S')
+            date = context_date or time.strftime('%Y-%m-%d %H:%M:%S')
             if from_currency.rate == 0:
                 currency_symbol = from_currency.symbol
             else:
@@ -298,20 +303,20 @@ class res_currency_rate(osv.osv):
         'currency_id': fields.many2one('res.currency', 'Currency', readonly=True),
     }
     _defaults = {
-        'name': lambda *a: time.strftime('%Y-%m-%d 00:00:00'),
+        'name': lambda *a: time.strftime('%Y-%m-%d %H:%M:%S'),
     }
     _order = "name desc"
 
     def name_search(self, cr, user, name, args=None, operator='ilike', context=None, limit=80):
         if operator in ['=', '!=']:
             try:
-                date_format = '%Y-%m-%d'
+                date_format = '%Y-%m-%d %H:%M:%S'
                 if context.get('lang'):
                     lang_obj = self.pool['res.lang']
                     lang_ids = lang_obj.search(cr, user, [('code', '=', context['lang'])], context=context)
                     if lang_ids:
                         date_format = lang_obj.browse(cr, user, lang_ids[0], context=context).date_format
-                name = time.strftime('%Y-%m-%d', time.strptime(name, date_format))
+                name = time.strftime('%Y-%m-%d %H:%M:%S', time.strptime(name, date_format))
             except ValueError:
                 try:
                     args.append(('rate', operator, float(name)))

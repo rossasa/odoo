@@ -36,8 +36,9 @@ class res_currency(osv.osv):
         if context is None:
             context = {}
         res = super(res_currency, self)._get_current_rate(cr, uid, ids, raise_on_no_rate, context=context)
-        if context.get('voucher_special_currency') in ids and context.get('voucher_special_currency_rate'):
-            res[context.get('voucher_special_currency')] = context.get('voucher_special_currency_rate')
+        # TODO: Discover if this is necessary
+        #if context.get('voucher_special_currency') in ids and context.get('voucher_special_currency_rate'):
+        #    res[context.get('voucher_special_currency')] = context.get('voucher_special_currency_rate')
         return res
 
 
