@@ -6021,6 +6021,10 @@ class BaseModel(object):
         #if field_name and not isinstance(field_name, list) and \
         #        self._fields[field_name].type in ('one2many', 'many2many'):
         #    result['value'].pop(field_name, None)
+        if field_name != 'currency_ids':
+            if field_name and not isinstance(field_name, list) and \
+                self._fields[field_name].type in ('one2many', 'many2many'):
+                result['value'].pop(field_name, None)
 
         return result
 
