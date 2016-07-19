@@ -116,7 +116,7 @@ class sale_order_line(osv.osv):
                         new_list_price, context=ctx)
                 discount = (new_list_price - price) / new_list_price * 100
                 if discount > 0:
-                    result['price_unit'] = new_list_price
+                    result['price_unit'] = price
                     result['discount'] = discount
                 else:
                     result['discount'] = 0.0
