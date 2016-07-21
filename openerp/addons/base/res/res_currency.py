@@ -43,10 +43,8 @@ class res_currency(osv.osv):
         if context is None:
             context = {}
         res = {}
-        context_date = context.get('date')
-        if context_date:
-            context_date = context_date+time.strftime(' %H:%M:%S')
-        date = context_date or time.strftime('%Y-%m-%d %H:%M:%S')
+
+        date = context.get('date') or fields2.Datetime.now()
         for id in ids:
             cr.execute('SELECT rate FROM res_currency_rate '
                        'WHERE currency_id = %s '
@@ -55,7 +53,6 @@ class res_currency(osv.osv):
                        (id, date))
             if cr.rowcount:
                 res[id] = cr.fetchone()[0]
-
             elif not raise_on_no_rate:
                 res[id] = 0
             else:
@@ -147,7 +144,6 @@ class res_currency(osv.osv):
     def round(self, cr, uid, currency, amount):
         """Return ``amount`` rounded  according to ``currency``'s
            rounding rules.
-
            :param Record currency: currency for which we are rounding
            :param float amount: the amount to round
            :return: rounded float
@@ -160,7 +156,6 @@ class res_currency(osv.osv):
             `self`'s precision. An amount is considered lower/greater than
             another amount if their rounded value is different. This is not the
             same as having a non-zero difference!
-
             For example 1.432 and 1.431 are equal at 2 digits precision, so this
             method would return 0. However 0.006 and 0.002 are considered
             different (returns 1) because they respectively round to 0.01 and
@@ -175,13 +170,11 @@ class res_currency(osv.osv):
            given currency's precision..
            An amount is considered lower/greater than another amount if their rounded
            value is different. This is not the same as having a non-zero difference!
-
            For example 1.432 and 1.431 are equal at 2 digits precision,
            so this method would return 0.
            However 0.006 and 0.002 are considered different (returns 1) because
            they respectively round to 0.01 and 0.0, even though
            0.006-0.002 = 0.004 which would be considered zero at 2 digits precision.
-
            :param Record currency: currency for which we are rounding
            :param float amount1: first amount to compare
            :param float amount2: second amount to compare
@@ -195,7 +188,6 @@ class res_currency(osv.osv):
     def is_zero(self, amount):
         """ Return true if `amount` is small enough to be treated as zero
             according to currency `self`'s rounding rules.
-
             Warning: ``is_zero(amount1-amount2)`` is not always equivalent to 
             ``compare_amounts(amount1,amount2) == 0``, as the former will round
             after computing the difference, while the latter will round before,
@@ -207,12 +199,10 @@ class res_currency(osv.osv):
     def is_zero(self, cr, uid, currency, amount):
         """Returns true if ``amount`` is small enough to be treated as
            zero according to ``currency``'s rounding rules.
-
            Warning: ``is_zero(amount1-amount2)`` is not always equivalent to 
            ``compare_amounts(amount1,amount2) == 0``, as the former will round after
            computing the difference, while the latter will round before, giving
            different results for e.g. 0.006 and 0.002 at 2 digits precision.
-
            :param Record currency: currency for which we are rounding
            :param float amount: amount to compare with currency's zero
         """
@@ -226,9 +216,7 @@ class res_currency(osv.osv):
         to_currency = self.browse(cr, uid, to_currency.id, context=ctx)
 
         if from_currency.rate == 0 or to_currency.rate == 0:
-            if context_date:
-                context_date = context_date+time.strftime(' %H:%M:%S')
-            date = context_date or time.strftime('%Y-%m-%d %H:%M:%S')
+            date = context.get('date', time.strftime('%Y-%m-%d'))
             if from_currency.rate == 0:
                 currency_symbol = from_currency.symbol
             else:
@@ -303,20 +291,20 @@ class res_currency_rate(osv.osv):
         'currency_id': fields.many2one('res.currency', 'Currency', readonly=True),
     }
     _defaults = {
-        'name': lambda *a: time.strftime('%Y-%m-%d %H:%M:%S'),
+        'name': lambda *a: time.strftime('%Y-%m-%d 00:00:00'),
     }
     _order = "name desc"
 
     def name_search(self, cr, user, name, args=None, operator='ilike', context=None, limit=80):
         if operator in ['=', '!=']:
             try:
-                date_format = '%Y-%m-%d %H:%M:%S'
+                date_format = '%Y-%m-%d'
                 if context.get('lang'):
                     lang_obj = self.pool['res.lang']
                     lang_ids = lang_obj.search(cr, user, [('code', '=', context['lang'])], context=context)
                     if lang_ids:
                         date_format = lang_obj.browse(cr, user, lang_ids[0], context=context).date_format
-                name = time.strftime('%Y-%m-%d %H:%M:%S', time.strptime(name, date_format))
+                name = time.strftime('%Y-%m-%d', time.strptime(name, date_format))
             except ValueError:
                 try:
                     args.append(('rate', operator, float(name)))
