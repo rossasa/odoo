@@ -6016,15 +6016,9 @@ class BaseModel(object):
 
         # At the moment, the client does not support updates on a *2many field
         # while this one is modified by the user.
-
-        # This was commented to allow one2many fields be populated during onchanges
-        #if field_name and not isinstance(field_name, list) and \
-        #        self._fields[field_name].type in ('one2many', 'many2many'):
-        #    result['value'].pop(field_name, None)
-        if field_name != 'currency_ids':
-            if field_name and not isinstance(field_name, list) and \
+        if field_name and not isinstance(field_name, list) and \
                 self._fields[field_name].type in ('one2many', 'many2many'):
-                result['value'].pop(field_name, None)
+            result['value'].pop(field_name, None)
 
         return result
 
