@@ -1,5 +1,6 @@
 .oe_product section {
     background: rgba(40, 40, 45, 0.80) !important;
+    height: 80px;
 }
 ul.wizard li {
     background-image: -webkit-linear-gradient(#8a9196,#7a8288 60%,#788084) !important;
