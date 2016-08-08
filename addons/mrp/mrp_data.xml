@@ -2,7 +2,7 @@
 <openerp>
     <data noupdate="1">
         <!-- notify all employees of module installation -->
-        <record model="mail.message" id="module_install_notification">
+        <!--record model="mail.message" id="module_install_notification">
             <field name="model">mail.group</field>
             <field name="res_id" ref="mail.group_all_employees"/>
             <field name="type">notification</field>
@@ -11,7 +11,7 @@
             <field name="body"><![CDATA[<p>Manage your manufacturing process with Odoo by defining your bills of materials (BoM), routings and work centers.</p><p>
 This application supports complete integration and production scheduling for stockable goods, consumables, and services.</p>
 <p>From the Manufacturing Settings, you can choose to compute production schedules periodically or just-in-time.</p>]]></field>
-        </record>
+        </record-->
         
         <record id="sequence_mrp_prod_type" model="ir.sequence.type">
             <field name="name">Production order</field>
