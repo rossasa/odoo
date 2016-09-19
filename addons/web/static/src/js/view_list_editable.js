@@ -467,7 +467,7 @@
                             self.resize_field(item.field, item.cell);
                         }, 0);
                     }
-                     
+
                 });
             });
 
@@ -501,8 +501,13 @@
                 if (saveInfo.created) {
                     return self.start_edition();
                 }
-                var record = self.records[next_record](
-                        saveInfo.record, {wraparound: true});
+                /*var record = self.records[next_record](
+                        saveInfo.record, {wraparound: true});*/
+
+                var record = self.records[next_record](saveInfo.record);
+                if (record === undefined) {
+                    return self.start_edition();
+                }
                 return self.start_edition(record, options);
             });
         },
@@ -593,13 +598,15 @@
         keydown_UP: function (e) {
             var self = this;
             return this._key_move_record(e, 'pred', function (el, cursor) {
-                return self._at_start(cursor, el);
+                /*return self._at_start(cursor, el);*/
+                return self._at_start(cursor, el) && !$(el).is('select,.ui-autocomplete-input');
             });
         },
         keydown_DOWN: function (e) {
             var self = this;
             return this._key_move_record(e, 'succ', function (el, cursor) {
-                return self._at_end(cursor, el);
+                /*return self._at_end(cursor, el);*/
+                return self._at_end(cursor, el) && !$(el).is('select,.ui-autocomplete-input');
             });
         },
 
@@ -698,7 +705,7 @@
         },
         start: function () {
             var self = this;
-            var _super = this._super();            
+            var _super = this._super();
             this.form.embedded_view = this._validate_view(
                     this.delegate.edition_view(this));
             var form_ready = this.form.appendTo(this.$el).done(
