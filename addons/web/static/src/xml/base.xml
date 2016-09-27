@@ -104,7 +104,7 @@
                     <tr>
                         <td><label for="db_name">Select a database name:</label></td>
                         <td>
-                            <input type="text" name="db_name" class="required" matches="^[a-zA-Z0-9][a-zA-Z0-9_-]+$" autofocus="true" placeholder="e.g. mycompany"/> 
+                            <input type="text" name="db_name" class="required" matches="^[a-zA-Z0-9][a-zA-Z0-9_-]+$" autofocus="true" placeholder="e.g. mycompany"/>
                         </td>
                     </tr>
                     <tr>
@@ -513,16 +513,15 @@
                             <span class="oe_view_title_text oe_breadcrumb_title"/>
                         </h2>
                 </td>
-                <td colspan="2">
-                        <div class="oe_view_manager_view_search"/>
-                </td>
             </tr>
             <tr class="oe_header_row">
                 <td>
                         <div class="oe_view_manager_buttons"/>
                 </td>
                 <td colspan="2">
+                        <div class="oe_view_manager_view_search"/>
                         <div class="oe_view_manager_sidebar"/>
+
                 </td>
                 <td>
                     <ul class="oe_view_manager_switch oe_button_group oe_right">
@@ -1125,7 +1124,7 @@
             ></textarea><img class="oe_field_translate oe_input_icon"
                             t-if="widget.field.translate and !widget.get('effective_readonly')"
                             t-att-src='_s + "/web/static/src/img/icons/terp-translate.png"' width="16" height="16" border="0"
-            />            
+            />
         </t>
         <t t-if="widget.get('effective_readonly')">
             <span class="oe_form_text_content"></span>
@@ -1454,7 +1453,7 @@
         <div class="oe_placeholder_files"/>
         <div class="oe_add" t-if="!widget.get('effective_readonly')">
             <!-- uploader of file -->
-            <button class="oe_attach"><span class="oe_e">'</span></button> 
+            <button class="oe_attach"><span class="oe_e">'</span></button>
             <span class='oe_attach_label'><t t-esc="widget.string"/></span>
             <t t-call="HiddenInputFile">
                 <t t-set="fileupload_id" t-value="widget.fileupload_id"/>
