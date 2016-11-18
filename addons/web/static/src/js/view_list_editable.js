@@ -301,11 +301,11 @@
             var $cell = $(cell);
 
             field.set_dimensions($cell.outerHeight(), $cell.outerWidth());
-            field.$el.css({top: 0, left: 0}).position({
+            field.$el.addClass('o_temp_visible').css({top: 0, left: 0}).position({
                 my: 'left top',
                 at: 'left top',
                 of: $cell
-            });
+            }).removeClass('o_temp_visible');
             if (field.get('effective_readonly')) {
                 field.$el.addClass('oe_readonly');
             }
@@ -467,7 +467,7 @@
                             self.resize_field(item.field, item.cell);
                         }, 0);
                     }
-                     
+
                 });
             });
 
@@ -501,8 +501,13 @@
                 if (saveInfo.created) {
                     return self.start_edition();
                 }
-                var record = self.records[next_record](
-                        saveInfo.record, {wraparound: true});
+                /*var record = self.records[next_record](
+                        saveInfo.record, {wraparound: true});*/
+
+                var record = self.records[next_record](saveInfo.record);
+                if (record === undefined) {
+                    return self.start_edition();
+                }
                 return self.start_edition(record, options);
             });
         },
@@ -593,13 +598,15 @@
         keydown_UP: function (e) {
             var self = this;
             return this._key_move_record(e, 'pred', function (el, cursor) {
-                return self._at_start(cursor, el);
+                /*return self._at_start(cursor, el);*/
+                return self._at_start(cursor, el) && !$(el).is('select,.ui-autocomplete-input');
             });
         },
         keydown_DOWN: function (e) {
             var self = this;
             return this._key_move_record(e, 'succ', function (el, cursor) {
-                return self._at_end(cursor, el);
+                /*return self._at_end(cursor, el);*/
+                return self._at_end(cursor, el) && !$(el).is('select,.ui-autocomplete-input');
             });
         },
 
@@ -656,7 +663,7 @@
                 .last()
                 .value();
             // tabbed from last field in form
-            if (last_field && last_field.$el.has(e.target).length) {
+            if (last_field && $(e.target).closest(last_field.el).length) {
                 e.preventDefault();
                 return this._next();
             }
@@ -698,7 +705,7 @@
         },
         start: function () {
             var self = this;
-            var _super = this._super();            
+            var _super = this._super();
             this.form.embedded_view = this._validate_view(
                     this.delegate.edition_view(this));
             var form_ready = this.form.appendTo(this.$el).done(
