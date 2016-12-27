@@ -51,7 +51,7 @@ class sale_order_line_make_invoice(osv.osv_memory):
             'section_id': order.section_id.id,
         }
 
-    
+
     def make_invoices(self, cr, uid, ids, context=None):
         """
              To make invoices.
@@ -80,7 +80,7 @@ class sale_order_line_make_invoice(osv.osv_memory):
                  @return:
 
             """
-            inv = self._prepare_invoice(cr, uid, order, lines)
+            inv = self._prepare_invoice(cr, uid, order, lines, context=context)
             inv_id = self.pool.get('account.invoice').create(cr, uid, inv)
             return inv_id
 
@@ -90,7 +90,7 @@ class sale_order_line_make_invoice(osv.osv_memory):
             if (not line.invoiced) and (line.state not in ('draft', 'cancel')):
                 if not line.order_id in invoices:
                     invoices[line.order_id] = []
-                line_id = sales_order_line_obj.invoice_line_create(cr, uid, [line.id])
+                line_id = sales_order_line_obj.invoice_line_create(cr, uid, [line.id], context=context)
                 for lid in line_id:
                     invoices[line.order_id].append(lid)
         for order, il in invoices.items():
