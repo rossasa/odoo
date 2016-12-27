@@ -788,6 +788,9 @@ class account_voucher(osv.osv):
                 #always use the amount booked in the company currency as the basis of the conversion into the voucher currency
                 amount_original = currency_pool.compute(cr, uid, company_currency, currency_id, line.credit or line.debit or 0.0, context=context_multi_currency)
                 amount_unreconciled = currency_pool.compute(cr, uid, company_currency, currency_id, abs(line.amount_residual), context=context_multi_currency)
+            if ttype == 'receipt' and not line.debit:
+                amount_original = currency_pool.compute(cr, uid, company_currency, currency_id, line.credit or line.debit or 0.0, context=context_multi_currency)
+                amount_unreconciled = currency_pool.compute(cr, uid, company_currency, currency_id, abs(line.amount_residual), context=context_multi_currency)
             line_currency_id = line.currency_id and line.currency_id.id or company_currency
             rs = {
                 'name':line.move_id.name,
@@ -1247,11 +1250,13 @@ class account_voucher(osv.osv):
                 amount_original_cc = currency_obj.compute(cr, uid, current_currency, company_currency, line.amount_original, context=ctx)
                 amount_original = (line.move_line_id.credit or line.move_line_id.debit)
                 currency_rate_difference = amount_paid_rate*(amount_original - amount_original_cc)  # 0.4684*(28.47 - 42.70)
-                _logger.warning("\namount_original_cc: %s\namount_paid_rate: %s\namount_original %s\ncurrency_rate_difference %s" % (amount_original_cc, amount_paid_rate, amount_original, currency_rate_difference))
-                '''if current_currency == 7:
+                '''_logger.warning("\namount_original_cc: %s\namount_paid_rate: %s\namount_original %s\ncurrency_rate_difference %s" % (amount_original_cc, amount_paid_rate, amount_original, currency_rate_difference))
+                if current_currency == 7:
                     currency_rate_difference = -7.56 #currency_obj.compute(cr, uid, line.move_line_id.currency_id.id, company_currency, move_line['debit']-move_line['credit'], context=ctx)
                 else:
                     currency_rate_difference = -6.67'''
+                if voucher.type == 'payment':
+                    currency_rate_difference = -currency_rate_difference
 
             move_line = {
                 'journal_id': voucher.journal_id.id,
@@ -1498,6 +1503,9 @@ class account_voucher_line(osv.osv):
                 res['amount_unreconciled'] = currency_pool.compute(cr, uid, move_line.currency_id.id, voucher_currency, abs(move_line.amount_residual_currency), context=ctx)
                 #res['amount_unreconciled'] = currency_pool.compute(cr, uid, company_currency, voucher_currency, abs(move_line.amount_residual), context=ctx)
             else:
+                res['amount_original'] = currency_pool.compute(cr, uid, company_currency, voucher_currency, move_line.credit or move_line.debit or 0.0, context=ctx)
+                res['amount_unreconciled'] = currency_pool.compute(cr, uid, company_currency, voucher_currency, abs(move_line.amount_residual), context=ctx)
+            if line.voucher_id.type == 'receipt' and not move_line.debit:
                 res['amount_original'] = currency_pool.compute(cr, uid, company_currency, voucher_currency, move_line.credit or move_line.debit or 0.0, context=ctx)
                 res['amount_unreconciled'] = currency_pool.compute(cr, uid, company_currency, voucher_currency, abs(move_line.amount_residual), context=ctx)
 
