@@ -1137,8 +1137,7 @@ class account_voucher(osv.osv):
             account_currency_id = line.account_id.currency_id.id
         else:
             account_currency_id = company_currency <> current_currency and current_currency or False
-        _logger.warning("\naccount_currency_id %s" % account_currency_id)
-        if line.currency_id:
+        if line.currency_id and line.currency_id.id != company_currency:
             account_currency_id = line.currency_id.id
         move_line = {
             'journal_id': line.voucher_id.journal_id.id,
