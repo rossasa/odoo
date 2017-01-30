@@ -466,6 +466,9 @@ instance.web.ActionManager = instance.web.Widget.extend({
     },
     ir_actions_act_window: function (action, options) {
         var self = this;
+	if ('clear_breadcrumb' in action) {
+            this.clear_breadcrumbs();
+        }
 
         return this.ir_actions_common({
             widget: function () { return new instance.web.ViewManagerAction(self, action); },
