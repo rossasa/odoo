@@ -1021,6 +1021,7 @@ class BaseModel(object):
         return position, 0, 0, 0
 
     def load(self, cr, uid, fields, data, context=None):
+        _logger.warning("Load")
         """
         Attempts to load the data matrix, and returns a list of ids (or
         ``False`` if there was an error and no id could be generated) and a
@@ -1050,13 +1051,18 @@ class BaseModel(object):
         noupdate = False
 
         ids = []
+        count = 0
         for id, xid, record, info in self._convert_records(cr, uid,
                 self._extract_records(cr, uid, fields, data,
                                       context=context, log=messages.append),
                 context=context, log=messages.append):
+            count += 1
+            _logger.warning("%s - %s - %s" % (count, info, record))
             try:
                 cr.execute('SAVEPOINT model_load_save')
+                _logger.warning("Done Savepoint")
             except psycopg2.InternalError, e:
+                _logger.warning("except 1")
                 # broken transaction, exit and hope the source error was
                 # already logged
                 if not any(message['type'] == 'error' for message in messages):
@@ -1068,17 +1074,22 @@ class BaseModel(object):
                      current_module, record, mode=mode, xml_id=xid,
                      noupdate=noupdate, res_id=id, context=context))
                 cr.execute('RELEASE SAVEPOINT model_load_save')
+                _logger.warning("Done Release Savepoint")
             except psycopg2.Warning, e:
+                _logger.warning("except 2")
                 messages.append(dict(info, type='warning', message=str(e)))
                 cr.execute('ROLLBACK TO SAVEPOINT model_load_save')
             except psycopg2.Error, e:
+                _logger.warning("except 3")
                 messages.append(dict(
                     info, type='error',
                     **PGERROR_TO_OE[e.pgcode](self, fg, info, e)))
                 # Failed to write, log to messages, rollback savepoint (to
                 # avoid broken transaction) and keep going
                 cr.execute('ROLLBACK TO SAVEPOINT model_load_save')
+                break
             except Exception, e:
+                _logger.warning("except 4")
                 message = (_('Unknown error during import:') +
                            ' %s: %s' % (type(e), unicode(e)))
                 moreinfo = _('Resolve other errors first')
@@ -1090,6 +1101,7 @@ class BaseModel(object):
                 cr.execute('ROLLBACK TO SAVEPOINT model_load_save')
         if any(message['type'] == 'error' for message in messages):
             cr.execute('ROLLBACK TO SAVEPOINT model_load')
+            _logger.warning("Rollback to Savepoint")
             ids = False
         return {'ids': ids, 'messages': messages}
 
@@ -1173,7 +1185,7 @@ class BaseModel(object):
                 'to': index + len(record_span) - 1
             }}
             index += len(record_span)
-    
+
     def _convert_records(self, cr, uid, records,
                          context=None, log=lambda a: None):
         """ Converts records from the source iterable (recursive dicts of
@@ -1900,7 +1912,7 @@ class BaseModel(object):
     def _read_group_prepare(self, orderby, aggregated_fields, annotated_groupbys, query):
         """
         Prepares the GROUP BY and ORDER BY terms for the read_group method. Adds the missing JOIN clause
-        to the query if order should be computed against m2o field. 
+        to the query if order should be computed against m2o field.
         :param orderby: the orderby definition in the form "%(field)s %(order)s"
         :param aggregated_fields: list of aggregated fields in the query
         :param annotated_groupbys: list of dictionaries returned by _read_group_process_groupby
@@ -1981,9 +1993,9 @@ class BaseModel(object):
         return {
             'field': split[0],
             'groupby': gb,
-            'type': field_type, 
+            'type': field_type,
             'display_format': display_formats[gb_function or 'month'] if temporal else None,
-            'interval': time_intervals[gb_function or 'month'] if temporal else None,                
+            'interval': time_intervals[gb_function or 'month'] if temporal else None,
             'tz_convert': tz_convert,
             'qualified_field': qualified_field
         }
@@ -2006,7 +2018,7 @@ class BaseModel(object):
 
     def _read_group_get_domain(self, groupby, value):
         """
-            Helper method to construct the domain corresponding to a groupby and 
+            Helper method to construct the domain corresponding to a groupby and
             a given value. This is mostly relevant for date/datetime.
         """
         if groupby['type'] in ('date', 'datetime') and value:
@@ -2024,9 +2036,9 @@ class BaseModel(object):
 
     def _read_group_format_result(self, data, annotated_groupbys, groupby, groupby_dict, domain, context):
         """
-            Helper method to format the data contained in the dictionary data by 
-            adding the domain corresponding to its values, the groupbys in the 
-            context and by properly formatting the date/datetime values. 
+            Helper method to format the data contained in the dictionary data by
+            adding the domain corresponding to its values, the groupbys in the
+            context and by properly formatting the date/datetime values.
         """
         domain_group = [dom for gb in annotated_groupbys for dom in self._read_group_get_domain(gb, data[gb['groupby']])]
         for k,v in data.iteritems():
@@ -2034,7 +2046,7 @@ class BaseModel(object):
             if gb and gb['type'] in ('date', 'datetime') and v:
                 data[k] = babel.dates.format_date(v, format=gb['display_format'], locale=context.get('lang', 'en_US'))
 
-        data['__domain'] = domain_group + domain 
+        data['__domain'] = domain_group + domain
         if len(groupby) - len(annotated_groupbys) >= 1:
             data['__context'] = { 'group_by': groupby[len(annotated_groupbys):]}
         del data['id']
@@ -2048,19 +2060,19 @@ class BaseModel(object):
         :param uid: current user id
         :param domain: list specifying search criteria [['field_name', 'operator', 'value'], ...]
         :param list fields: list of fields present in the list view specified on the object
-        :param list groupby: list of groupby descriptions by which the records will be grouped.  
+        :param list groupby: list of groupby descriptions by which the records will be grouped.
                 A groupby description is either a field (then it will be grouped by that field)
                 or a string 'field:groupby_function'.  Right now, the only functions supported
-                are 'day', 'week', 'month', 'quarter' or 'year', and they only make sense for 
+                are 'day', 'week', 'month', 'quarter' or 'year', and they only make sense for
                 date/datetime fields.
         :param int offset: optional number of records to skip
         :param int limit: optional max number of records to return
-        :param dict context: context arguments, like lang, time zone. 
+        :param dict context: context arguments, like lang, time zone.
         :param list orderby: optional ``order by`` specification, for
                              overriding the natural sort ordering of the
                              groups, see also :py:meth:`~osv.osv.osv.search`
                              (supported only for many2one fields currently)
-        :param bool lazy: if true, the results are only grouped by the first groupby and the 
+        :param bool lazy: if true, the results are only grouped by the first groupby and the
                 remaining groupbys are put in the __context key.  If false, all the groupbys are
                 done in one call.
         :return: list of dictionaries(one dictionary for each record) containing:
@@ -2075,12 +2087,12 @@ class BaseModel(object):
         if context is None:
             context = {}
         self.check_access_rights(cr, uid, 'read')
-        query = self._where_calc(cr, uid, domain, context=context) 
+        query = self._where_calc(cr, uid, domain, context=context)
         fields = fields or self._columns.keys()
 
         groupby = [groupby] if isinstance(groupby, basestring) else groupby
         groupby_list = groupby[:1] if lazy else groupby
-        annotated_groupbys = [self._read_group_process_groupby(gb, query, context) 
+        annotated_groupbys = [self._read_group_process_groupby(gb, query, context)
                                     for gb in groupby_list]
         groupby_fields = [g['field'] for g in annotated_groupbys]
         order = orderby or ','.join([g for g in groupby_list])
@@ -2151,7 +2163,7 @@ class BaseModel(object):
         if many2onefields:
             data_ids = [r['id'] for r in fetched_data]
             many2onefields = list(set(many2onefields))
-            data_dict = {d['id']: d for d in self.read(cr, uid, data_ids, many2onefields, context=context)} 
+            data_dict = {d['id']: d for d in self.read(cr, uid, data_ids, many2onefields, context=context)}
             for d in fetched_data:
                 d.update(data_dict[d['id']])
 
@@ -2161,7 +2173,7 @@ class BaseModel(object):
             # Right now, read_group only fill results in lazy mode (by default).
             # If you need to have the empty groups in 'eager' mode, then the
             # method _read_group_fill_results need to be completely reimplemented
-            # in a sane way 
+            # in a sane way
             result = self._read_group_fill_results(cr, uid, domain, groupby_fields[0], groupby[len(annotated_groupbys):],
                                                        aggregated_fields, count_field, result, read_group_order=order,
                                                        context=context)
@@ -5191,11 +5203,11 @@ class BaseModel(object):
         # read() ignores active_test, but it would forward it to any downstream search call
         # (e.g. for x2m or function fields), and this is not the desired behavior, the flag
         # was presumably only meant for the main search().
-        # TODO: Move this to read() directly?                                                                                                
-        read_ctx = dict(context or {})                                                                                                       
-        read_ctx.pop('active_test', None)                                                                                                    
-                                                                                                                                             
-        result = self.read(cr, uid, record_ids, fields, context=read_ctx) 
+        # TODO: Move this to read() directly?
+        read_ctx = dict(context or {})
+        read_ctx.pop('active_test', None)
+
+        result = self.read(cr, uid, record_ids, fields, context=read_ctx)
         if len(result) <= 1:
             return result
 
