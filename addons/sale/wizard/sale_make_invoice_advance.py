@@ -159,7 +159,6 @@ class sale_advance_payment_inv(osv.osv_memory):
         return result
 
     def _create_invoices(self, cr, uid, inv_values, sale_id, context=None):
-        _logger.warning("AQUI FOI")
         inv_obj = self.pool.get('account.invoice')
         sale_obj = self.pool.get('sale.order')
         inv_id = inv_obj.create(cr, uid, inv_values, context=context)
@@ -170,7 +169,6 @@ class sale_advance_payment_inv(osv.osv_memory):
 
     def create_invoices(self, cr, uid, ids, context=None):
         """ create invoices for the active sales orders """
-        _logger.warning("WAT?")
         sale_obj = self.pool.get('sale.order')
         act_window = self.pool.get('ir.actions.act_window')
         wizard = self.browse(cr, uid, ids[0], context)
@@ -193,9 +191,7 @@ class sale_advance_payment_inv(osv.osv_memory):
         assert wizard.advance_payment_method in ('fixed', 'percentage')
 
         inv_ids = []
-        _logger.warning("AQUI ANTES")
         for sale_id, inv_values in self._prepare_advance_invoice_vals(cr, uid, ids, context=context):
-            _logger.warning("AQUI VAI")
             inv_ids.append(self._create_invoices(cr, uid, inv_values, sale_id, context=context))
 
         if context.get('open_invoices', False):
