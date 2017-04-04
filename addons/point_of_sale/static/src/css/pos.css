@@ -82,7 +82,7 @@ td {
     margin: 0;
     background-color: #f0eeee;
     font-family: "Lato","Lucida Grande", Helvetica, Verdana, Arial;
-    color: #555555;
+    color: #0072C5;
     font-size: 12px;
     position: absolute;
     left: 0;
@@ -164,9 +164,6 @@ td {
     height: 100%;
 }
 .pos .window .subwindow.collapsed{
-    height: 0px;
-}
-.pos .window .subwindow-container .collapsed{
     height: 0px;
 }
 .pos .subwindow .subwindow-container{
@@ -265,7 +262,12 @@ td {
     margin:0;
     padding:0;
     color: gray;
-    background: #393939;
+    background: #35393B;
+}
+
+.selection-area {
+    height: 35px;
+    background: #0072C5;
 }
 
 /*  a) The left part of the top-bar */
@@ -279,17 +281,21 @@ td {
     height:100%;
     margin:0;
     padding:0;
-    border-right: 1px solid #373737;
+    border-right: 1px solid #0072C5;
     text-align:left;
     line-height:100%;
     vertical-align: middle;
 }
 .pos .pos-logo {
-    height: 35px;
-    margin-left: 7px;
+    height: 70px;
+    margin-left: 12px;
+    position: fixed;
+    z-index:10;
     margin-top: 2px;
-    vertical-align:middle;
-} 
+    border-radius: 5px;
+    background-color: white;
+    vertical-align: middle;
+}
 .pos .pos-branding .username{
     float:right;
     color:#DDD;
@@ -297,13 +303,14 @@ td {
     margin-right:32px;
     line-height: 48px;
     font-style:italic;
+    font-size: 25px;
 }
 
 /*  b) The right part of the top-bar */
 
 .pos .pos-rightheader {
     position: absolute;
-    left:440px;
+    left:419px;
     right:0;
     top:0;
     height:100%;
@@ -332,6 +339,7 @@ td {
 }
 .pos .order-button.selected{
     font-weight: 900;
+    font-size: 20px;
     background: #EEEEEE;
     color: rgb(75,75,75);
     height: 45px;
@@ -458,7 +466,8 @@ td {
     position: absolute;
     top: 48px;
     bottom: 0;
-    background: #F0EEEE;
+    background: #35393B;
+
 }
 
 /*  ********* The leftpane contains the order, numpad and paypad ********* */
@@ -469,8 +478,9 @@ td {
         -ms-box-sizing: border-box;
             box-sizing: border-box;
     position:absolute;
-    left:0;
-    width:440px;
+    left: 430px;
+    right: 0;
+
     top:0px;
     bottom:0;
     border-right: solid 1px #CECBCB;
@@ -527,7 +537,8 @@ td {
     display: inline-block;
     text-align: center;
     vertical-align: top;
-    width: 205px;
+    width: 74%;
+    height: 232px;
     max-height: 350px;
     overflow-y: auto;
     overflow-x: hidden;
@@ -573,6 +584,8 @@ td {
     font-size: 14px;
 }
 
+
+
 /*  ********* The right pane contains the screens and headers ********* */
 
 .pos .rightpane {
@@ -580,8 +593,9 @@ td {
     top: 0;
     /*bottom: 105px;*/
     bottom:0;
-    left: 440px;
-    right: 0;
+    left: 0;
+    width:430px;
+    /*right: 0;*/
     vertical-align: top;
     -webkit-transform: translate3d(0,0,0);
 }
@@ -589,8 +603,10 @@ td {
 .pos .rightpane-header {
     padding: 0;
     height: 48px;
-    border-bottom: 1px solid #c7c7c7;
-    background: #d3d3d3;
+    border-bottom: 1px solid #D3D3D3;
+    border-top: 1px solid lightgrey;
+    /*background: #0072C5;*/
+    margin-top:30px;
     text-align: center;
 }
 
@@ -636,6 +652,7 @@ td {
     line-height: 48px;
     height: 48px;
     min-width: 48px;
+    background-color: #d3d3d3;
 }
 .pos .breadcrumb:last-child {
     padding-right: 3px;
@@ -660,11 +677,13 @@ td {
 /*  b) the search box */
 
 .pos .searchbox {
-    position: absolute;
+    position: fixed;
     right: 2px;
+    z-index: 10;
+    top: -34px;
 }
 .pos .searchbox input {
-    width: 100px;
+    width: 175px;
     border: 1px solid #cecbcb;
     padding: 10px 20px;
     padding-left: 38px;
@@ -902,7 +921,7 @@ td {
 }
 .screen .top-content{
     position: absolute;
-    left: 0px; top: 0px; right: 0px;
+    left: 0px; top: 20px; right: 0px;
     height: 64px;
     border-bottom: dashed 1px rgb(215,215,215);
     text-align: center;
@@ -958,8 +977,9 @@ td {
 }
 .screen .full-content{
     position: absolute;
-    right: 0%; top: 65px; bottom: 0px;
+    right: 0%; top: 80px; bottom: 0px;
     left: 0%;
+    background-color: #FFFFFF;
 }
 
 /* a) Layout for the Product Screen */
@@ -1094,7 +1114,7 @@ td {
     text-align: left;
     width: 300px;
     background-color: white;
-    margin: 20px;
+    margin: 30px;
     padding: 15px;
     font-size: 14px;
     padding-bottom:30px;
@@ -1235,6 +1255,7 @@ td {
 .pos .clientlist-screen .client-list{
     font-size: 16px;
     width: 100%;
+    top: 80px;
     line-height: 40px;
 }
 .pos .clientlist-screen .client-list th,
@@ -1300,6 +1321,18 @@ td {
     opacity: 0;
     cursor: pointer;
 }
+
+/*.fa {
+    display: inline-block;
+    font-family: FontAwesome;
+    font-style: normal;
+    margin-left: 9px;
+    font-weight: normal;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+*/
 .pos .clientlist-screen .client-name {
     font-size: 32px;
     line-height: 64px;
@@ -1307,19 +1340,24 @@ td {
 }
 .pos .clientlist-screen .edit-buttons {
     position: absolute;
-    right: 16px;
-    top: 10px;
+    left: 185px;
+    top: -50px;
 }
 .pos .clientlist-screen .edit-buttons .button{
     display: inline-block;
-    margin-left: 16px;
-    color: rgb(128,128,128);
+    margin-left: 10px;
+    margin-top: 2px;
+    color: rgb(0, 114, 197);
+    background-color: #E6E6E6;
+    border-radius: 3px;
+    width: 50px;
     cursor: pointer;
     font-size: 36px;
 }
 .pos .clientlist-screen .client-details-box{
     position: relative;
     font-size: 16px;
+    left: 90px;
 }
 .pos .clientlist-screen .client-details-left{
     width: 50%;
@@ -1331,13 +1369,14 @@ td {
 }
 .pos .clientlist-screen .client-detail{
     line-height: 24px;
+    display: inline-grid;
 }
 .pos .clientlist-screen .client-detail > .label{
     font-weight: bold;
     display: inline-block;
     width: 75px;
-    text-align: right;
-    margin-right: 8px;
+    text-align: left;
+    margin-left: -85px;
 }
 .pos .clientlist-screen .client-details input,
 .pos .clientlist-screen .client-details select
@@ -1349,15 +1388,15 @@ td {
     background: white;
     font-family: "Lato","Lucida Grande", Helvetica, Verdana, Arial;
     color: #555555;
-    width: 340px;
+    width: 25 0px;
     font-size: 14px;
     box-sizing: border-box;
 }
 .pos .clientlist-screen .client-details input.client-name {
     font-size: 24px;
     line-height: 24px;
-    margin: 18px 6px;
-    width: 340px;
+    margin: 10px -10px;
+    width: 300px;
 }
 .pos .clientlist-screen .client-detail > .empty{
     opacity: 0.3;
@@ -1369,7 +1408,9 @@ td {
     left: 50%;
 }
 .pos .clientlist-screen .searchbox input{
-    width: 120px;
+    width: 175px;
+    margin-left: 62px;
+    margin-top: -2px;
 }
 .pos .clientlist-screen .button.new-customer {
     left: 50%;
@@ -1413,7 +1454,7 @@ td {
     border-radius: 3px;
     border: solid 1px rgb(220,220,220);
     text-align: left;
-    max-width: 500px;
+    max-width: 100%;
     -webkit-transform: translate3d(0,0,0);
 }
 
@@ -1460,6 +1501,8 @@ td {
     border-radius: 3px;
 }
 
+
+
 .submit-kitchen-button {
     float: left;
     background: rgb(61, 235, 82);
@@ -1471,6 +1514,13 @@ td {
 }
 
 /*  ********* The OrderLineWidget  ********* */
+
+.pos .mode-selected {
+    background-color: #0072C5;
+    color: white;
+    border-radius: 3px;
+    font-weight: bold;
+}
 
 .pos .order .orderline{
     width:100%;
@@ -1500,7 +1550,7 @@ td {
 }
 
 .pos .order .orderline.selected{
-    background: rgba(140,143,183,0.2);
+    background: rgba(0, 142, 189, 0.2);
     -webkit-transition: background 250ms ease-in-out;
        -moz-transition: background 250ms ease-in-out;
             transition: background 250ms ease-in-out;
@@ -1524,7 +1574,7 @@ td {
     margin-left:10px;
 }
 .pos .order .orderline .info-list em{
-    color: #777;
+    /*color: #777;*/
     font-weight: bold;
     font-style:normal;
 }
@@ -1592,6 +1642,7 @@ td {
     padding-left:3px;
     padding-right:3px;
     overflow:hidden;
+    background-color: #35393B;
 }
 
 .pos .pos-actionbar .button{
@@ -1883,4 +1934,9 @@ td {
 }
 .pos .not-supported-browser img{
     border-collapse: separate;
+}
+
+select:focus {
+    background-color: red;
+    color: white;
 }

@@ -551,7 +551,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             this._super(parent, options);
         },
 
-        show_leftpane: false,
+        show_leftpane: true,
 
         auto_back: true,
 
@@ -926,7 +926,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
         template: 'ReceiptScreenWidget',
 
         show_numpad:     false,
-        show_leftpane:   false,
+        show_leftpane:   true,
 
         show: function(){
             this._super();
@@ -967,10 +967,11 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             // 2 seconds is the same as the default timeout for sending orders and so the dialog
             // should have appeared before the timeout... so yeah that's not ultra reliable. 
 
+            /*I Don't see the need of it anymore
             finish_button.set_disabled(true);   
             setTimeout(function(){
                 finish_button.set_disabled(false);
-            }, 2000);
+            }, 2000);*/
         },
         print: function() {
             this.pos.get('selectedOrder')._printed = true;
@@ -992,7 +993,6 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             this._super();
         }
     });
-
 
     module.PaymentScreenWidget = module.ScreenWidget.extend({
         template: 'PaymentScreenWidget',
@@ -1082,10 +1082,19 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                         self.validate_order();
                     },
                 });
+
+            this.add_action_button({
+                    label: _t('Pagaré'),
+                    name: 'promissory',
+                    icon: '/point_of_sale/static/src/img/promissory.png',
+                    click: function(){
+                        self.make_promissory();
+                    },
+                });
            
             if( this.pos.config.iface_invoicing ){
                 this.add_action_button({
-                        label: _t('Invoice'),
+                        label: _t('Factura'),
                         name: 'invoice',
                         icon: '/point_of_sale/static/src/img/icons/png48/invoice.png',
                         click: function(){
@@ -1246,7 +1255,27 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             this.$('.payment-due-total').html(this.format_currency(dueTotal));
             this.$('.payment-paid-total').html(this.format_currency(paidTotal));
             this.$('.payment-remaining').html(this.format_currency(remaining));
-            this.$('.payment-change').html(this.format_currency(change));
+
+            teste =     "<span class='left-block'>"+
+                            "Troco Guarani:"+
+                        "</span>"+
+                        "<span class='right-block payment-change'>"+
+                        this.format_currency(change)+
+                        "</span>"+
+                        "<span class='left-block'>"+
+                            "Troco Real:"+
+                        "</span>"+
+                        "<span class='right-block payment-change'>"+
+                        this.format_currency(change*this.pos.journals[1].currency_rate)+
+                        "</span>"+
+                        "<span class='left-block'>"+
+                            "Troco Dolar:"+
+                        "</span>"+
+                        "<span class='right-block payment-change'>"+
+                        this.format_currency(change*this.pos.journals[2].currency_rate)+
+                        "</span>"
+
+            this.$('.bigger').html(teste);
             if(currentOrder.selected_orderline === undefined){
                 remaining = 1;  // What is this ? 
             }
@@ -1258,8 +1287,8 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
         },
         is_paid: function(){
             var currentOrder = this.pos.get('selectedOrder');
-            return (currentOrder.getTotalTaxIncluded() < 0.000001 
-                   || currentOrder.getPaidTotal() + 0.000001 >= currentOrder.getTotalTaxIncluded());
+            return (currentOrder.getTotalTaxIncluded() < 1000.000001 
+                   || currentOrder.getPaidTotal() + 1000.000001 >= currentOrder.getTotalTaxIncluded());
 
         },
         validate_order: function(options) {
@@ -1287,9 +1316,9 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                 }
             }
 
-            if(!this.is_paid()){
+            /*if(!this.is_paid()){
                 return;
-            }
+            }*/
 
             // The exact amount must be paid if there is no cash payment method defined.
             if (Math.abs(currentOrder.getTotalTaxIncluded() - currentOrder.getPaidTotal()) > 0.00001) {
@@ -1351,6 +1380,83 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                     this.pos_widget.screen_selector.set_current_screen(this.next_screen);
                 }
             }
+
+            // hide onscreen (iOS) keyboard 
+            setTimeout(function(){
+                document.activeElement.blur();
+                $("input").blur();
+            },250);
+        },
+
+
+        make_promissory: function(options) {
+            var self = this;
+            options = options || {};
+
+            var currentOrder = this.pos.get('selectedOrder');
+            console.log(currentOrder.get_client());
+            if(currentOrder.get_client() == null){
+                this.pos_widget.screen_selector.show_popup('error',{
+                    'message': _t('Empty User'),
+                    'comment': _t('There must be a client, to pay with promissory note'),
+                });
+                return;
+            }
+
+            if(currentOrder.get('orderLines').models.length === 0){
+                this.pos_widget.screen_selector.show_popup('error',{
+                    'message': _t('Empty Order'),
+                    'comment': _t('There must be at least one product in your order before it can be validated'),
+                });
+                return;
+            }
+
+            var plines = currentOrder.get('paymentLines').models;
+            for (var i = 0; i < plines.length; i++) {
+                if (plines[i].get_type() === 'bank' && plines[i].get_amount() < 0) {
+                    this.pos_widget.screen_selector.show_popup('error',{
+                        'message': _t('Negative Bank Payment'),
+                        'comment': _t('You cannot have a negative amount in a Bank payment. Use a cash payment method to return money to the customer.'),
+                    });
+                    return;
+                }
+            }
+
+            /*if(!this.is_paid()){
+                return;
+            }*/
+
+            // The exact amount must be paid if there is no cash payment method defined.
+            if (Math.abs(currentOrder.getTotalTaxIncluded() - currentOrder.getPaidTotal()) > 0.00001) {
+                var cash = false;
+                for (var i = 0; i < this.pos.cashregisters.length; i++) {
+                    cash = cash || (this.pos.cashregisters[i].journal.type === 'cash');
+                }
+                if (!cash) {
+                    this.pos_widget.screen_selector.show_popup('error',{
+                        message: _t('Cannot return change without a cash payment method'),
+                        comment: _t('There is no cash payment method available in this point of sale to handle the change.\n\n Please pay the exact amount or add a cash payment method in the point of sale configuration'),
+                    });
+                    return;
+                }
+            }
+
+            /*if (this.pos.config.iface_cashdrawer) {
+                    this.pos.proxy.open_cashbox();
+            }*/
+
+            //currentOrder['promissory'] = true;
+            this.pos.push_and_make_promissory(currentOrder)
+            if(this.pos.config.iface_print_via_proxy){
+                var receipt = currentOrder.export_for_printing();
+                this.pos.proxy.print_receipt(QWeb.render('XmlReceipt',{
+                    receipt: receipt, widget: self,
+                }));
+                this.pos.get('selectedOrder').destroy();    //finish order and go back to scan screen
+            }else{
+                this.pos_widget.screen_selector.set_current_screen(this.next_screen);
+            }
+            
 
             // hide onscreen (iOS) keyboard 
             setTimeout(function(){

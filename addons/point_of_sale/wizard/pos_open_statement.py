@@ -62,11 +62,11 @@ class pos_open_statement(osv.osv_memory):
                 'state': 'draft',
                 'name': number
             })
-            statement_id = statement_obj.create(cr, uid, data, context=context)
-            st_ids.append(int(statement_id))
+            #statement_id = statement_obj.create(cr, uid, data, context=context)
+            #st_ids.append(int(statement_id))
 
-            if journal.cash_control:
-                statement_obj.button_open(cr, uid, [statement_id], context)
+            #if journal.cash_control:
+            #    statement_obj.button_open(cr, uid, [statement_id], context)
 
         tree_res = mod_obj.get_object_reference(cr, uid, 'point_of_sale', 'view_cash_statement_pos_tree')
         tree_id = tree_res and tree_res[1] or False
@@ -81,7 +81,7 @@ class pos_open_statement(osv.osv_memory):
             'view_type': 'form',
             'view_mode': 'tree,form',
             'res_model': 'account.bank.statement',
-            'domain': str([('id', 'in', st_ids)]),
+            #'domain': str([('id', 'in', st_ids)]),
             'views': [(tree_id, 'tree'), (form_id, 'form')],
             'search_view_id': search_id,
         }

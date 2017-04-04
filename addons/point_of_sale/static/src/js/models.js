@@ -169,7 +169,7 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
             loaded: function(self,users){ self.users = users; },
         },{
             model:  'res.partner',
-            fields: ['name','street','city','state_id','country_id','vat','phone','zip','mobile','email','ean13','write_date'],
+            fields: ['name','street','city','state_id','country_id','vat','phone','ruc','zip','mobile','email','ean13','write_date'],
             domain: [['customer','=',true]],
             loaded: function(self,partners){
                 self.partners = partners;
@@ -563,6 +563,26 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
             return invoiced;
         },
 
+        push_and_make_promissory: function(order) {
+            var self = this;
+
+            if(order){
+                this.proxy.log('push_order',order.export_as_JSON());
+                this.db.add_order(order.export_as_JSON());
+            }
+            
+            var pushed = new $.Deferred();
+
+            this.flush_mutex.exec(function(){
+                var flushed = self._flush_orders(self.db.get_orders(),{timeout:30000, promissory:true});
+
+                flushed.always(function(ids){
+                    pushed.resolve();
+                });
+            });
+            return pushed;
+        },
+
         // wrapper around the _save_to_server that updates the synch status widget
         _flush_orders: function(orders, options) {
             var self = this;
@@ -604,6 +624,7 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
             return posOrderModel.call('create_from_ui',
                 [_.map(orders, function (order) {
                     order.to_invoice = options.to_invoice || false;
+                    order.promissory = options.promissory || false;
                     return order;
                 })],
                 undefined,
@@ -730,6 +751,7 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
                 }
             }
             this.trigger('change',this);
+            $('.selected .info #quantity').addClass('mode-selected');
         },
         // return the quantity of product
         get_quantity: function(){
@@ -783,6 +805,19 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
             }else if(this.get_discount() > 0){             // we don't merge discounted orderlines
                 return false;
             }else if(this.price !== orderline.price){
+                return false;
+            }else{ 
+                return true;
+            }
+        },
+        can_be_merged_without_price: function(orderline){
+            if( this.get_product().id !== orderline.get_product().id){    //only orderline of the same product can be merged
+                return false;
+            }else if(!this.get_unit() || !this.get_unit().groupable){
+                return false;
+            }else if(this.get_product_type() !== orderline.get_product_type()){
+                return false;
+            }else if(this.get_discount() > 0){             // we don't merge discounted orderlines
                 return false;
             }else{ 
                 return true;
@@ -1060,6 +1095,7 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
             line.order = this;
             this.get('orderLines').add(line);
             this.selectLine(this.getLastOrderline());
+            $('.selected .info #quantity').addClass('mode-selected');
         },
         addProduct: function(product, options){
             if(this._printed){
@@ -1089,6 +1125,7 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
                 this.get('orderLines').add(line);
             }
             this.selectLine(this.getLastOrderline());
+            $('.selected .info #quantity').addClass('mode-selected');
         },
         removeOrderline: function( line ){
             this.get('orderLines').remove(line);
@@ -1397,12 +1434,30 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
                 buffer: "0",
                 mode: newMode
             });
+            if ( newMode == "quantity" ){
+                $('.selected .info #price').removeClass('mode-selected');
+                $('.selected .info #discount').removeClass('mode-selected');
+                $('.selected .info #quantity').addClass('mode-selected');
+            } 
+            if ( newMode == "price" ){
+                $('.selected .info #quantity').removeClass('mode-selected');
+                $('.selected .info #discount').removeClass('mode-selected');
+                $('.selected .info #price').addClass('mode-selected');
+            } 
+            if ( newMode == "discount" ){
+                $('.selected .info #quantity').removeClass('mode-selected');
+                $('.selected .info #price').removeClass('mode-selected');
+                $('.selected .info #discount').addClass('mode-selected');
+            }
         },
         reset: function() {
             this.set({
                 buffer: "0",
                 mode: "quantity"
             });
+            $('.selected .info #price').removeClass('mode-selected');
+            $('.selected .info #discount').removeClass('mode-selected');
+            $('.selected .info #quantity').addClass('mode-selected');
         },
         resetValue: function(){
             this.set({buffer:'0'});

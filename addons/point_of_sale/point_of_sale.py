@@ -20,7 +20,6 @@
 ##############################################################################
 
 import logging
-import psycopg2
 import time
 from datetime import datetime
 
@@ -124,7 +123,7 @@ class pos_config(osv.osv):
         return True
 
     _constraints = [
-        (_check_cash_control, "You cannot have two cash controls in one Point Of Sale !", ['journal_ids']),
+        #(_check_cash_control, "You cannot have two cash controls in one Point Of Sale !", ['journal_ids']),
         (_check_company_location, "The company of the stock location is different than the one of point of sale", ['company_id', 'stock_location_id']),
         (_check_company_journal, "The company of the sale journal is different than the one of point of sale", ['company_id', 'journal_id']),
         (_check_company_payment, "The company of a payment method is different than the one of point of sale", ['company_id', 'journal_ids']),
@@ -248,11 +247,12 @@ class pos_session(osv.osv):
                 'cash_register_id' : False,
                 'cash_control' : False,
             }
-            for st in record.statement_ids:
+
+            '''for st in record.statement_ids:
                 if st.journal_id.cash_control == True:
                     result[record.id]['cash_control'] = True
                     result[record.id]['cash_journal_id'] = st.journal_id.id
-                    result[record.id]['cash_register_id'] = st.id
+                    result[record.id]['cash_register_id'] = st.id'''
 
         return result
 
@@ -422,8 +422,14 @@ class pos_session(osv.osv):
                 'user_id' : uid,
                 'company_id' : pos_config.company_id.id
             }
-            statement_id = self.pool.get('account.bank.statement').create(cr, uid, bank_values, context=context)
-            bank_statement_ids.append(statement_id)
+            #statement_id = self.pool.get('account.bank.statement').create(cr, uid, bank_values, context=context)
+            statement_id = self.pool.get('account.bank.statement').search(cr, uid, [('journal_id','=',journal.id),('state','=','open')], context=context)
+
+            if journal.type == 'cash':
+                if len(statement_id) == 0:
+                    raise osv.except_osv( _('Error!'),
+                        _("El caja \"%s\" debe estar abierto.")%journal.name)
+                bank_statement_ids.append(statement_id[0])
 
         values.update({
             'name': self.pool['ir.sequence'].get(cr, uid, 'pos.session', context=context),
@@ -443,7 +449,9 @@ class pos_session(osv.osv):
         """
         call the Point Of Sale interface and set the pos.session to 'opened' (in progress)
         """
-        context = dict(context or {})
+
+        if context is None:
+            context = dict()
 
         if isinstance(ids, (int, long)):
             ids = [ids]
@@ -484,13 +492,18 @@ class pos_session(osv.osv):
     def wkf_action_closing_control(self, cr, uid, ids, context=None):
         for session in self.browse(cr, uid, ids, context=context):
             for statement in session.statement_ids:
-                if (statement != session.cash_register_id) and (statement.balance_end != statement.balance_end_real):
-                    self.pool.get('account.bank.statement').write(cr, uid, [statement.id], {'balance_end_real': statement.balance_end})
+                if statement.state != 'confirm':
+                    raise osv.except_osv(
+                        _('Error!'),
+                        _("Debes cerrar todos los cajas antes de cerrar el PDV"))
+                #if (statement != session.cash_register_id) and (statement.balance_end != statement.balance_end_real):
+                #    self.pool.get('account.bank.statement').write(cr, uid, [statement.id], {'balance_end_real': statement.balance_end})
+    
         return self.write(cr, uid, ids, {'state' : 'closing_control', 'stop_at' : time.strftime('%Y-%m-%d %H:%M:%S')}, context=context)
 
     def wkf_action_close(self, cr, uid, ids, context=None):
         # Close CashBox
-        for record in self.browse(cr, uid, ids, context=context):
+        '''for record in self.browse(cr, uid, ids, context=context):
             for st in record.statement_ids:
                 if abs(st.difference) > st.journal_id.amount_authorized_diff:
                     # The pos manager can close statements with maximums.
@@ -500,7 +513,7 @@ class pos_session(osv.osv):
                 if (st.journal_id.type not in ['bank', 'cash']):
                     raise osv.except_osv(_('Error!'), 
                         _("The type of the journal for your payment method should be bank or cash "))
-                getattr(st, 'button_confirm_%s' % st.journal_id.type)(context=context)
+                getattr(st, 'button_confirm_%s' % st.journal_id.type)(context=context)'''
         self._confirm_orders(cr, uid, ids, context=context)
         self.write(cr, uid, ids, {'state' : 'closed'}, context=context)
 
@@ -524,6 +537,8 @@ class pos_session(osv.osv):
             pos_order_obj._create_account_move_line(cr, uid, order_ids, session, move_id, context=local_context)
 
             for order in session.order_ids:
+                if order.state == 'promissory':
+                    continue
                 if order.state == 'done':
                     continue
                 if order.state not in ('paid', 'invoiced'):
@@ -536,7 +551,8 @@ class pos_session(osv.osv):
         return True
 
     def open_frontend_cb(self, cr, uid, ids, context=None):
-        context = dict(context or {})
+        if not context:
+            context = {}
         if not ids:
             return {}
         for session in self.browse(cr, uid, ids, context=context):
@@ -555,6 +571,9 @@ class pos_order(osv.osv):
     _name = "pos.order"
     _description = "Point of Sale"
     _order = "id desc"
+
+
+
 
     def _amount_line_tax(self, cr, uid, line, context=None):
         account_tax_obj = self.pool['account.tax']
@@ -621,6 +640,7 @@ class pos_order(osv.osv):
         order_id = self.create(cr, uid, self._order_fields(cr, uid, order, context=context),context)
         journal_ids = set()
         for payments in order['statement_ids']:
+            print "\n%s\n"%order
             self.add_payment(cr, uid, order_id, self._payment_fields(cr, uid, payments[2], context=context), context=context)
             journal_ids.add(payments[2]['journal_id'])
 
@@ -666,17 +686,31 @@ class pos_order(osv.osv):
 
         for tmp_order in orders_to_save:
             to_invoice = tmp_order['to_invoice']
+            print "\n%s\n"%tmp_order
+            promissory = tmp_order['promissory']
             order = tmp_order['data']
             order_id = self._process_order(cr, uid, order, context=context)
             order_ids.append(order_id)
 
-            try:
-                self.signal_workflow(cr, uid, [order_id], 'paid')
-            except psycopg2.OperationalError:
-                # do not hide transactional errors, the order(s) won't be saved!
-                raise
-            except Exception as e:
-                _logger.error('Could not fully process the POS Order: %s', tools.ustr(e))
+            if promissory:
+                print "\nTry generate promissory\n"
+                
+                #self.action_invoice(cr, uid, [order_id], context)
+                #order_obj = self.browsere(cr, uid, order_id, context)
+                promissory = self.pool['account.promissory_note'].create(cr, uid, {
+                    'partner_id': order['partner_id'] or 1,
+                    'value': order['amount_total']
+                    })
+                self.write(cr, uid, [order_id], {
+                    'state':'promissory',
+                    'promissory': promissory
+                    })
+            else:
+                try:
+                    self.signal_workflow(cr, uid, [order_id], 'paid')
+                except Exception as e:
+                    _logger.error('Could not fully process the POS Order: %s', tools.ustr(e))
+
 
             if to_invoice:
                 self.action_invoice(cr, uid, [order_id], context)
@@ -727,7 +761,9 @@ class pos_order(osv.osv):
             val1 = val2 = 0.0
             cur = order.pricelist_id.currency_id
             for payment in order.statement_ids:
-                res[order.id]['amount_paid'] +=  payment.amount
+                #print "\n%s\n"%payment.journal_id.currency_rate
+                currency_rate = payment.journal_id.currency_rate or 1
+                res[order.id]['amount_paid'] +=  payment.amount/currency_rate
                 res[order.id]['amount_return'] += (payment.amount < 0 and payment.amount or 0)
             for line in order.lines:
                 val1 += self._amount_line_tax(cr, uid, line, context=context)
@@ -761,6 +797,7 @@ class pos_order(osv.osv):
 
         'state': fields.selection([('draft', 'New'),
                                    ('cancel', 'Cancelled'),
+                                   ('promissory', 'Pagare'),
                                    ('paid', 'Paid'),
                                    ('done', 'Posted'),
                                    ('invoiced', 'Invoiced')],
@@ -823,7 +860,7 @@ class pos_order(osv.osv):
             if order.lines and not order.amount_total:
                 return True
             if (not order.lines) or (not order.statement_ids) or \
-                (abs(order.amount_total-order.amount_paid) > 0.00001):
+                (abs(order.amount_total-order.amount_paid) > 500):
                 return False
         return True
 
@@ -951,7 +988,9 @@ class pos_order(osv.osv):
         if not statement_id:
             raise osv.except_osv(_('Error!'), _('You have to open at least one cashbox.'))
 
+        amount_currency = journal.currency_rate and data['amount']*journal.currency_rate or data['amount']
         args.update({
+            'amount': amount_currency,
             'statement_id': statement_id,
             'pos_statement_id': order_id,
             'journal_id': journal_id,
@@ -1528,6 +1567,9 @@ class res_partner(osv.osv):
         """ create or modify a partner from the point of sale ui.
             partner contains the partner's fields. """
 
+        #Remove the ruc if this field is clean
+        if partner['ruc'] == '':
+                partner.pop('ruc', None)
         #image is a dataurl, get the data after the comma
         if partner.get('image',False):
             img =  partner['image'].split(',')[1]
