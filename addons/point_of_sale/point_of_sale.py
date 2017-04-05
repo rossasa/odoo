@@ -675,25 +675,29 @@ class pos_order(osv.osv):
         return order_id
 
     def create_from_ui(self, cr, uid, orders, context=None):
+        #_logger.warning("create_from_ui Inicio %s" % context)
         # Keep only new orders
         submitted_references = [o['data']['name'] for o in orders]
         existing_order_ids = self.search(cr, uid, [('pos_reference', 'in', submitted_references)], context=context)
         existing_orders = self.read(cr, uid, existing_order_ids, ['pos_reference'], context=context)
         existing_references = set([o['pos_reference'] for o in existing_orders])
         orders_to_save = [o for o in orders if o['data']['name'] not in existing_references]
-
+        context = context or {}
         order_ids = []
 
         for tmp_order in orders_to_save:
+            _logger.warning("create_from_ui meio %s" % tmp_order)
             to_invoice = tmp_order['to_invoice']
             to_invoice = True
             #print "\n%s\n"%tmp_order
             #promissory = tmp_order['promissory']
             order = tmp_order['data']
+            context['legal_invoice'] = tmp_order['to_invoice']
+            context['journal_id'] = tmp_order['journal_id']
+            print context
             if not order['partner_id']:
                 order['partner_id'] = 1
             order_id = self._process_order(cr, uid, order, context=context)
-
             order_ids.append(order_id)
 
             '''if promissory:
@@ -719,7 +723,6 @@ class pos_order(osv.osv):
                 self.action_invoice(cr, uid, [order_id], context)
                 order_obj = self.browse(cr, uid, order_id, context)
                 self.pool['account.invoice'].signal_workflow(cr, uid, [order_obj.invoice_id.id], 'invoice_open')
-
         return order_ids
 
     def write(self, cr, uid, ids, vals, context=None):

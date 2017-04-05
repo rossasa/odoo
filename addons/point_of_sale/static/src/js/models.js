@@ -488,7 +488,7 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
 
         // saves the order locally and try to send it to the backend.
         // it returns a deferred that succeeds after having tried to send the order and all the other pending orders.
-        push_order: function(order) {
+        push_order: function(order, config) {
             var self = this;
 
             if(order){
@@ -499,7 +499,7 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
             var pushed = new $.Deferred();
 
             this.flush_mutex.exec(function(){
-                var flushed = self._flush_orders(self.db.get_orders());
+                var flushed = self._flush_orders(self.db.get_orders(), config);
 
                 flushed.always(function(ids){
                     pushed.resolve();
@@ -516,7 +516,7 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
         // error-transfer: there was a connection error during the transfer. You can retry to make the invoice once
         //     the network connection is up
 
-        /*push_and_invoice_order: function(order){
+        push_and_invoice_order: function(order){
             var self = this;
             var invoiced = new $.Deferred();
 
@@ -561,7 +561,7 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
             });
 
             return invoiced;
-        },*/
+        },
 
         /*push_and_make_promissory: function(order) {
             var self = this;
@@ -623,6 +623,7 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
             return posOrderModel.call('create_from_ui',
                 [_.map(orders, function (order) {
                     order.to_invoice = options.to_invoice || false;
+                    order.journal_id = options.journal_id;
                     //order.promissory = options.promissory || false;
                     //order.promissory = options.user_id || false;
                     return order;

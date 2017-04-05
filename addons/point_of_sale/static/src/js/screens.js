@@ -1338,9 +1338,11 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             if (this.pos.config.iface_cashdrawer) {
                     this.pos.proxy.open_cashbox();
             }
-
+            //currentOrder.journal_id = currentOrder.pos.config.legal_journal_id[0]
+            config = {timeout:30000, to_invoice:false, journal_id: currentOrder.pos.config.legal_journal_id[0]}
             if(options.invoice){
                 console.log("Factura Legal");
+                config.to_invoice = true
                 console.log(currentOrder);
                 // deactivate the validation button while we try to send the order
                 /*this.pos_widget.action_bar.set_button_disabled('validation',true);
@@ -1370,7 +1372,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                     self.pos.get('selectedOrder').destroy();
                 });*/
             }
-            this.pos.push_order(currentOrder)
+            this.pos.push_order(currentOrder, config)
             if(this.pos.config.iface_print_via_proxy){
                 var receipt = currentOrder.export_for_printing();
                 this.pos.proxy.print_receipt(QWeb.render('XmlReceipt',{
