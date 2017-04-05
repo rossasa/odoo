@@ -1288,13 +1288,6 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
 
             var currentOrder = this.pos.get('selectedOrder');
             console.log(currentOrder.get_client());
-            if(!currentOrder.get_client()){
-                self.pos_widget.screen_selector.show_popup('error',{
-                    message: _t('An anonymous order cannot be invoiced'),
-                    comment: _t('Please select a client for this order. This can be done by clicking the order tab'),
-                });
-                return;
-            }
 
             if(currentOrder.get('orderLines').models.length === 0){
                 this.pos_widget.screen_selector.show_popup('error',{
@@ -1341,6 +1334,13 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             //currentOrder.journal_id = currentOrder.pos.config.legal_journal_id[0]
             config = {timeout:30000, to_invoice:false, journal_id: currentOrder.pos.config.legal_journal_id[0]}
             if(options.invoice){
+                if(!currentOrder.get_client()){
+                    self.pos_widget.screen_selector.show_popup('error',{
+                        message: _t('An anonymous order cannot be invoiced'),
+                        comment: _t('Please select a client for this order. This can be done by clicking the order tab'),
+                    });
+                    return;
+                }
                 console.log("Factura Legal");
                 config.to_invoice = true
                 console.log(currentOrder);

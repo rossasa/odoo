@@ -481,8 +481,8 @@ class pos_session(osv.osv):
                 values['start_at'] = time.strftime('%Y-%m-%d %H:%M:%S')
             values['state'] = 'opened'
             record.write(values)
-            for st in record.statement_ids:
-                st.button_open()
+            '''for st in record.statement_ids:
+                st.button_open()'''
 
         return self.open_frontend_cb(cr, uid, ids, context=context)
 
@@ -532,9 +532,9 @@ class pos_session(osv.osv):
             local_context = dict(context or {}, force_company=company_id)
             order_ids = [order.id for order in session.order_ids if order.state == 'paid']
 
-            move_id = pos_order_obj._create_account_move(cr, uid, session.start_at, session.name, session.config_id.journal_id.id, company_id, context=context)
+            #move_id = pos_order_obj._create_account_move(cr, uid, session.start_at, session.name, session.config_id.journal_id.id, company_id, context=context)
 
-            pos_order_obj._create_account_move_line(cr, uid, order_ids, session, move_id, context=local_context)
+            #pos_order_obj._create_account_move_line(cr, uid, order_ids, session, move_id, context=local_context)
 
             for order in session.order_ids:
                 if order.state == 'promissory':
@@ -686,11 +686,6 @@ class pos_order(osv.osv):
         order_ids = []
 
         for tmp_order in orders_to_save:
-            _logger.warning("create_from_ui meio %s" % tmp_order)
-            to_invoice = tmp_order['to_invoice']
-            to_invoice = True
-            #print "\n%s\n"%tmp_order
-            #promissory = tmp_order['promissory']
             order = tmp_order['data']
             context['legal_invoice'] = tmp_order['to_invoice']
             context['journal_id'] = tmp_order['journal_id']
@@ -704,7 +699,7 @@ class pos_order(osv.osv):
                 print "\nTry generate promissory\n"
 
                 #self.action_invoice(cr, uid, [order_id], context)
-                #order_obj = self.browsere(cr, uid, order_id, context)
+                #order_obj = self.browse(cr, uid, order_id, context)
                 promissory = self.pool['account.promissory_note'].create(cr, uid, {
                     'partner_id': order['partner_id'] or 1,
                     'value': order['amount_total']
@@ -719,10 +714,35 @@ class pos_order(osv.osv):
             except Exception as e:
                 _logger.error('Could not fully process the POS Order: %s', tools.ustr(e))
 
-            if to_invoice:
-                self.action_invoice(cr, uid, [order_id], context)
-                order_obj = self.browse(cr, uid, order_id, context)
-                self.pool['account.invoice'].signal_workflow(cr, uid, [order_obj.invoice_id.id], 'invoice_open')
+            self.action_invoice(cr, uid, [order_id], context)
+            order_obj = self.browse(cr, uid, order_id, context)
+            self.pool['account.invoice'].signal_workflow(cr, uid, [order_obj.invoice_id.id], 'invoice_open')
+            voucher_obj = self.pool['account.voucher']
+            for line in order_obj.statement_ids:
+                print line
+                voucher_id = voucher_obj.create(cr, uid, {
+                    'name': "POS",
+                    'partner_id': order_obj.partner_id.id,
+                    'journal_id': line.journal_id.id,
+                    'type': 'receipt',
+                    'date': order_obj.date_order,
+                    'account_id':
+                        line.journal_id.default_debit_account_id.id,
+                    'amount': line.amount,
+                    'reference': order_obj.pos_reference,
+                    'line_cr_ids': [(0, 0, {
+                        'move_line_id':
+                        order_obj.invoice_id.move_id.line_id[0].id,
+                        'account_id':
+                        order_obj.invoice_id.move_id.line_id[0].account_id.id,
+                        'amount': line.amount,
+                    })],
+                    'line_dr_ids': [],
+                    })
+                voucher = voucher_obj.browse(cr, uid, voucher_id, context)
+                voucher.proforma_voucher()
+                line.journal_entry_id = voucher.move_id
+
         return order_ids
 
     def write(self, cr, uid, ids, vals, context=None):
