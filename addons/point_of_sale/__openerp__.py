@@ -47,10 +47,7 @@ Main Features
 * Refund previous sales
     """,
     'author': 'OpenERP SA',
-    'depends': [
-        'sale_stock',
-        'account_promissory_note',
-    ],
+    'depends': ['sale_stock'],
     'data': [
         'data/report_paperformat.xml',
         'security/point_of_sale_security.xml',

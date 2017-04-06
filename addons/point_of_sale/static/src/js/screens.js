@@ -1,16 +1,16 @@
 
 // this file contains the screens definitions. Screens are the
-// content of the right pane of the pos, containing the main functionalities.
+// content of the right pane of the pos, containing the main functionalities. 
 // screens are contained in the PosWidget, in pos_widget.js
 // all screens are present in the dom at all time, but only one is shown at the
-// same time.
+// same time. 
 //
 // transition between screens is made possible by the use of the screen_selector,
 // which is responsible of hiding and showing the screens, as well as maintaining
 // the state of the screens between different orders.
 //
 // all screens inherit from ScreenWidget. the only addition from the base widgets
-// are show() and hide() which shows and hides the screen but are also used to
+// are show() and hide() which shows and hides the screen but are also used to 
 // bind and unbind actions on widgets and devices. The screen_selector guarantees
 // that only one screen is shown at the same time and that show() is called after all
 // hide()s
@@ -35,12 +35,12 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
 
             this.current_mode = options.default_mode || 'cashier';
 
-            this.current_screen = null;
+            this.current_screen = null; 
 
             for(screen_name in this.screen_set){
                 this.screen_set[screen_name].hide();
             }
-
+            
             for(popup_name in this.popup_set){
                 this.popup_set[popup_name].hide();
             }
@@ -73,10 +73,10 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
         load_saved_screen:  function(){
             this.close_popup();
             var selectedOrder = this.pos.get('selectedOrder');
-            // FIXME : this changing screen behaviour is sometimes confusing ...
+            // FIXME : this changing screen behaviour is sometimes confusing ... 
             this.set_current_screen(selectedOrder.get_screen_data('screen') || this.default_screen,null,'refresh');
             //this.set_current_screen(this.default_screen,null,'refresh');
-
+            
         },
         set_user_mode: function(user_mode){
             if(user_mode !== this.current_mode){
@@ -138,7 +138,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
 
     module.ScreenWidget = module.PosBaseWidget.extend({
 
-        show_numpad:     true,
+        show_numpad:     true,  
         show_leftpane:   true,
 
         init: function(parent,options){
@@ -154,12 +154,12 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
 
         hotkeys_handlers: {},
 
-        // what happens when a product is scanned :
-        // it will add the product to the order and go to barcode_product_screen.
+        // what happens when a product is scanned : 
+        // it will add the product to the order and go to barcode_product_screen. 
         barcode_product_action: function(code){
             var self = this;
             if(self.pos.scan_product(code)){
-                if(self.barcode_product_screen){
+                if(self.barcode_product_screen){ 
                     self.pos_widget.screen_selector.set_current_screen(self.barcode_product_screen);
                 }
             }else{
@@ -168,9 +168,9 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
         },
 
         // what happens when a cashier id barcode is scanned.
-        // the default behavior is the following :
+        // the default behavior is the following : 
         // - if there's a user with a matching ean, put it as the active 'cashier', go to cashier mode, and return true
-        // - else : do nothing and return false. You probably want to extend this to show and appropriate error popup...
+        // - else : do nothing and return false. You probably want to extend this to show and appropriate error popup... 
         barcode_cashier_action: function(code){
             var users = this.pos.users;
             for(var i = 0, len = users.length; i < len; i++){
@@ -183,11 +183,11 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             this.pos_widget.screen_selector.show_popup('error-barcode',code.code);
             return false;
         },
-
+        
         // what happens when a client id barcode is scanned.
-        // the default behavior is the following :
+        // the default behavior is the following : 
         // - if there's a user with a matching ean, put it as the active 'client' and return true
-        // - else : return false.
+        // - else : return false. 
         barcode_client_action: function(code){
             var partner = this.pos.db.get_partner_by_ean13(code.code);
             if(partner){
@@ -198,7 +198,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             this.pos_widget.screen_selector.show_popup('error-barcode',code.code);
             return false;
         },
-
+        
         // what happens when a discount barcode is scanned : the default behavior
         // is to set the discount on the last order.
         barcode_discount_action: function(code){
@@ -247,7 +247,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             }else{
                 this.hide_action_bar();
             }
-
+            
             var self = this;
 
             this.pos_widget.set_numpad_visible(this.show_numpad);
@@ -285,7 +285,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
         // we need this because some screens re-render themselves when they are hidden
         // (due to some events, or magic, or both...)  we must make sure they remain hidden.
         // the good solution would probably be to make them not re-render themselves when they
-        // are hidden.
+        // are hidden. 
         renderElement: function(){
             this._super();
             if(this.hidden){
@@ -305,7 +305,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
         /* called before hide, when a popup is closed */
         close: function(){
         },
-        /* hides the popup. keep in mind that this is called in the initialization pass of the
+        /* hides the popup. keep in mind that this is called in the initialization pass of the 
          * pos instantiation, so you don't want to do anything fancy in here */
         hide: function(){
             if(this.$el){
@@ -365,7 +365,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             this.message = options.message || '';
             this.comment = options.comment || '';
             this.renderElement();
-
+            
             this.$('.button.cancel').click(function(){
                 self.pos_widget.screen_selector.close_popup();
                 if( options.cancel ){
@@ -581,7 +581,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
 
             var partners = this.pos.db.get_partners_sorted(1000);
             this.render_list(partners);
-
+            
             this.reload_partners();
 
             if( this.old_client ){
@@ -728,7 +728,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
         // save was successfull.
         save_client_details: function(partner) {
             var self = this;
-
+            
             var fields = {}
             this.$('.client-details-contents .detail').each(function(idx,el){
                 fields[el.name] = el.value;
@@ -740,14 +740,14 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                 });
                 return;
             }
-
+            
             if (this.uploaded_picture) {
                 fields.image = this.uploaded_picture;
             }
 
             fields.id           = partner.id || false;
             fields.country_id   = fields.country_id || false;
-            fields.ean13        = fields.ean13 ? this.pos.barcode_reader.sanitize_ean(fields.ean13) : false;
+            fields.ean13        = fields.ean13 ? this.pos.barcode_reader.sanitize_ean(fields.ean13) : false; 
 
             new instance.web.Model('res.partner').call('create_from_ui',[fields]).then(function(partner_id){
                 self.saved_client_details(partner_id);
@@ -759,7 +759,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                 });
             });
         },
-
+        
         // what happens when we've just pushed modifications for a partner of id partner_id
         saved_client_details: function(partner_id){
             var self = this;
@@ -771,7 +771,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                     self.display_client_details('show',partner);
                 } else {
                     // should never happen, because create_from_ui must return the id of the partner it
-                    // has created, and reload_partner() must have loaded the newly created partner.
+                    // has created, and reload_partner() must have loaded the newly created partner. 
                     self.display_client_details('hide');
                 }
             });
@@ -816,7 +816,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                 });
                 return;
             }
-
+            
             var reader = new FileReader();
             reader.onload = function(event){
                 var dataurl = event.target.result;
@@ -833,13 +833,13 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             reader.readAsDataURL(file);
         },
 
-        // This fetches partner changes on the server, and in case of changes,
+        // This fetches partner changes on the server, and in case of changes, 
         // rerenders the affected views
         reload_partners: function(){
             var self = this;
             return this.pos.load_new_partners().then(function(){
                 self.render_list(self.pos.db.get_partners_sorted(1000));
-
+                
                 // update the currently assigned client if it has been changed in db.
                 var curr_client = self.pos.get_order().get_client();
                 if (curr_client) {
@@ -860,9 +860,9 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             var scroll   = parent.scrollTop();
             var height   = contents.height();
 
-            contents.off('click','.button.edit');
-            contents.off('click','.button.save');
-            contents.off('click','.button.undo');
+            contents.off('click','.button.edit'); 
+            contents.off('click','.button.save'); 
+            contents.off('click','.button.undo'); 
             contents.on('click','.button.edit',function(){ self.edit_client_details(partner); });
             contents.on('click','.button.save',function(){ self.save_client_details(partner); });
             contents.on('click','.button.undo',function(){ self.undo_client_details(partner); });
@@ -953,19 +953,19 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             //
             // The problem is that in chrome the print() is asynchronous and doesn't
             // execute until all rpc are finished. So it conflicts with the rpc used
-            // to send the orders to the backend, and the user is able to go to the next
-            // screen before the printing dialog is opened. The problem is that what's
+            // to send the orders to the backend, and the user is able to go to the next 
+            // screen before the printing dialog is opened. The problem is that what's 
             // printed is whatever is in the page when the dialog is opened and not when it's called,
-            // and so you end up printing the product list instead of the receipt...
+            // and so you end up printing the product list instead of the receipt... 
             //
             // Fixing this would need a re-architecturing
             // of the code to postpone sending of orders after printing.
             //
             // But since the print dialog also blocks the other asynchronous calls, the
-            // button enabling in the setTimeout() is blocked until the printing dialog is
+            // button enabling in the setTimeout() is blocked until the printing dialog is 
             // closed. But the timeout has to be big enough or else it doesn't work
             // 2 seconds is the same as the default timeout for sending orders and so the dialog
-            // should have appeared before the timeout... so yeah that's not ultra reliable.
+            // should have appeared before the timeout... so yeah that's not ultra reliable. 
 
             /*I Don't see the need of it anymore
             finish_button.set_disabled(true);
@@ -994,6 +994,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
         }
     });
 
+
     module.PaymentScreenWidget = module.ScreenWidget.extend({
         template: 'PaymentScreenWidget',
         back_screen: 'products',
@@ -1016,7 +1017,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                     node = node.parentNode;
                 }
                 if(node){
-                    self.pos.get('selectedOrder').removePaymentline(node.line)
+                    self.pos.get('selectedOrder').removePaymentline(node.line)   
                 }
                 event.stopPropagation();
             };
@@ -1060,16 +1061,16 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
         show: function(){
             this._super();
             var self = this;
-
+            
             this.enable_numpad();
             this.focus_selected_line();
-
+            
             document.body.addEventListener('keyup', this.hotkey_handler);
 
             this.add_action_button({
                     label: _t('Back'),
                     icon: '/point_of_sale/static/src/img/icons/png48/go-previous.png',
-                    click: function(){
+                    click: function(){  
                         self.back();
                     },
                 });
@@ -1082,10 +1083,10 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                         self.validate_order();
                     },
                 });
-
+           
             if( this.pos.config.iface_invoicing ){
                 this.add_action_button({
-                        label: _t('Factura'),
+                        label: _t('Invoice'),
                         name: 'invoice',
                         icon: '/point_of_sale/static/src/img/icons/png48/invoice.png',
                         click: function(){
@@ -1116,7 +1117,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
         remove_empty_lines: function(){
             var order = this.pos.get('selectedOrder');
             var lines = order.get('paymentLines').models.slice(0);
-            for(var i = 0; i < lines.length; i++){
+            for(var i = 0; i < lines.length; i++){ 
                 var line = lines[i];
                 if(line.get_amount() === 0){
                     order.removePaymentline(line);
@@ -1191,7 +1192,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
         add_paymentline: function(line) {
             var list_container = this.el.querySelector('.payment-lines');
                 list_container.appendChild(this.render_paymentline(line));
-
+            
             if(this.numpad_state){
                 this.numpad_state.reset();
             }
@@ -1217,7 +1218,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
         rerender_paymentline: function(line){
             var old_node = line.node;
             var new_node = this.render_paymentline(line);
-
+            
             old_node.parentNode.replaceChild(new_node,old_node);
         },
         remove_paymentline: function(line){
@@ -1233,7 +1234,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             for(var i = 0; i < paymentlines.length; i++){
                 list_container.appendChild(this.render_paymentline(paymentlines[i]));
             }
-
+            
             this.update_payment_summary();
         },
         update_payment_summary: function() {
@@ -1268,9 +1269,9 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
 
             this.$('.bigger').html(teste);
             if(currentOrder.selected_orderline === undefined){
-                remaining = 1;  // What is this ?
+                remaining = 1;  // What is this ? 
             }
-
+                
             if(this.pos_widget.action_bar){
                 this.pos_widget.action_bar.set_button_disabled('validation', !this.is_paid());
                 this.pos_widget.action_bar.set_button_disabled('invoice', !this.is_paid());
@@ -1287,7 +1288,6 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             options = options || {};
 
             var currentOrder = this.pos.get('selectedOrder');
-            console.log(currentOrder.get_client());
 
             if(currentOrder.get('orderLines').models.length === 0){
                 this.pos_widget.screen_selector.show_popup('error',{
@@ -1318,7 +1318,6 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                 for (var i = 0; i < this.pos.cashregisters.length; i++) {
                     cash = cash || (this.pos.cashregisters[i].journal.type === 'cash');
                 }
-
                 if (!cash) {
                     this.pos_widget.screen_selector.show_popup('error',{
                         message: _t('Cannot return change without a cash payment method'),
@@ -1382,9 +1381,8 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             }else{
                 this.pos_widget.screen_selector.set_current_screen(this.next_screen);
             }
-            //}
 
-            // hide onscreen (iOS) keyboard
+            // hide onscreen (iOS) keyboard 
             setTimeout(function(){
                 document.activeElement.blur();
                 $("input").blur();
@@ -1399,7 +1397,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                 this.numpad_state.bind('set_value',   this.set_value, this);
                 this.numpad_state.bind('change:mode', this.set_mode_back_to_payment, this);
             }
-
+                    
         },
         disable_numpad: function(){
             if(this.numpad_state){

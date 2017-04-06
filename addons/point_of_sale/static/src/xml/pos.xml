@@ -102,14 +102,11 @@ color #0072C5
             </div>
             &lt;![endif]--&gt;
         </div>
-
     </t>
 
     <t t-name="SynchNotificationWidget">
         <div class="oe_status js_synch">
             <span class="placeholder-UsernameWidget"></span>
-
-
             <span class='js_msg oe_hidden'>0</span>
             <div class="js_connected oe_icon oe_green">
                 <i class='fa fa-fw fa-rss'></i>

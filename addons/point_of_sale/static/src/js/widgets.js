@@ -255,7 +255,6 @@ function openerp_pos_widgets(instance, module){ //module is instance.point_of_sa
                 el_node.addEventListener('click',this.line_click_handler);
 
             orderline.node = el_node;
-
             return el_node;
         },
         remove_orderline: function(order_line){
