@@ -380,7 +380,7 @@ class pos_session(osv.osv):
     ]
 
     def create(self, cr, uid, values, context=None):
-        context = dict(context or {})
+        '''context = dict(context or {})
         config_id = values.get('config_id', False) or context.get('default_config_id', False)
         if not config_id:
             raise osv.except_osv( _('Error!'),
@@ -429,7 +429,7 @@ class pos_session(osv.osv):
             'name': self.pool['ir.sequence'].get(cr, uid, 'pos.session', context=context),
             'statement_ids' : [(6, 0, bank_statement_ids)],
             'config_id': config_id
-        })
+        })'''
 
         return super(pos_session, self).create(cr, uid, values, context=context)
 
