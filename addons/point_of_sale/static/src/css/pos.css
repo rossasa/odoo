@@ -166,6 +166,9 @@ td {
 .pos .window .subwindow.collapsed{
     height: 0px;
 }
+.pos .window .subwindow-container .collapsed{
+    height: 0px;
+}
 .pos .subwindow .subwindow-container{
     display: table-cell;
     position: relative;
@@ -310,7 +313,7 @@ td {
 
 .pos .pos-rightheader {
     position: absolute;
-    left:419px;
+    left:440px;
     right:0;
     top:0;
     height:100%;
@@ -478,9 +481,8 @@ td {
         -ms-box-sizing: border-box;
             box-sizing: border-box;
     position:absolute;
-    left: 430px;
-    right: 0;
-
+    left:0;
+    width:440px;
     top:0px;
     bottom:0;
     border-right: solid 1px #CECBCB;
@@ -537,8 +539,7 @@ td {
     display: inline-block;
     text-align: center;
     vertical-align: top;
-    width: 74%;
-    height: 232px;
+    width: 205px;
     max-height: 350px;
     overflow-y: auto;
     overflow-x: hidden;
@@ -593,9 +594,8 @@ td {
     top: 0;
     /*bottom: 105px;*/
     bottom:0;
-    left: 0;
-    width:430px;
-    /*right: 0;*/
+    left: 440px;
+    right: 0;
     vertical-align: top;
     -webkit-transform: translate3d(0,0,0);
 }
@@ -677,13 +677,11 @@ td {
 /*  b) the search box */
 
 .pos .searchbox {
-    position: fixed;
+    position: absolute;
     right: 2px;
-    z-index: 10;
-    top: -34px;
 }
 .pos .searchbox input {
-    width: 175px;
+    width: 100px;
     border: 1px solid #cecbcb;
     padding: 10px 20px;
     padding-left: 38px;
@@ -921,7 +919,7 @@ td {
 }
 .screen .top-content{
     position: absolute;
-    left: 0px; top: 20px; right: 0px;
+    left: 0px; top: 0px; right: 0px;
     height: 64px;
     border-bottom: dashed 1px rgb(215,215,215);
     text-align: center;
@@ -977,7 +975,7 @@ td {
 }
 .screen .full-content{
     position: absolute;
-    right: 0%; top: 80px; bottom: 0px;
+    right: 0%; top: 65px; bottom: 0px;
     left: 0%;
     background-color: #FFFFFF;
 }
@@ -1114,7 +1112,7 @@ td {
     text-align: left;
     width: 300px;
     background-color: white;
-    margin: 30px;
+    margin: 20px;
     padding: 15px;
     font-size: 14px;
     padding-bottom:30px;
@@ -1255,7 +1253,6 @@ td {
 .pos .clientlist-screen .client-list{
     font-size: 16px;
     width: 100%;
-    top: 80px;
     line-height: 40px;
 }
 .pos .clientlist-screen .client-list th,
@@ -1321,18 +1318,6 @@ td {
     opacity: 0;
     cursor: pointer;
 }
-
-/*.fa {
-    display: inline-block;
-    font-family: FontAwesome;
-    font-style: normal;
-    margin-left: 9px;
-    font-weight: normal;
-    line-height: 1;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
-*/
 .pos .clientlist-screen .client-name {
     font-size: 32px;
     line-height: 64px;
@@ -1340,24 +1325,20 @@ td {
 }
 .pos .clientlist-screen .edit-buttons {
     position: absolute;
-    left: 185px;
-    top: -50px;
+    right: 16px;
+    top: 10px;
 }
 .pos .clientlist-screen .edit-buttons .button{
     display: inline-block;
-    margin-left: 10px;
-    margin-top: 2px;
+    margin-left: 16px;
     color: rgb(0, 114, 197);
     background-color: #E6E6E6;
-    border-radius: 3px;
-    width: 50px;
     cursor: pointer;
     font-size: 36px;
 }
 .pos .clientlist-screen .client-details-box{
     position: relative;
     font-size: 16px;
-    left: 90px;
 }
 .pos .clientlist-screen .client-details-left{
     width: 50%;
@@ -1375,8 +1356,8 @@ td {
     font-weight: bold;
     display: inline-block;
     width: 75px;
-    text-align: left;
-    margin-left: -85px;
+    text-align: right;
+    margin-right: 8px;
 }
 .pos .clientlist-screen .client-details input,
 .pos .clientlist-screen .client-details select
@@ -1388,15 +1369,15 @@ td {
     background: white;
     font-family: "Lato","Lucida Grande", Helvetica, Verdana, Arial;
     color: #555555;
-    width: 25 0px;
+    width: 340px;
     font-size: 14px;
     box-sizing: border-box;
 }
 .pos .clientlist-screen .client-details input.client-name {
     font-size: 24px;
     line-height: 24px;
-    margin: 10px -10px;
-    width: 300px;
+    margin: 18px 6px;
+    width: 340px;
 }
 .pos .clientlist-screen .client-detail > .empty{
     opacity: 0.3;
@@ -1408,9 +1389,7 @@ td {
     left: 50%;
 }
 .pos .clientlist-screen .searchbox input{
-    width: 175px;
-    margin-left: 62px;
-    margin-top: -2px;
+    width: 120px;
 }
 .pos .clientlist-screen .button.new-customer {
     left: 50%;
@@ -1454,7 +1433,7 @@ td {
     border-radius: 3px;
     border: solid 1px rgb(220,220,220);
     text-align: left;
-    max-width: 100%;
+    max-width: 500px;
     -webkit-transform: translate3d(0,0,0);
 }
 
@@ -1500,8 +1479,6 @@ td {
     background: rgba(110, 200, 155, 0.17);
     border-radius: 3px;
 }
-
-
 
 .submit-kitchen-button {
     float: left;
