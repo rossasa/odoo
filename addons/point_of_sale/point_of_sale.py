@@ -822,9 +822,9 @@ class pos_order(osv.osv):
         for order in self.browse(cr, uid, ids, context=context):
             if order.lines and not order.amount_total:
                 return True
-            if (not order.lines) or (not order.statement_ids) or \
+            '''if (not order.lines) or (not order.statement_ids) or \
                 (abs(order.amount_total-order.amount_paid) > 0.00001):
-                return False
+                return False'''
         return True
 
     def create_picking(self, cr, uid, ids, context=None):
@@ -867,7 +867,7 @@ class pos_order(osv.osv):
                     continue
 
                 move_list.append(move_obj.create(cr, uid, {
-                    'name': line.name,
+                    'name': line.product_id.name,
                     'product_uom': line.product_id.uom_id.id,
                     'product_uos': line.product_id.uom_id.id,
                     'picking_id': picking_id,

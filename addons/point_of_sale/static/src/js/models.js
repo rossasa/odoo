@@ -1358,7 +1358,14 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
             }), 0), this.pos.currency.rounding);
         },
         getChange: function() {
-            return this.getPaidTotal() - this.getTotalTaxIncluded();
+            //Avoid make payments for credit orders
+            var change = this.getPaidTotal() - this.getTotalTaxIncluded();
+            if(change > 0){
+                return change;
+            } else {
+                return 0;
+            }
+            //return this.getPaidTotal() - this.getTotalTaxIncluded();
         },
         getDueLeft: function() {
             return this.getTotalTaxIncluded() - this.getPaidTotal();
