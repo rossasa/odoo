@@ -899,7 +899,6 @@ function openerp_pos_widgets(instance, module){ //module is instance.point_of_sa
     module.SynchNotificationWidget = module.StatusWidget.extend({
         template: 'SynchNotificationWidget',
         start: function(){
-            console.log("startsync");
             var self = this;
             this.pos.bind('change:synch', function(pos,synch){
                 self.set_status(synch.state, synch.pending);
@@ -1005,7 +1004,6 @@ function openerp_pos_widgets(instance, module){ //module is instance.point_of_sa
         },
 
         start: function() {
-            console.log("start");
             var self = this;
             return self.pos.ready.done(function() {
                 // remove default webclient handlers that induce click delay
@@ -1276,7 +1274,6 @@ function openerp_pos_widgets(instance, module){ //module is instance.point_of_sa
             }
         },
         close: function() {
-            console.log("close");
             var self = this;
 
             function close(){

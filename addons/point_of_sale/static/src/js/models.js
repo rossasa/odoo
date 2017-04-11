@@ -835,7 +835,6 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
         // it returns a deferred that succeeds after having tried to send the order and all the other pending orders.
         push_order: function(order, config) {
             var self = this;
-			console.log("push_order");
 
             if(order){
                 this.proxy.log('push_order',order.export_as_JSON());
@@ -843,7 +842,6 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
 
                 if(config.to_invoice){
 					invoice_data = order.export_for_printing();
-					console.log(invoice_data);
                     next_number = order.pos.config.legal_next_number;
                     order.pos.config.legal_next_number = order.pos.config.legal_next_number + 1;
                     prefix = order.pos.config.legal_prefix;
@@ -864,20 +862,15 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
 					street = order.attributes.client.address;
 					phone = order.attributes.client.phone;
 					var lines = "";
-					console.log
 					for (var item in invoice_data.orderlines) {
 						var line = invoice_data.orderlines[item];
-						console.log("line");
-						console.log(line);
 					    lines = lines+line.quantity+"  "+line.product_name+"  "+line.price+"  "+line.tax+"\n";
 					}
 					//for line in lines:
 					//lines = "123 asdf \nteste2 asfd\n";
 					gross = invoice_data.subtotal;
-					console.log("aqui");
 					amount_in_word_line = NumeroALetras(invoice_data.subtotal);
-					console.log(amount_in_word_line);
-					amount_tax = invoice_data.tax_details.total_tax;
+					amount_tax = invoice_data.total_tax;
 					invoice = "\n" +
 "\n" +
 "\n" +
@@ -898,20 +891,13 @@ gross+"\n"+
 "\n"+
 "  "+amount_in_word_line+"\n"+
 "\n"+
-+amount_tax+amount_tax+"\n"+
++amount_tax+"    "+amount_tax+"\n"+
 "\n"+
 "\n"+
 "\n";
                     var blob = new Blob([invoice], {type: "text/plain;charset=utf-8"});
-                } else {
-                    next_number = order.pos.config.ticket_next_number;
-                    order.pos.config.ticket_next_number = order.pos.config.ticket_next_number + 1;
-                    prefix = order.pos.config.ticket_prefix;
-                    name = prefix+next_number;
-                    var blob = new Blob(["Hello, world! "+order.attributes.name+"ticket "+name], {type: "text/plain;charset=utf-8"});
+                    saveAs(blob, "invoice_"+next_number+".txt");
                 }
-                saveAs(blob, "invoice_"+next_number+".txt");
-
             }
 
             var pushed = new $.Deferred();
@@ -960,8 +946,6 @@ gross+"\n"+
 
 
             this.set('synch',{ state: 'connecting', pending: orders.length});
-			console.log("_flush_orders");
-			console.log(self.db.get_orders())
             return self._save_to_server(orders, options).done(function (server_ids) {
                 var pending = self.db.get_orders().length;
 
@@ -985,7 +969,6 @@ gross+"\n"+
                 result.resolve([]);
                 return result;
             }
-            //console.log(orders)
             options = options || {};
 
             var self = this;

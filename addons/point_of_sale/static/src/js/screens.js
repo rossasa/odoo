@@ -894,11 +894,6 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                 this.toggle_save_button();
                 this.$('#ruc').on('change',function(res){
                     new_ruc = $('#ruc').val().split('-');
-                    console.log(new_ruc);
-                    /*console.log(res);
-                    self.asdf(new_ruc);
-                    console.log(res);*/
-                    //ruc = res;
                     dv=new_ruc[1];
                     ruc=new_ruc[0];
                     new instance.web.Model("ruc.list").get_func('search_read')([['ruc', '=', ruc]],['name']).pipe(
@@ -935,21 +930,6 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                 this.toggle_save_button();
             }
         },
-        /*asdf: function(res){
-            console.log(res);
-            ruc = res.split('-');
-            dv=ruc[1];
-            ruc=ruc[0];
-            new instance.web.Model("ruc.list").get_func('search_read')([['ruc', '=', ruc]],['name']).pipe(
-                function(res){
-                    if(res[0]){
-                        name_set = res[0].name.split(', ');
-                        name = name_set[1]+" "+name_set[0];
-                        $('#partner_name').val(name);
-                    }
-                }
-            );
-        },*/
         close: function(){
             this._super();
         },
@@ -1317,7 +1297,6 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
 
         },
         validate_order: function(options) {
-            console.log("validate_order");
             var self = this;
             options = options || {};
 
@@ -1386,21 +1365,22 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                     });
                     return;
                 }
-                //console.log("Factura Legal");
                 config.to_invoice = true
                 currentOrder.to_invoice = true
                 currentOrder.journal_id = currentOrder.pos.config.legal_journal_id[0]
 
             }
             this.pos.push_order(currentOrder, config)
-            if(this.pos.config.iface_print_via_proxy){
-                var receipt = currentOrder.export_for_printing();
-                this.pos.proxy.print_receipt(QWeb.render('XmlReceipt',{
-                    receipt: receipt, widget: self,
-                }));
-                this.pos.get('selectedOrder').destroy();    //finish order and go back to scan screen
-            }else{
-                this.pos_widget.screen_selector.set_current_screen(this.next_screen);
+            if(!options.invoice){
+                if(this.pos.config.iface_print_via_proxy){
+                    var receipt = currentOrder.export_for_printing();
+                    this.pos.proxy.print_receipt(QWeb.render('XmlReceipt',{
+                        receipt: receipt, widget: self,
+                    }));
+                    this.pos.get('selectedOrder').destroy();    //finish order and go back to scan screen
+                }else{
+                    this.pos_widget.screen_selector.set_current_screen(this.next_screen);
+                }
             }
 
             // hide onscreen (iOS) keyboard
