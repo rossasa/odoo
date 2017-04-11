@@ -1,4 +1,11 @@
-
+function string_pad(qty, user_str)
+{
+    user_str = user_str.toString()
+    while(user_str.length<qty){
+        user_str = user_str + " ";
+    }
+    return user_str;
+}
 function Unidades(num){
 
     switch(num)
@@ -852,22 +859,29 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
 					if(order.payment_term == 1){
 						contado = "x";
 						credito = "";
+                        condicion = "Contado";
 					} else {
 						contado = "";
 						credito = "x";
+                        condicion = "Credito";
 					}
 
 					partner = invoice_data.client;
 					ruc = order.attributes.client.vat;
 					street = order.attributes.client.address;
 					phone = order.attributes.client.phone;
+                    var max_lines = 11;
+                    var lines_count = 0;
 					var lines = "";
 					for (var item in invoice_data.orderlines) {
 						var line = invoice_data.orderlines[item];
-					    lines = lines+line.quantity+"  "+line.product_name+"  "+line.price+"  "+line.tax+"\n";
+					    lines = lines+string_pad(5,'')+string_pad(10,line.quantity)+" "+string_pad(53,line.product_name)+" "+string_pad(45,line.price).replace(/\B(?=(\d{3})+(?!\d))/g, ".")+" "+string_pad(5,line.price_with_tax).replace(/\B(?=(\d{3})+(?!\d))/g, ".")+"\n";
+                        lines_count = lines_count + 1;
 					}
-					//for line in lines:
-					//lines = "123 asdf \nteste2 asfd\n";
+                    while(lines_count < max_lines){
+                        lines = lines+"\n";
+                        lines_count = lines_count + 1;
+                    }
 					gross = invoice_data.subtotal;
 					amount_in_word_line = NumeroALetras(invoice_data.subtotal);
 					amount_tax = invoice_data.total_tax;
@@ -880,18 +894,19 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
 "\n" +
 "\n" +
 "\n" +
-"            "+day+"             "+month+"                                    "+year+"                                            "+contado+credito+"\n"+
-"               "+partner+"                         "+ruc+"\n"+
+string_pad(20,'')+string_pad(2,day)+" de "+string_pad(2,month)+" de "+string_pad(80,year)+" "+string_pad(8,condicion)+"\n"+
 "\n"+
-"                "+street+"        "+phone+"\n"+
+string_pad(20,'')+string_pad(90,partner)+" "+string_pad(10,ruc)+"\n"+
+string_pad(20,'')+string_pad(43,street)+" "+string_pad(15,phone)+"\n"+
 "\n"+
 "\n"+
-lines+"\n"+
-gross+"\n"+
+lines+
 "\n"+
-"  "+amount_in_word_line+"\n"+
 "\n"+
-+amount_tax+"    "+amount_tax+"\n"+
+"\n"+
+string_pad(120,'')+string_pad(10,gross).replace(/\B(?=(\d{3})+(?!\d))/g, ".")+"\n"+
+string_pad(5,'')+string_pad(140,amount_in_word_line)+"\n"+
+string_pad(66,'')+string_pad(10,amount_tax).replace(/\B(?=(\d{3})+(?!\d))/g, ".")+string_pad(24,'')+string_pad(10,amount_tax).replace(/\B(?=(\d{3})+(?!\d))/g, ".")+"\n"+
 "\n"+
 "\n"+
 "\n";
