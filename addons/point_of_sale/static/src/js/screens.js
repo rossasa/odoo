@@ -892,7 +892,25 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                 contents.empty();
                 contents.append($(QWeb.render('ClientDetailsEdit',{widget:this,partner:partner})));
                 this.toggle_save_button();
-
+                this.$('#ruc').on('change',function(res){
+                    new_ruc = $('#ruc').val().split('-');
+                    console.log(new_ruc);
+                    /*console.log(res);
+                    self.asdf(new_ruc);
+                    console.log(res);*/
+                    //ruc = res;
+                    dv=new_ruc[1];
+                    ruc=new_ruc[0];
+                    new instance.web.Model("ruc.list").get_func('search_read')([['ruc', '=', ruc]],['name']).pipe(
+                        function(resto){
+                            if(res[0]){
+                                name_set = resto[0].name.split(', ');
+                                name = name_set[1]+" "+name_set[0];
+                                $('#partner_name').val(name);
+                            }
+                        }
+                    );
+                });
                 contents.find('.image-uploader').on('change',function(event){
                     self.load_image_file(event.target.files[0],function(res){
                         if (res) {
@@ -917,6 +935,21 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                 this.toggle_save_button();
             }
         },
+        /*asdf: function(res){
+            console.log(res);
+            ruc = res.split('-');
+            dv=ruc[1];
+            ruc=ruc[0];
+            new instance.web.Model("ruc.list").get_func('search_read')([['ruc', '=', ruc]],['name']).pipe(
+                function(res){
+                    if(res[0]){
+                        name_set = res[0].name.split(', ');
+                        name = name_set[1]+" "+name_set[0];
+                        $('#partner_name').val(name);
+                    }
+                }
+            );
+        },*/
         close: function(){
             this._super();
         },
@@ -1335,9 +1368,21 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             config = {timeout:30000, to_invoice:false, journal_id: currentOrder.pos.config.legal_journal_id[0]}
             if(options.invoice || currentOrder.payment_term != "1"){
                 if(!currentOrder.get_client()){
-                    self.pos_widget.screen_selector.show_popup('error',{
-                        message: _t('An anonymous order cannot be invoiced'),
-                        comment: _t('Please select a client for this order. This can be done by clicking the order tab'),
+                    //setTimeout(function(){
+                    //Show the client Screen instead of show an error message
+                    var ss = self.pos.pos_widget.screen_selector;
+                    ss.set_current_screen('clientlist');
+                    //}, 30);
+                    //self.pos_widget.screen_selector.show_popup('error',{
+                    //    message: _t('An anonymous order cannot be invoiced'),
+                    //    comment: _t('Please select a client for this order. This can be done by clicking the order tab'),
+                    //});
+                    return;
+                }
+                if(!currentOrder.get_client().vat){
+                    this.pos_widget.screen_selector.show_popup('error',{
+                        'message': _t('Cliente sin RUC o Cedula'),
+                        'comment': _t('El RUC o Cedula del cliente no estan definidos, para hacer factura legal hay que informar el RUC o Cedula en el catastro del cliente'),
                     });
                     return;
                 }
@@ -1345,34 +1390,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                 config.to_invoice = true
                 currentOrder.to_invoice = true
                 currentOrder.journal_id = currentOrder.pos.config.legal_journal_id[0]
-                //console.log(currentOrder);
-                // deactivate the validation button while we try to send the order
-                /*this.pos_widget.action_bar.set_button_disabled('validation',true);
-                this.pos_widget.action_bar.set_button_disabled('invoice',true);
 
-                var invoiced = this.pos.push_and_invoice_order(currentOrder);
-
-                invoiced.fail(function(error){
-                    if(error === 'error-no-client'){
-                        self.pos_widget.screen_selector.show_popup('error',{
-                            message: _t('An anonymous order cannot be invoiced'),
-                            comment: _t('Please select a client for this order. This can be done by clicking the order tab'),
-                        });
-                    }else{
-                        self.pos_widget.screen_selector.show_popup('error',{
-                            message: _t('The order could not be sent'),
-                            comment: _t('Check your internet connection and try again.'),
-                        });
-                    }
-                    self.pos_widget.action_bar.set_button_disabled('validation',false);
-                    self.pos_widget.action_bar.set_button_disabled('invoice',false);
-                });
-
-                invoiced.done(function(){
-                    self.pos_widget.action_bar.set_button_disabled('validation',false);
-                    self.pos_widget.action_bar.set_button_disabled('invoice',false);
-                    self.pos.get('selectedOrder').destroy();
-                });*/
             }
             this.pos.push_order(currentOrder, config)
             if(this.pos.config.iface_print_via_proxy){

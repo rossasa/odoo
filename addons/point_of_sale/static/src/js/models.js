@@ -1,3 +1,165 @@
+
+function Unidades(num){
+
+    switch(num)
+    {
+        case 1: return "UN";
+        case 2: return "DOS";
+        case 3: return "TRES";
+        case 4: return "CUATRO";
+        case 5: return "CINCO";
+        case 6: return "SEIS";
+        case 7: return "SIETE";
+        case 8: return "OCHO";
+        case 9: return "NUEVE";
+    }
+
+    return "";
+}//Unidades()
+
+function Decenas(num){
+
+    decena = Math.floor(num/10);
+    unidad = num - (decena * 10);
+
+    switch(decena)
+    {
+        case 1:
+            switch(unidad)
+            {
+                case 0: return "DIEZ";
+                case 1: return "ONCE";
+                case 2: return "DOCE";
+                case 3: return "TRECE";
+                case 4: return "CATORCE";
+                case 5: return "QUINCE";
+                default: return "DIECI" + Unidades(unidad);
+            }
+            break;
+        case 2:
+            switch(unidad)
+            {
+                case 0: return "VEINTE";
+                default: return "VEINTI" + Unidades(unidad);
+            }
+            break;
+        case 3: return DecenasY("TREINTA", unidad);
+        case 4: return DecenasY("CUARENTA", unidad);
+        case 5: return DecenasY("CINCUENTA", unidad);
+        case 6: return DecenasY("SESENTA", unidad);
+        case 7: return DecenasY("SETENTA", unidad);
+        case 8: return DecenasY("OCHENTA", unidad);
+        case 9: return DecenasY("NOVENTA", unidad);
+        case 0: return Unidades(unidad);
+    }
+}//Unidades()
+
+function DecenasY(strSin, numUnidades) {
+    if (numUnidades > 0)
+    return strSin + " Y " + Unidades(numUnidades);
+
+    return strSin;
+}//DecenasY()
+
+function Centenas(num) {
+    centenas = Math.floor(num / 100);
+    decenas = num - (centenas * 100);
+
+    switch(centenas)
+    {
+        case 1:
+            if (decenas > 0)
+                return "CIENTO " + Decenas(decenas);
+            return "CIEN";
+        case 2: return "DOSCIENTOS " + Decenas(decenas);
+        case 3: return "TRESCIENTOS " + Decenas(decenas);
+        case 4: return "CUATROCIENTOS " + Decenas(decenas);
+        case 5: return "QUINIENTOS " + Decenas(decenas);
+        case 6: return "SEISCIENTOS " + Decenas(decenas);
+        case 7: return "SETECIENTOS " + Decenas(decenas);
+        case 8: return "OCHOCIENTOS " + Decenas(decenas);
+        case 9: return "NOVECIENTOS " + Decenas(decenas);
+    }
+
+    return Decenas(decenas);
+}//Centenas()
+
+function Seccion(num, divisor, strSingular, strPlural) {
+    cientos = Math.floor(num / divisor);
+    resto = num - (cientos * divisor);
+
+    letras = "";
+
+    if (cientos > 0)
+        if (cientos > 1)
+            letras = Centenas(cientos) + " " + strPlural;
+        else
+            letras = strSingular;
+
+    if (resto > 0)
+        letras += "";
+
+    return letras;
+}//Seccion()
+
+function Miles(num) {
+    divisor = 1000;
+    cientos = Math.floor(num / divisor);
+    resto = num - (cientos * divisor);
+
+    strMiles = Seccion(num, divisor, "UN MIL", "MIL");
+    strCentenas = Centenas(resto);
+
+    if(strMiles === "")
+        return strCentenas;
+
+    return strMiles + " " + strCentenas;
+}//Miles()
+
+function Millones(num) {
+    divisor = 1000000;
+    cientos = Math.floor(num / divisor);
+    resto = num - (cientos * divisor);
+
+    strMillones = Seccion(num, divisor, "UN MILLON DE", "MILLONES DE");
+    strMiles = Miles(resto);
+
+    if(strMillones === "")
+        return strMiles;
+
+    return strMillones + " " + strMiles;
+}//Millones()
+
+function NumeroALetras(num) {
+    var data = {
+        numero: num,
+        enteros: Math.floor(num),
+        centavos: (((Math.round(num * 100)) - (Math.floor(num) * 100))),
+        letrasCentavos: "",
+        letrasMonedaPlural: 'GUARANIES',//"PESOS", 'Dólares', 'Bolívares', 'etcs'
+        letrasMonedaSingular: 'GUARANI', //"PESO", 'Dólar', 'Bolivar', 'etc'
+
+        letrasMonedaCentavoPlural: "CENTAVOS",
+        letrasMonedaCentavoSingular: "CENTAVO"
+    };
+
+    if (data.centavos > 0) {
+        data.letrasCentavos = "CON " + (function (){
+            if (data.centavos == 1)
+                return Millones(data.centavos) + " " + data.letrasMonedaCentavoSingular;
+            else
+                return Millones(data.centavos) + " " + data.letrasMonedaCentavoPlural;
+            })();
+    }
+
+    if(data.enteros === 0)
+        return "CERO " + data.letrasMonedaPlural + " " + data.letrasCentavos;
+    if (data.enteros == 1)
+        return Millones(data.enteros) + " " + data.letrasMonedaSingular + " " + data.letrasCentavos;
+    else
+        return Millones(data.enteros) + " " + data.letrasMonedaPlural + " " + data.letrasCentavos;
+}//NumeroALetras()
+
 var saveAs = saveAs || (function(view) {
 	"use strict";
 	// IE <10 is explicitly unsupported
@@ -160,6 +322,8 @@ var saveAs = saveAs || (function(view) {
 	|| typeof window !== "undefined" && window
 	|| this.content
 ));
+
+
 // `self` is undefined in Firefox for Android content script context
 // while `this` is nsIContentFrameMessageManager
 // with an attribute `content` that corresponds to the window
@@ -173,12 +337,18 @@ if (typeof module !== "undefined" && module.exports) {
 }
 
 
+
+
+
+
 function openerp_pos_models(instance, module){ //module is instance.point_of_sale
     var QWeb = instance.web.qweb;
 	var _t = instance.web._t;
 
     var round_di = instance.web.round_decimals;
     var round_pr = instance.web.round_precision
+
+
 
     // The PosModel contains the Point Of Sale's representation of the backend.
     // Since the PoS must work in standalone ( Without connection to the server )
@@ -672,11 +842,67 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
                 this.db.add_order(order.export_as_JSON());
 
                 if(config.to_invoice){
+					invoice_data = order.export_for_printing();
+					console.log(invoice_data);
                     next_number = order.pos.config.legal_next_number;
                     order.pos.config.legal_next_number = order.pos.config.legal_next_number + 1;
                     prefix = order.pos.config.legal_prefix;
                     name = prefix+next_number;
-                    var blob = new Blob(["Hello, world! "+order.attributes.name+"legal "+name], {type: "text/plain;charset=utf-8"});
+					day = invoice_data.date.date;
+					month = invoice_data.date.month;
+					year = invoice_data.date.year;
+					if(order.payment_term == 1){
+						contado = "x";
+						credito = "";
+					} else {
+						contado = "";
+						credito = "x";
+					}
+
+					partner = invoice_data.client;
+					ruc = order.attributes.client.vat;
+					street = order.attributes.client.address;
+					phone = order.attributes.client.phone;
+					var lines = "";
+					console.log
+					for (var item in invoice_data.orderlines) {
+						var line = invoice_data.orderlines[item];
+						console.log("line");
+						console.log(line);
+					    lines = lines+line.quantity+"  "+line.product_name+"  "+line.price+"  "+line.tax+"\n";
+					}
+					//for line in lines:
+					//lines = "123 asdf \nteste2 asfd\n";
+					gross = invoice_data.subtotal;
+					console.log("aqui");
+					amount_in_word_line = NumeroALetras(invoice_data.subtotal);
+					console.log(amount_in_word_line);
+					amount_tax = invoice_data.tax_details.total_tax;
+					invoice = "\n" +
+"\n" +
+"\n" +
+"\n" +
+"\n" +
+"\n" +
+"\n" +
+"\n" +
+"\n" +
+"            "+day+"             "+month+"                                    "+year+"                                            "+contado+credito+"\n"+
+"               "+partner+"                         "+ruc+"\n"+
+"\n"+
+"                "+street+"        "+phone+"\n"+
+"\n"+
+"\n"+
+lines+"\n"+
+gross+"\n"+
+"\n"+
+"  "+amount_in_word_line+"\n"+
+"\n"+
++amount_tax+amount_tax+"\n"+
+"\n"+
+"\n"+
+"\n";
+                    var blob = new Blob([invoice], {type: "text/plain;charset=utf-8"});
                 } else {
                     next_number = order.pos.config.ticket_next_number;
                     order.pos.config.ticket_next_number = order.pos.config.ticket_next_number + 1;

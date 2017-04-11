@@ -93,8 +93,8 @@ color #0072C5
                     <img src='/point_of_sale/static/src/img/pos_screenshot.jpg' />
                     <p>
                         The Point of Sale is not supported by Microsoft Internet Explorer. Please use
-                        a modern browser like <a href="http://www.mozilla.org/firefox/" target="_blank">Mozilla Firefox</a> 
-                        or <a href="http://www.google.com/chrome" target="_blank">Google Chrome</a>. 
+                        a modern browser like <a href="http://www.mozilla.org/firefox/" target="_blank">Mozilla Firefox</a>
+                        or <a href="http://www.google.com/chrome" target="_blank">Google Chrome</a>.
                     </p>
                 </div>
             </div>
@@ -298,6 +298,7 @@ color #0072C5
             <td><t t-esc='partner.name' /></td>
             <td><t t-esc='partner.address' /></td>
             <td><t t-esc='partner.phone or partner.mobile or ""' /></td>
+            <td><t t-esc='partner.vat or ""'/></td>
         </tr>
     </t>
 
@@ -310,9 +311,9 @@ color #0072C5
                 <t t-if='partner.id'>
                     <img t-att-src='widget.partner_icon_url(partner.id)' />
                 </t>
-                <input type='file' class='image-uploader'></input>   
+                <input type='file' class='image-uploader'></input>
             </div>
-            <input class='detail client-name' name='name' t-att-value='partner.name' placeholder='Name'></input>
+            <input id="partner_name" class='detail client-name' name='name' t-att-value='partner.name' placeholder='Name'></input>
             <div class='edit-buttons'>
                 <div class='button undo'><i class='fa fa-undo' /></div>
                 <div class='button save'><i class='fa fa-floppy-o' /></div>
@@ -357,8 +358,8 @@ color #0072C5
                         <input class='detail barcode'       name='ean13'    t-att-value='partner.ean13 || ""'></input>
                     </div>
                     <div class='client-detail'>
-                        <span class='label'>Tax ID</span>
-                        <input class='detail vat'           name='vat'     t-att-value='partner.vat || ""'></input>
+                        <span class='label'>RUC o Cedula</span>
+                        <input id='ruc' class='detail vat'           name='vat'     t-att-value='partner.vat || ""'></input>
                     </div>
                 </div>
             </div>
@@ -406,7 +407,7 @@ color #0072C5
                     <div class='client-detail'>
                         <span class='label'>Tax ID</span>
                         <t t-if='partner.vat'>
-                            <span class='detail vat'><t t-esc='partner.vat'/></span>
+                            <span id='ruca' class='detail vat'><t t-esc='partner.vat'/></span>
                         </t>
                         <t t-if='!partner.vat'>
                             <span class='detail vat empty'>N/A</span>
@@ -456,6 +457,7 @@ color #0072C5
                                                 <th>Name</th>
                                                 <th>Address</th>
                                                 <th>Phone</th>
+                                                <th>RUC o Cedula</th>
                                             </tr>
                                         </thead>
                                         <tbody class='client-list-contents'>
@@ -470,7 +472,7 @@ color #0072C5
         </div>
     </t>
 
-        
+
 
     <t t-name="PaymentScreenWidget">
         <div class="payment-screen screen touch-scrollable">
@@ -571,9 +573,9 @@ color #0072C5
                                     <t t-esc='line.quantity' />
                                 </value>
                                 <t t-if='line.unit_name !== "Unit(s)"'>
-                                    <t t-esc='line.unit_name' /> 
+                                    <t t-esc='line.unit_name' />
                                 </t>
-                                x 
+                                x
                                 <value value-decimals='2'>
                                     <t t-esc='line.price' />
                                 </value>
@@ -617,14 +619,14 @@ color #0072C5
                     <right><value><t t-esc='line.amount'/></value></right>
                 </line>
             </t>
-            <br/> 
+            <br/>
 
             <line size='double-height'>
                 <left><pre>        CHANGE</pre></left>
                 <right><value><t t-esc='receipt.change' /></value></right>
             </line>
             <br/>
-            
+
             <!-- Extra Payment Info -->
 
             <t t-if='receipt.total_discount'>
@@ -714,10 +716,10 @@ color #0072C5
                 <p class="comment"><t t-esc=" widget.comment || '' "/></p>
                 <div class="footer">
                     <div class="button confirm">
-                        Confirm 
+                        Confirm
                     </div>
                     <div class="button cancel">
-                        Cancel 
+                        Cancel
                     </div>
                 </div>
             </div>
@@ -750,7 +752,7 @@ color #0072C5
     <t t-name="Product">
         <span class='product' t-att-data-product-id="product.id">
             <div class="product-img">
-                <img t-att-src='image_url' /> 
+                <img t-att-src='image_url' />
                 <t t-if="!product.to_weight">
                     <span class="price-tag">
                         <t t-esc="widget.format_currency(product.price,'Product Price')"/>
@@ -939,7 +941,7 @@ color #0072C5
 
     <t t-name="PosTicket">
         <div class="pos-sale-ticket">
-            
+
             <div class="pos-center-align"><t t-esc="new Date().toString(Date.CultureInfo.formatPatterns.shortDate + ' ' +
                 Date.CultureInfo.formatPatterns.longTime)"/> <t t-esc="order.get('name')"/></div>
             <br />
@@ -1056,7 +1058,7 @@ color #0072C5
         </li>
     </t>
 
-    <!-- Onscreen Keyboard : 
+    <!-- Onscreen Keyboard :
          http://net.tutsplus.com/tutorials/javascript-ajax/creating-a-keyboard-with-css-and-jquery/ -->
     <t t-name="OnscreenKeyboardFull">
         <div class="keyboard_frame">
