@@ -896,7 +896,7 @@ gross+"\n"+
 "\n"+
 "\n";
                     var blob = new Blob([invoice], {type: "text/plain;charset=utf-8"});
-                    saveAs(blob, "invoice_"+next_number+".txt");
+                    saveAs(blob, "factura_"+next_number+".prn");
                 }
             }
 
