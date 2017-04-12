@@ -842,77 +842,11 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
         // it returns a deferred that succeeds after having tried to send the order and all the other pending orders.
         push_order: function(order, config) {
             var self = this;
-
             if(order){
                 this.proxy.log('push_order',order.export_as_JSON());
                 this.db.add_order(order.export_as_JSON());
-
-                if(config.to_invoice){
-					invoice_data = order.export_for_printing();
-                    next_number = order.pos.config.legal_next_number;
-                    order.pos.config.legal_next_number = order.pos.config.legal_next_number + 1;
-                    prefix = order.pos.config.legal_prefix;
-                    name = prefix+next_number;
-					day = invoice_data.date.date;
-					month = invoice_data.date.month;
-					year = invoice_data.date.year;
-					if(order.payment_term == 1){
-						contado = "x";
-						credito = "";
-                        condicion = "Contado";
-					} else {
-						contado = "";
-						credito = "x";
-                        condicion = "Credito";
-					}
-
-					partner = invoice_data.client;
-					ruc = order.attributes.client.vat;
-					street = order.attributes.client.address;
-					phone = order.attributes.client.phone;
-                    var max_lines = 11;
-                    var lines_count = 0;
-					var lines = "";
-					for (var item in invoice_data.orderlines) {
-						var line = invoice_data.orderlines[item];
-					    lines = lines+string_pad(5,'')+string_pad(10,line.quantity)+" "+string_pad(53,line.product_name)+" "+string_pad(45,line.price).replace(/\B(?=(\d{3})+(?!\d))/g, ".")+" "+string_pad(5,line.price_with_tax).replace(/\B(?=(\d{3})+(?!\d))/g, ".")+"\n";
-                        lines_count = lines_count + 1;
-					}
-                    while(lines_count < max_lines){
-                        lines = lines+"\n";
-                        lines_count = lines_count + 1;
-                    }
-					gross = invoice_data.subtotal;
-					amount_in_word_line = NumeroALetras(invoice_data.subtotal);
-					amount_tax = invoice_data.total_tax;
-					invoice = "\n" +
-"\n" +
-"\n" +
-"\n" +
-"\n" +
-"\n" +
-"\n" +
-"\n" +
-"\n" +
-string_pad(20,'')+string_pad(2,day)+" de "+string_pad(2,month)+" de "+string_pad(80,year)+" "+string_pad(8,condicion)+"\n"+
-"\n"+
-string_pad(20,'')+string_pad(90,partner)+" "+string_pad(10,ruc)+"\n"+
-string_pad(20,'')+string_pad(43,street)+" "+string_pad(15,phone)+"\n"+
-"\n"+
-"\n"+
-lines+
-"\n"+
-"\n"+
-"\n"+
-string_pad(120,'')+string_pad(10,gross).replace(/\B(?=(\d{3})+(?!\d))/g, ".")+"\n"+
-string_pad(5,'')+string_pad(140,amount_in_word_line)+"\n"+
-string_pad(66,'')+string_pad(10,amount_tax).replace(/\B(?=(\d{3})+(?!\d))/g, ".")+string_pad(24,'')+string_pad(10,amount_tax).replace(/\B(?=(\d{3})+(?!\d))/g, ".")+"\n"+
-"\n"+
-"\n"+
-"\n";
-                    var blob = new Blob([invoice], {type: "text/plain;charset=utf-8"});
-                    saveAs(blob, "factura_"+next_number+".prn");
-                }
+                order.to_invoice = config.to_invoice
+                order.pos.config.legal_next_number = order.pos.config.legal_next_number + 1;
             }
 
             var pushed = new $.Deferred();
