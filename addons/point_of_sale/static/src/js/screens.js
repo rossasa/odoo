@@ -959,9 +959,9 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
 
             this.refresh();
 
-            /*if (!this.pos.get('selectedOrder')._printed) {
+            if (!this.pos.get('selectedOrder')._printed) {
                 this.print();
-            }*/
+            }
 
             //
             // The problem is that in chrome the print() is asynchronous and doesn't
@@ -989,13 +989,26 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
         print: function() {
             this.pos.get('selectedOrder')._printed = true;
             order = this.pos.get('selectedOrder')
+            var months = new Array();
+            months[0] = "Enero";
+            months[1] = "Febrero";
+            months[2] = "Marzo";
+            months[3] = "Abril";
+            months[4] = "Mayo";
+            months[5] = "Junio";
+            months[6] = "Julio";
+            months[7] = "Agosto";
+            months[8] = "Septiembre";
+            months[9] = "Octubre";
+            months[10] = "Noviembre";
+            months[11] = "Dicimbre";
             if(config.to_invoice){
                 invoice_data = order.export_for_printing();
                 next_number = order.pos.config.legal_next_number;
                 prefix = order.pos.config.legal_prefix;
                 name = prefix+next_number;
                 day = invoice_data.date.date;
-                month = invoice_data.date.month;
+                month = months[invoice_data.date.month];
                 year = invoice_data.date.year;
                 if(order.payment_term == 1){
                     contado = "x";
@@ -1187,6 +1200,7 @@ string_pad(66,'')+string_pad(10,amount_tax).replace(/\B(?=(\d{3})+(?!\d))/g, "."
             }
 
             this.update_payment_summary();
+            selectedOrder = this.pos.get('selectedOrder');
             if (selectedOrder.payment_term && selectedOrder.payment_term != 1){
                 self.pos_widget.action_bar.set_button_disabled('validation',false);
                 self.pos_widget.action_bar.set_button_disabled('invoice',false);
