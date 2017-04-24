@@ -1352,13 +1352,13 @@ string_pad(66,'')+string_pad(10,amount_tax).replace(/\B(?=(\d{3})+(?!\d))/g, "."
                         this.format_currency(change)+
                         "</span>"+
                         "<span class='left-block'>"+
-                            "Troco Real:"+
+                            "Troco Dolar:"+
                         "</span>"+
                         "<span class='right-block payment-change'>"+
                         this.format_currency(change*this.pos.journals[1].currency_rate)+
                         "</span>"+
                         "<span class='left-block'>"+
-                            "Troco Dolar:"+
+                            "Troco Real:"+
                         "</span>"+
                         "<span class='right-block payment-change'>"+
                         this.format_currency(change*this.pos.journals[2].currency_rate)+
