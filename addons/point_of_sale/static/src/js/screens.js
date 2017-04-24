@@ -176,6 +176,8 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             for(var i = 0, len = users.length; i < len; i++){
                 if(users[i].ean13 === code.code){
                     this.pos.cashier = users[i];
+                    this.pos.user = users[i];
+                    $('#seller_id').val(users[i].id);
                     this.pos_widget.username.refresh();
                     return true;
                 }
