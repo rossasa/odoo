@@ -682,6 +682,9 @@ function openerp_pos_devices(instance,module){ //module is instance.point_of_sal
                 // This is because ean-13 are UCP-A with an additional zero at the beginning,
                 // so by stripping zeros you get retrocompatibility with UCP-A systems.
                 var parse_result = this.parse_ean('0'+code);
+                //This has been added to deal with products without 0 on barcode start
+                parse_result.code = code;
+                parse_result.base_code = code;
             }else if(this.pos.db.get_product_by_reference(code)){
                 var parse_result = {
                     encoding: 'reference',
