@@ -71,7 +71,6 @@ function openerp_pos_widgets(instance, module){ //module is instance.point_of_sa
             var newChar;
             newChar = event.currentTarget.innerText || event.currentTarget.textContent;
             var mode = this.state.get('mode');
-            console.log(mode);
             if ( mode == "quantity" ){
                 $('.selected .info #quantity').addClass('mode-selected');
             }
@@ -93,7 +92,6 @@ function openerp_pos_widgets(instance, module){ //module is instance.point_of_sa
             $('.selected-mode').removeClass('selected-mode');
             $(_.str.sprintf('.mode-button[data-mode="%s"]', mode), this.$el).addClass('selected-mode');
 
-            console.log(mode);
             if ( mode == "quantity" ){
                 $('.selected .info #price').removeClass('mode-selected');
                 $('.selected .info #discount').removeClass('mode-selected');
@@ -205,7 +203,6 @@ function openerp_pos_widgets(instance, module){ //module is instance.point_of_sa
                     $('.selected .info #price').removeClass('mode-selected');
                     $('.selected .info #discount').removeClass('mode-selected');
                     $('.selected .info #quantity').addClass('mode-selected');
-                    console.log(val);
 
                 }else if( mode === 'discount'){
                     order.getSelectedLine().set_discount(val);

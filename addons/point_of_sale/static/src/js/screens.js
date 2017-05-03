@@ -1295,6 +1295,11 @@ string_pad(66,'')+string_pad(10,amount_tax).replace(/\B(?=(\d{3})+(?!\d))/g, "."
             if(this.numpad_state){
                 this.numpad_state.reset();
             }
+            selectedStatement = line;
+            if (selectedStatement.cashregister.journal.payment_subtype){
+                selectedStatement.card_mode = this.$('#select_card option:selected').val();
+                selectedStatement.ref = '';
+            }
         },
         render_paymentline: function(line){
             var el_html  = openerp.qweb.render('Paymentline',{widget: this, line: line});
@@ -1303,12 +1308,23 @@ string_pad(66,'')+string_pad(10,amount_tax).replace(/\B(?=(\d{3})+(?!\d))/g, "."
             var el_node  = document.createElement('tbody');
                 el_node.innerHTML = el_html;
                 el_node = el_node.childNodes[0];
+                line.card_mode = $('#select_card').val()
                 el_node.line = line;
                 el_node.querySelector('.paymentline-delete')
                     .addEventListener('click', this.line_delete_handler);
                 el_node.addEventListener('click', this.line_click_handler);
                 el_node.querySelector('input')
                     .addEventListener('keyup', this.line_change_handler);
+                if (line.cashregister.journal.payment_subtype == 'receive_card'){
+                    el_node.querySelector('#select_card')
+                    .addEventListener('change',function(){
+                        line.card_mode = $('#select_card').val()
+                    });
+                    el_node.querySelector('#ref')
+                    .addEventListener('change',function(){
+                        line.ref = $('#ref').val()
+                    });
+                }
 
             line.node = el_node;
 
@@ -1402,6 +1418,13 @@ string_pad(66,'')+string_pad(10,amount_tax).replace(/\B(?=(\d{3})+(?!\d))/g, "."
                     this.pos_widget.screen_selector.show_popup('error',{
                         'message': _t('Negative Bank Payment'),
                         'comment': _t('You cannot have a negative amount in a Bank payment. Use a cash payment method to return money to the customer.'),
+                    });
+                    return;
+                }
+                if (plines[i].get_type() === 'bank' && $('#ref').val() == '') {
+                    this.pos_widget.screen_selector.show_popup('error',{
+                        'message': _t('Sem Referencia'),
+                        'comment': _t('Debes completar la referencia.'),
                     });
                     return;
                 }

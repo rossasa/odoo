@@ -881,17 +881,7 @@ color #0072C5
 
     <t t-name="Paymentline">
         <div t-attf-class="paymentline #{line.selected ? 'selected' : ''}">
-            <div t-if="line.cashregister.journal.payment_subtype=='receive_card'">
-                <div>
-                    <select id="select_card">
-                        <option name="credit">Credito</option>
-                        <option name="debit">Debito</option>
-                    </select>
-                <!--/div>
-                <div-->
-                    Referencia <input id='ref'/>
-                </div>
-            </div>
+
 
             <div class='paymentline-name'>
                 <t t-esc="line.name"/>
@@ -903,6 +893,16 @@ color #0072C5
             <span  class='paymentline-delete'>
                 <img src="/point_of_sale/static/src/img/search_reset.gif" />
             </span>
+            <div t-if="line.cashregister.journal.payment_subtype=='receive_card'">
+                <div>
+                    <select id="select_card">
+                        <option value="credit">Credito</option>
+                        <option value="debit">Debito</option>
+                    </select>
+                    Referencia <input id='ref'/>
+
+                </div>
+            </div>
         </div>
     </t>
 

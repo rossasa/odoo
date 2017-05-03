@@ -1330,6 +1330,8 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
         export_as_JSON: function(){
             return {
                 name: instance.web.datetime_to_str(new Date()),
+                card_mode: this.card_mode,
+                reference: this.ref,
                 statement_id: this.cashregister.id,
                 account_id: this.cashregister.account_id[0],
                 journal_id: this.cashregister.journal_id[0],
