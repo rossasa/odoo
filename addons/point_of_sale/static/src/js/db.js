@@ -223,8 +223,8 @@ function openerp_pos_db(instance, module){
             if(partner.email){
                 str += '|' + partner.email;
             }
-            if(partner.vat){
-                str += '|' + partner.vat;
+            if(partner.ruc){
+                str += '|' + partner.ruc;
             }
             str = '' + partner.id + ':' + str.replace(':','') + '\n';
             return str;

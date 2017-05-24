@@ -298,7 +298,7 @@ color #0072C5
             <td><t t-esc='partner.name' /></td>
             <td><t t-esc='partner.address' /></td>
             <td><t t-esc='partner.phone or partner.mobile or ""' /></td>
-            <td><t t-esc='partner.vat or ""'/></td>
+            <td><t t-esc='partner.ruc or ""'/></td>
         </tr>
     </t>
 
@@ -359,7 +359,7 @@ color #0072C5
                     </div>
                     <div class='client-detail'>
                         <span class='label'>RUC o Cedula</span>
-                        <input id='ruc' class='detail vat'           name='vat'     t-att-value='partner.vat || ""'></input>
+                        <input id='ruc' class='detail vat'           name='vat'     t-att-value='partner.ruc || ""'></input>
                     </div>
                 </div>
             </div>
@@ -406,10 +406,10 @@ color #0072C5
                     </div>
                     <div class='client-detail'>
                         <span class='label'>Tax ID</span>
-                        <t t-if='partner.vat'>
-                            <span id='ruca' class='detail vat'><t t-esc='partner.vat'/></span>
+                        <t t-if='partner.ruc'>
+                            <span id='ruca' class='detail vat'><t t-esc='partner.ruc'/></span>
                         </t>
-                        <t t-if='!partner.vat'>
+                        <t t-if='!partner.ruc'>
                             <span class='detail vat empty'>N/A</span>
                         </t>
                     </div>
