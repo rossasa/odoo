@@ -1339,24 +1339,38 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             this.$('.payment-due-total').html(this.format_currency(dueTotal));
             this.$('.payment-paid-total').html(this.format_currency(paidTotal));
             this.$('.payment-remaining').html(this.format_currency(remaining));
-
+            rate_pyg = 1;
+            rate_usd = 1;
+            rate_brl = 1;
+            for (var number in this.pos.journals){
+                journal = this.pos.journals[number]
+                if (journal.currency && journal.currency[1] == 'USD'){
+                    rate_usd = journal.currency_rate;
+                }
+            }
+            for (var number in this.pos.journals){
+                journal = this.pos.journals[number]
+                if (journal.currency && journal.currency[1] == 'BRL'){
+                    rate_brl = journal.currency_rate;
+                }
+            }
             teste =     "<span class='left-block'>"+
-                            "Troco Guarani:"+
+                            "Vuelto Guarani:"+
                         "</span>"+
                         "<span class='right-block payment-change'>"+
                         this.format_currency(change)+
                         "</span>"+
                         "<span class='left-block'>"+
-                            "Troco Dolar:"+
+                            "Vuelto Dolar:"+
                         "</span>"+
                         "<span class='right-block payment-change'>"+
-                        this.format_currency(change*this.pos.journals[1].currency_rate)+
+                        this.format_currency(change*rate_usd)+
                         "</span>"+
                         "<span class='left-block'>"+
-                            "Troco Real:"+
+                            "Vuelto Real:"+
                         "</span>"+
                         "<span class='right-block payment-change'>"+
-                        this.format_currency(change*this.pos.journals[2].currency_rate)+
+                        this.format_currency(change*rate_brl)+
                         "</span>"
 
             this.$('.bigger').html(teste);
