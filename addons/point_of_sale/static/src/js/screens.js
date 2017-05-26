@@ -1148,7 +1148,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                 });
 
             this.add_action_button({
-                    label: _t('Validate'),
+                    label: _t('Ticket'),
                     name: 'validation',
                     icon: '/point_of_sale/static/src/img/icons/png48/validate.png',
                     click: function(){
@@ -1158,7 +1158,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
 
             if( this.pos.config.iface_invoicing ){
                 this.add_action_button({
-                        label: _t('Invoice'),
+                        label: _t('Factura'),
                         name: 'invoice',
                         icon: '/point_of_sale/static/src/img/icons/png48/invoice.png',
                         click: function(){
