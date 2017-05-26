@@ -507,7 +507,6 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
 
         start: function(){ //FIXME this should work as renderElement... but then the categories aren't properly set. explore why
             var self = this;
-
             this.product_list_widget = new module.ProductListWidget(this,{
                 click_product_action: function(product){
                     if(product.to_weight && self.pos.config.iface_electronic_scale){
@@ -1026,12 +1025,13 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                 ruc = order.attributes.client.ruc;
                 street = order.attributes.client.address;
                 phone = order.attributes.client.phone;
-                var max_lines = 11;
+                var max_lines = this.pos.dotmatrix_invoice[0].qty_lines;
                 var lines_count = 0;
                 var lines = "";
                 for (var item in invoice_data.orderlines) {
                     var line = invoice_data.orderlines[item];
-                    lines = lines+string_pad(5,'')+string_pad(10,line.quantity)+" "+string_pad(53,line.product_name)+" "+string_pad(45,line.price).replace(/\B(?=(\d{3})+(?!\d))/g, ".")+" "+string_pad(5,line.price_with_tax).replace(/\B(?=(\d{3})+(?!\d))/g, ".")+"\n";
+                    line_eval = eval(this.pos.dotmatrix_invoice[0].line)
+                    lines = lines+line_eval;
                     lines_count = lines_count + 1;
                 }
                 while(lines_count < max_lines){
@@ -1041,31 +1041,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                 gross = invoice_data.subtotal;
                 amount_in_word_line = NumeroALetras(invoice_data.subtotal);
                 amount_tax = invoice_data.total_tax;
-                invoice = "\n" +
-"\n" +
-"\n" +
-"\n" +
-"\n" +
-"\n" +
-"\n" +
-"\n" +
-"\n" +
-string_pad(20,'')+string_pad(2,day)+" de "+string_pad(2,month)+" de "+string_pad(80,year)+" "+string_pad(8,condicion)+"\n"+
-"\n"+
-string_pad(20,'')+string_pad(90,partner)+" "+string_pad(10,ruc)+"\n"+
-string_pad(20,'')+string_pad(43,street)+" "+string_pad(15,phone)+"\n"+
-"\n"+
-"\n"+
-lines+
-"\n"+
-"\n"+
-"\n"+
-string_pad(120,'')+string_pad(10,gross).replace(/\B(?=(\d{3})+(?!\d))/g, ".")+"\n"+
-string_pad(5,'')+string_pad(140,amount_in_word_line)+"\n"+
-string_pad(66,'')+string_pad(10,amount_tax).replace(/\B(?=(\d{3})+(?!\d))/g, ".")+string_pad(24,'')+string_pad(10,amount_tax).replace(/\B(?=(\d{3})+(?!\d))/g, ".")+"\n"+
-"\n"+
-"\n"+
-"\n";
+                invoice = eval(this.pos.dotmatrix_invoice[0].content)
                 var blob = new Blob([invoice], {type: "text/plain;charset=utf-8"});
                 saveAs(blob, "factura_"+next_number+".prn");
             } else {
