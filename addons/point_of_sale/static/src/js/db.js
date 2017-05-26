@@ -226,6 +226,9 @@ function openerp_pos_db(instance, module){
             if(partner.ruc){
                 str += '|' + partner.ruc;
             }
+            if(partner.cedula){
+                str += '|' + partner.cedula;
+            }
             str = '' + partner.id + ':' + str.replace(':','') + '\n';
             return str;
         },

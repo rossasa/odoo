@@ -1023,6 +1023,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
 
                 partner = invoice_data.client;
                 ruc = order.attributes.client.ruc;
+                cedula = order.attributes.client.cedula;
                 street = order.attributes.client.address;
                 phone = order.attributes.client.phone;
                 var max_lines = this.pos.dotmatrix_invoice[0].qty_lines;
@@ -1043,7 +1044,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                 amount_tax = invoice_data.total_tax;
                 invoice = eval(this.pos.dotmatrix_invoice[0].content)
                 var blob = new Blob([invoice], {type: "text/plain;charset=utf-8"});
-                saveAs(blob, "factura_"+next_number+".prn");
+                saveAs(blob, "factura_"+next_number+".prt");
             } else {
                 window.print();
             }
@@ -1450,8 +1451,10 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                     });
                     return;
                 }
-                config.to_invoice = true
-                currentOrder.to_invoice = true
+                if (options.invoice){
+                    config.to_invoice = true
+                    currentOrder.to_invoice = true
+                }
                 currentOrder.journal_id = currentOrder.pos.config.legal_journal_id[0]
 
             }

@@ -299,6 +299,7 @@ color #0072C5
             <td><t t-esc='partner.address' /></td>
             <td><t t-esc='partner.phone or partner.mobile or ""' /></td>
             <td><t t-esc='partner.ruc or ""'/></td>
+            <td><t t-esc='partner.cedula or ""'/></td>
         </tr>
     </t>
 
@@ -358,8 +359,12 @@ color #0072C5
                         <input class='detail barcode'       name='ean13'    t-att-value='partner.ean13 || ""'></input>
                     </div>
                     <div class='client-detail'>
-                        <span class='label'>RUC o Cedula</span>
+                        <span class='label'>RUC</span>
                         <input id='ruc' class='detail vat'           name='vat'     t-att-value='partner.ruc || ""'></input>
+                    </div>
+                    <div class='client-detail'>
+                        <span class='label'>Cedula</span>
+                        <input id='cedula' class='detail vat'           name='cedula'     t-att-value='partner.cedula || ""'></input>
                     </div>
                 </div>
             </div>
@@ -457,7 +462,8 @@ color #0072C5
                                                 <th>Name</th>
                                                 <th>Address</th>
                                                 <th>Phone</th>
-                                                <th>RUC o Cedula</th>
+                                                <th>RUC</th>
+                                                <th>Cedula</th>
                                             </tr>
                                         </thead>
                                         <tbody class='client-list-contents'>
@@ -1042,6 +1048,17 @@ color #0072C5
                 <div style='text-align:center'>
                     <t t-esc="widget.pos.config.receipt_footer" />
                 </div>
+            </t>
+            <t t-if="order.payment_term != 1">
+                <br/>
+                <br/>
+                <span>Pagaré a la orden de <t t-esc="widget.pos.company.name"/> la suma de <t t-esc="widget.format_currency(order.getTotalTaxIncluded())"/> de acuerdo al la condición de pago "<t t-esc="order.payment_term_name"/>"</span>
+                <br/>
+                <br/>
+                <br/>
+                Firma:__________________________________<br/>
+                Nombre: <t t-esc="order.attributes.client.name"/><br/>
+                Documento: RUC: <t t-esc="order.attributes.client.ruc"/> CI: <t t-esc="order.attributes.client.cedula"/><br/>
             </t>
         </div>
     </t>
