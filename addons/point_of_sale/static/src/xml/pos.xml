@@ -360,7 +360,7 @@ color #0072C5
                     </div>
                     <div class='client-detail'>
                         <span class='label'>RUC</span>
-                        <input id='ruc' class='detail vat'           name='vat'     t-att-value='partner.ruc || ""'></input>
+                        <input id='ruc' class='detail vat'           name='ruc'     t-att-value='partner.ruc || ""'></input>
                     </div>
                     <div class='client-detail'>
                         <span class='label'>Cedula</span>

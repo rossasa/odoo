@@ -1024,6 +1024,9 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                 partner = invoice_data.client;
                 ruc = order.attributes.client.ruc;
                 cedula = order.attributes.client.cedula;
+                if (!ruc){
+                    ruc = cedula;
+                }
                 street = order.attributes.client.address;
                 phone = order.attributes.client.phone;
                 var max_lines = this.pos.dotmatrix_invoice[0].qty_lines;
@@ -1458,7 +1461,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                     //});
                     return;
                 }
-                if(!currentOrder.get_client().ruc){
+                if(!currentOrder.get_client().ruc && !currentOrder.get_client().cedula){
                     this.pos_widget.screen_selector.show_popup('error',{
                         'message': _t('Cliente sin RUC o Cedula'),
                         'comment': _t('El RUC o Cedula del cliente no estan definidos, para hacer factura legal hay que informar el RUC o Cedula en el catastro del cliente'),
