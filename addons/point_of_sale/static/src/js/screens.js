@@ -1042,7 +1042,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                 gross = invoice_data.subtotal;
                 amount_in_word_line = NumeroALetras(invoice_data.subtotal);
                 amount_tax = invoice_data.total_tax;
-                invoice = eval(this.pos.dotmatrix_invoice[0].content)
+                invoice = eval(this.pos.dotmatrix_invoice[0].content).replace("false", "")
                 var blob = new Blob([invoice], {type: "text/plain;charset=utf-8"});
                 saveAs(blob, "factura_"+next_number+".prt");
             } else {
