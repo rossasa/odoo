@@ -1048,8 +1048,8 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                     var street = partner.address;
                     var phone = partner.phone;
                 }
-                next_number = order.pos.config.ticket_number;
-                prefix = order.pos.config.ticket_prefix;
+                next_number = order.pos.config.ticket_next_number;
+                prefix = order.pos.config.ticket_prefix.replace("%(year)s", year);
                 var name = prefix+next_number;
             } else {
                 var prefix = "ticket_";
@@ -1063,8 +1063,8 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                 }
                 var street = partner.address;
                 var phone = partner.phone;
-                next_number = order.pos.config.ticket_number;
-                prefix = order.pos.config.ticket_prefix;
+                next_number = order.pos.config.ticket_next_number;
+                prefix = order.pos.config.ticket_prefix.replace("%(year)s", year);
                 var name = prefix+next_number;
             }
             var max_lines = dotmatrix_model.qty_lines;
