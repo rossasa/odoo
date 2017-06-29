@@ -1,5 +1,8 @@
 function string_pad(qty, user_str)
 {
+    if (!user_str){
+        user_str = "";
+    }
     user_str = user_str.toString()
     while(user_str.length<qty){
         user_str = user_str + " ";

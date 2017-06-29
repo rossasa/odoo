@@ -988,8 +988,8 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             }, 2000);*/
         },
         print: function() {
-            this.pos.get('selectedOrder')._printed = true;
             order = this.pos.get('selectedOrder')
+            order._printed = true;
             var months = new Array();
             months[0] = "Enero";
             months[1] = "Febrero";
@@ -1003,54 +1003,89 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             months[9] = "Octubre";
             months[10] = "Noviembre";
             months[11] = "Dicimbre";
+            invoice_data = order.export_for_printing();
+            day = invoice_data.date.date;
+            month = months[invoice_data.date.month];
+            year = invoice_data.date.year;
+            if(order.payment_term == 1){
+                contado = "x";
+                credito = "";
+                condicion = "Contado";
+            } else {
+                contado = "";
+                credito = "x";
+                condicion = "Credito";
+            }
             if(config.to_invoice){
-                invoice_data = order.export_for_printing();
-                next_number = order.pos.config.legal_next_number;
-                prefix = order.pos.config.legal_prefix;
-                name = prefix+next_number;
-                day = invoice_data.date.date;
-                month = months[invoice_data.date.month];
-                year = invoice_data.date.year;
-                if(order.payment_term == 1){
-                    contado = "x";
-                    credito = "";
-                    condicion = "Contado";
-                } else {
-                    contado = "";
-                    credito = "x";
-                    condicion = "Credito";
-                }
-
-                partner = invoice_data.client;
-                ruc = order.attributes.client.ruc;
-                cedula = order.attributes.client.cedula;
+                var prefix = "factura_";
+                var extension = ".prt";
+                var dotmatrix_model = this.pos.dotmatrix_invoice[0];
+                console.log("dotmatrix_model", dotmatrix_model);
+                var partner = invoice_data.client;
+                var ruc = partner.ruc;
+                var cedula = partner.cedula;
                 if (!ruc){
                     ruc = cedula;
                 }
-                street = order.attributes.client.address;
-                phone = order.attributes.client.phone;
-                var max_lines = this.pos.dotmatrix_invoice[0].qty_lines;
-                var lines_count = 0;
-                var lines = "";
-                for (var item in invoice_data.orderlines) {
-                    var line = invoice_data.orderlines[item];
-                    line_eval = eval(this.pos.dotmatrix_invoice[0].line)
-                    lines = lines+line_eval;
-                    lines_count = lines_count + 1;
+                var street = partner.address;
+                var phone = partner.phone;
+                next_number = order.pos.config.legal_next_number;
+                prefix = order.pos.config.legal_prefix;
+                var name = prefix+next_number;
+            } else if (order.payment_term == 1){
+                var prefix = "ticket_";
+                var extension = ".prl";
+                var dotmatrix_model = this.pos.dotmatrix_invoice[1];
+                var partner = invoice_data.client;
+                var ruc = false;
+                var cedula = false;
+                if (partner) {
+                    ruc = partner.ruc;
+                    cedula = partner.cedula;
+                    if (!ruc){
+                        ruc = cedula;
+                    }
+                    var street = partner.address;
+                    var phone = partner.phone;
                 }
-                while(lines_count < max_lines){
-                    lines = lines+"\n";
-                    lines_count = lines_count + 1;
-                }
-                gross = invoice_data.subtotal;
-                amount_in_word_line = NumeroALetras(invoice_data.subtotal);
-                amount_tax = invoice_data.total_tax;
-                invoice = eval(this.pos.dotmatrix_invoice[0].content).replace("false", "")
-                var blob = new Blob([invoice], {type: "text/plain;charset=utf-8"});
-                saveAs(blob, "factura_"+next_number+".prt");
+                next_number = order.pos.config.ticket_number;
+                prefix = order.pos.config.ticket_prefix;
+                var name = prefix+next_number;
             } else {
-                window.print();
+                var prefix = "ticket_";
+                var extension = ".prl";
+                var dotmatrix_model = this.pos.dotmatrix_invoice[2];
+                var partner = invoice_data.client;
+                var ruc = partner.ruc;
+                var cedula = partner.cedula;
+                if (!ruc){
+                    ruc = cedula;
+                }
+                var street = partner.address;
+                var phone = partner.phone;
+                next_number = order.pos.config.ticket_number;
+                prefix = order.pos.config.ticket_prefix;
+                var name = prefix+next_number;
             }
+            var max_lines = dotmatrix_model.qty_lines;
+            var lines_count = 0;
+            var lines = "";
+            for (var item in invoice_data.orderlines) {
+                var line = invoice_data.orderlines[item];
+                line_eval = eval(dotmatrix_model.line)
+                lines = lines+line_eval;
+                lines_count = lines_count + 1;
+            }
+            while(lines_count < max_lines){
+                lines = lines+"\n";
+                lines_count = lines_count + 1;
+            }
+            gross = invoice_data.subtotal;
+            amount_in_word_line = NumeroALetras(invoice_data.subtotal);
+            amount_tax = invoice_data.total_tax;
+            invoice = eval(dotmatrix_model.content).replace("false", "")
+            var blob = new Blob([invoice], {type: "text/plain;charset=utf-8"});
+            saveAs(blob, prefix+next_number+extension);
         },
         finishOrder: function() {
             this.pos.get('selectedOrder').destroy();
