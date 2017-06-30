@@ -1030,7 +1030,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                 var street = partner.address;
                 var phone = partner.phone;
                 next_number = order.pos.config.legal_next_number;
-                prefix = order.pos.config.legal_prefix;
+                prefix = order.pos.config.legal_prefix.replace("%(year)s", year);
                 var name = prefix+next_number;
             } else if (order.payment_term == 1){
                 var prefix = "ticket_";
