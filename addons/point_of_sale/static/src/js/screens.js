@@ -1067,25 +1067,27 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                 prefix = order.pos.config.ticket_prefix.replace("%(year)s", year);
                 var name = prefix+next_number;
             }
-            var max_lines = dotmatrix_model.qty_lines;
-            var lines_count = 0;
-            var lines = "";
-            for (var item in invoice_data.orderlines) {
-                var line = invoice_data.orderlines[item];
-                line_eval = eval(dotmatrix_model.line)
-                lines = lines+line_eval;
-                lines_count = lines_count + 1;
+            if (dotmatrix_model){
+                var max_lines = dotmatrix_model.qty_lines;
+                var lines_count = 0;
+                var lines = "";
+                for (var item in invoice_data.orderlines) {
+                    var line = invoice_data.orderlines[item];
+                    line_eval = eval(dotmatrix_model.line)
+                    lines = lines+line_eval;
+                    lines_count = lines_count + 1;
+                }
+                while(lines_count < max_lines){
+                    lines = lines+"\n";
+                    lines_count = lines_count + 1;
+                }
+                gross = invoice_data.subtotal;
+                amount_in_word_line = NumeroALetras(invoice_data.subtotal);
+                amount_tax = invoice_data.total_tax;
+                invoice = eval(dotmatrix_model.content).replace("false", "")
+                var blob = new Blob([invoice], {type: "text/plain;charset=utf-8"});
+                saveAs(blob, prefix+next_number+extension);
             }
-            while(lines_count < max_lines){
-                lines = lines+"\n";
-                lines_count = lines_count + 1;
-            }
-            gross = invoice_data.subtotal;
-            amount_in_word_line = NumeroALetras(invoice_data.subtotal);
-            amount_tax = invoice_data.total_tax;
-            invoice = eval(dotmatrix_model.content).replace("false", "")
-            var blob = new Blob([invoice], {type: "text/plain;charset=utf-8"});
-            saveAs(blob, prefix+next_number+extension);
         },
         finishOrder: function() {
             this.pos.get('selectedOrder').destroy();
