@@ -1020,8 +1020,8 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                 var prefix = "factura_";
                 var extension = ".prt";
                 var dotmatrix_model = this.pos.dotmatrix_invoice[0];
-                console.log("dotmatrix_model", dotmatrix_model);
-                var partner = invoice_data.client;
+                var partner_name = invoice_data.client;
+                var partner = order.attributes.client;
                 var ruc = partner.ruc;
                 var cedula = partner.cedula;
                 if (!ruc){
@@ -1036,7 +1036,8 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                 var prefix = "ticket_";
                 var extension = ".prl";
                 var dotmatrix_model = this.pos.dotmatrix_invoice[1];
-                var partner = invoice_data.client;
+                var partner_name = invoice_data.client;
+                var partner = order.attributes.client;
                 var ruc = false;
                 var cedula = false;
                 if (partner) {
@@ -1055,7 +1056,8 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                 var prefix = "ticket_";
                 var extension = ".prl";
                 var dotmatrix_model = this.pos.dotmatrix_invoice[2];
-                var partner = invoice_data.client;
+                var partner_name = invoice_data.client;
+                var partner = order.attributes.client;
                 var ruc = partner.ruc;
                 var cedula = partner.cedula;
                 if (!ruc){
@@ -1073,18 +1075,21 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                 var lines = "";
                 for (var item in invoice_data.orderlines) {
                     var line = invoice_data.orderlines[item];
+                    default_code = order.attributes.orderLines.models[item].product.default_code;
                     line_eval = eval(dotmatrix_model.line)
                     lines = lines+line_eval;
                     lines_count = lines_count + 1;
                 }
-                while(lines_count < max_lines){
-                    lines = lines+"\n";
-                    lines_count = lines_count + 1;
+                if(config.to_invoice){
+                    while(lines_count < max_lines){
+                        lines = lines+"\n";
+                        lines_count = lines_count + 1;
+                    }
                 }
                 gross = invoice_data.subtotal;
                 amount_in_word_line = NumeroALetras(invoice_data.subtotal);
                 amount_tax = invoice_data.total_tax;
-                invoice = eval(dotmatrix_model.content).replace("false", "")
+                invoice = eval(dotmatrix_model.content).replace("false", "");
                 var blob = new Blob([invoice], {type: "text/plain;charset=utf-8"});
                 saveAs(blob, prefix+next_number+extension);
             }
@@ -1425,8 +1430,9 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
         },
         is_paid: function(){
             var currentOrder = this.pos.get('selectedOrder');
-            return (currentOrder.getTotalTaxIncluded() < 1000.000001
-                   || currentOrder.getPaidTotal() + 1000.000001 >= currentOrder.getTotalTaxIncluded());
+            round_limit = this.pos.config.round_limit
+            return (currentOrder.getTotalTaxIncluded() < round_limit
+                   || currentOrder.getPaidTotal() + round_limit >= currentOrder.getTotalTaxIncluded());
 
         },
         validate_order: function(options) {
