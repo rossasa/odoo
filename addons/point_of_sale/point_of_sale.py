@@ -248,11 +248,11 @@ class pos_session(osv.osv):
                 'cash_register_id' : False,
                 'cash_control' : False,
             }
-            for st in record.statement_ids:
-                if st.journal_id.cash_control == True:
-                    result[record.id]['cash_control'] = True
-                    result[record.id]['cash_journal_id'] = st.journal_id.id
-                    result[record.id]['cash_register_id'] = st.id
+            #for st in record.statement_ids:
+                #if st.journal_id.cash_control == True:
+                #    result[record.id]['cash_control'] = True
+                #    result[record.id]['cash_journal_id'] = st.journal_id.id
+                #    result[record.id]['cash_register_id'] = st.id
 
         return result
 
