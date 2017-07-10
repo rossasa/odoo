@@ -849,7 +849,11 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
                 this.proxy.log('push_order',order.export_as_JSON());
                 this.db.add_order(order.export_as_JSON());
                 order.to_invoice = config.to_invoice
-                order.pos.config.legal_next_number = order.pos.config.legal_next_number + 1;
+                if (order.to_invoice){
+                    order.pos.config.legal_next_number = order.pos.config.legal_next_number + 1;
+                } else {
+                    order.pos.config.ticket_next_number = order.pos.config.ticket_next_number + 1;
+                }
             }
 
             var pushed = new $.Deferred();
