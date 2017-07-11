@@ -988,111 +988,129 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             }, 2000);*/
         },
         print: function() {
+            self = this;
             order = this.pos.get('selectedOrder')
-            order._printed = true;
-            var months = new Array();
-            months[0] = "Enero";
-            months[1] = "Febrero";
-            months[2] = "Marzo";
-            months[3] = "Abril";
-            months[4] = "Mayo";
-            months[5] = "Junio";
-            months[6] = "Julio";
-            months[7] = "Agosto";
-            months[8] = "Septiembre";
-            months[9] = "Octubre";
-            months[10] = "Noviembre";
-            months[11] = "Dicimbre";
-            invoice_data = order.export_for_printing();
-            day = invoice_data.date.date;
-            month = months[invoice_data.date.month];
-            year = invoice_data.date.year;
-            if(order.payment_term == 1){
-                contado = "x";
-                credito = "";
-                condicion = "Contado";
-            } else {
-                contado = "";
-                credito = "x";
-                condicion = "Credito";
-            }
+            console.log("Factura Legal");
             if(config.to_invoice){
-                var prefix = "factura_";
-                var extension = ".prt";
-                var dotmatrix_model = this.pos.dotmatrix_invoice[0];
-                var partner_name = invoice_data.client;
-                var partner = order.attributes.client;
-                var ruc = partner.ruc;
-                var cedula = partner.cedula;
-                if (!ruc){
-                    ruc = cedula;
+                journal_id =  order.pos.config.legal_journal_id[0];
+            } else {
+                journal_id =  order.pos.config.journal_id[0];
+            }
+            new instance.web.Model('pos.order').call(
+                'get_invoice_number',[1, journal_id]
+            ).then(function(name){
+                console.log("Valor", name)
+                //order.pos.config.legal_next_number = value;
+                //var name = order.invoice_number.value;
+                order._printed = true;
+                var months = new Array();
+                months[0] = "Enero";
+                months[1] = "Febrero";
+                months[2] = "Marzo";
+                months[3] = "Abril";
+                months[4] = "Mayo";
+                months[5] = "Junio";
+                months[6] = "Julio";
+                months[7] = "Agosto";
+                months[8] = "Septiembre";
+                months[9] = "Octubre";
+                months[10] = "Noviembre";
+                months[11] = "Dicimbre";
+                invoice_data = order.export_for_printing();
+                day = invoice_data.date.date;
+                month = months[invoice_data.date.month];
+                year = invoice_data.date.year;
+                if(order.payment_term == 1){
+                    contado = "x";
+                    credito = "";
+                    condicion = "Contado";
+                } else {
+                    contado = "";
+                    credito = "x";
+                    condicion = "Credito";
                 }
-                var street = partner.address;
-                var phone = partner.phone;
-                next_number = order.pos.config.legal_next_number - 1;
-                prefix = order.pos.config.legal_prefix.replace("%(year)s", year);
-                var name = prefix+next_number;
-            } else if (order.payment_term == 1){
-                var prefix = "ticket_";
-                var extension = ".prl";
-                var dotmatrix_model = this.pos.dotmatrix_invoice[1];
-                var partner_name = invoice_data.client;
-                var partner = order.attributes.client;
-                var ruc = false;
-                var cedula = false;
-                if (partner) {
-                    ruc = partner.ruc;
-                    cedula = partner.cedula;
+                if(config.to_invoice){
+                    var prefix = "factura_";
+                    var extension = ".prt";
+                    var dotmatrix_model = self.pos.dotmatrix_invoice[0];
+                    var partner_name = invoice_data.client;
+                    var partner = order.attributes.client;
+                    var ruc = partner.ruc;
+                    var cedula = partner.cedula;
                     if (!ruc){
                         ruc = cedula;
                     }
                     var street = partner.address;
                     var phone = partner.phone;
+                    //next_number = order.pos.config.legal_next_number - 1;
+                    //prefix = order.pos.config.legal_prefix.replace("%(year)s", year);
+                    //var name = prefix+next_number;
+
+
+                } else if (order.payment_term == 1){
+                    //var prefix = "ticket_";
+                    var extension = ".prl";
+                    var dotmatrix_model = self.pos.dotmatrix_invoice[1];
+                    var partner_name = invoice_data.client;
+                    var partner = order.attributes.client;
+                    var ruc = false;
+                    var cedula = false;
+                    if (partner) {
+                        ruc = partner.ruc;
+                        cedula = partner.cedula;
+                        if (!ruc){
+                            ruc = cedula;
+                        }
+                        var street = partner.address;
+                        var phone = partner.phone;
+                    }
+                    //next_number = order.pos.config.ticket_next_number;
+                    //prefix = order.pos.config.ticket_prefix.replace("%(year)s", year);
+                    //var name = prefix+next_number;
+                } else {
+                    //var prefix = "ticket_";
+                    var extension = ".prl";
+                    var dotmatrix_model = self.pos.dotmatrix_invoice[2];
+                    var partner_name = invoice_data.client;
+                    var partner = order.attributes.client;
+                    var ruc = partner.ruc;
+                    var cedula = partner.cedula;
+                    if (!ruc){
+                        ruc = cedula;
+                    }
+                    var street = partner.address;
+                    var phone = partner.phone;
+                    //next_number = order.pos.config.ticket_next_number;
+                    //prefix = order.pos.config.ticket_prefix.replace("%(year)s", year);
+                    //var name = prefix+next_number;
                 }
-                next_number = order.pos.config.ticket_next_number;
-                prefix = order.pos.config.ticket_prefix.replace("%(year)s", year);
-                var name = prefix+next_number;
-            } else {
-                var prefix = "ticket_";
-                var extension = ".prl";
-                var dotmatrix_model = this.pos.dotmatrix_invoice[2];
-                var partner_name = invoice_data.client;
-                var partner = order.attributes.client;
-                var ruc = partner.ruc;
-                var cedula = partner.cedula;
-                if (!ruc){
-                    ruc = cedula;
-                }
-                var street = partner.address;
-                var phone = partner.phone;
-                next_number = order.pos.config.ticket_next_number;
-                prefix = order.pos.config.ticket_prefix.replace("%(year)s", year);
-                var name = prefix+next_number;
-            }
-            if (dotmatrix_model){
-                var max_lines = dotmatrix_model.qty_lines;
-                var lines_count = 0;
-                var lines = "";
-                for (var item in invoice_data.orderlines) {
-                    var line = invoice_data.orderlines[item];
-                    default_code = order.attributes.orderLines.models[item].product.default_code;
-                    line_eval = eval(dotmatrix_model.line)
-                    lines = lines+line_eval;
-                    lines_count = lines_count + 1;
-                }
-                if(config.to_invoice){
-                    while(lines_count < max_lines){
-                        lines = lines+"\n";
+                if (dotmatrix_model){
+                    var max_lines = dotmatrix_model.qty_lines;
+                    var lines_count = 0;
+                    var lines = "";
+                    for (var item in invoice_data.orderlines) {
+                        var line = invoice_data.orderlines[item];
+                        default_code = order.attributes.orderLines.models[item].product.default_code;
+                        line_eval = eval(dotmatrix_model.line)
+                        lines = lines+line_eval;
                         lines_count = lines_count + 1;
                     }
+                    if(config.to_invoice){
+                        while(lines_count < max_lines){
+                            lines = lines+"\n";
+                            lines_count = lines_count + 1;
+                        }
+                    }
+                    gross = invoice_data.subtotal;
+                    amount_in_word_line = NumeroALetras(invoice_data.subtotal);
+                    amount_tax = invoice_data.total_tax;
+                    invoice = eval(dotmatrix_model.content).replace("false", "");
+                    var blob = new Blob([invoice], {type: "text/plain;charset=utf-8"});
+                    console.log("Blob", invoice);
+                    //saveAs(blob, prefix+next_number+extension);
+                    saveAs(blob, name+extension);
                 }
-                gross = invoice_data.subtotal;
-                amount_in_word_line = NumeroALetras(invoice_data.subtotal);
-                amount_tax = invoice_data.total_tax;
-                invoice = eval(dotmatrix_model.content).replace("false", "");
-                var blob = new Blob([invoice], {type: "text/plain;charset=utf-8"});
-                saveAs(blob, prefix+next_number+extension);
-            }
+            });
         },
         finishOrder: function() {
             this.pos.get('selectedOrder').destroy();
@@ -1491,6 +1509,8 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             }
             //currentOrder.journal_id = currentOrder.pos.config.legal_journal_id[0]
             config = {timeout:30000, to_invoice:false, journal_id: currentOrder.pos.config.legal_journal_id[0]}
+
+
             if(options.invoice || currentOrder.payment_term != "1"){
                 if(!currentOrder.get_client()){
                     //setTimeout(function(){
@@ -1512,13 +1532,13 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                     return;
                 }
                 if (options.invoice){
-                    config.to_invoice = true
-                    currentOrder.to_invoice = true
+                    config.to_invoice = true;
+                    currentOrder.to_invoice = true;
                 }
-                currentOrder.journal_id = currentOrder.pos.config.legal_journal_id[0]
+                currentOrder.journal_id = currentOrder.pos.config.legal_journal_id[0];
 
             }
-            this.pos.push_order(currentOrder, config)
+            this.pos.push_order(currentOrder, config);
             if(this.pos.config.iface_print_via_proxy){
                 var receipt = currentOrder.export_for_printing();
                 this.pos.proxy.print_receipt(QWeb.render('XmlReceipt',{
