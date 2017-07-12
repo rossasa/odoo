@@ -1029,7 +1029,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                 }
                 var street = partner.address;
                 var phone = partner.phone;
-                next_number = order.pos.config.legal_next_number - 1;
+                next_number = string_pad(order.pos.config.legal_padding,order.pos.config.legal_next_number - 1, "0", "left");
                 prefix = order.pos.config.legal_prefix.replace("%(year)s", year);
                 var name = prefix+next_number;
             } else if (order.payment_term == 1){
@@ -1489,8 +1489,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             if (this.pos.config.iface_cashdrawer) {
                     this.pos.proxy.open_cashbox();
             }
-            //currentOrder.journal_id = currentOrder.pos.config.legal_journal_id[0]
-            config = {timeout:30000, to_invoice:false, journal_id: currentOrder.pos.config.legal_journal_id[0]}
+            config = {timeout:30000, to_invoice:false}
             if(options.invoice || currentOrder.payment_term != "1"){
                 if(!currentOrder.get_client()){
                     //setTimeout(function(){

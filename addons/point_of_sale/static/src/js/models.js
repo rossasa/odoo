@@ -1,11 +1,15 @@
-function string_pad(qty, user_str)
+function string_pad(qty, user_str, complete=" ", order="right")
 {
     if (!user_str){
         user_str = "";
     }
     user_str = user_str.toString()
     while(user_str.length<qty){
-        user_str = user_str + " ";
+        if (order == "right"){
+            user_str = user_str + complete;
+        } else {
+            user_str = complete + user_str;
+        }
     }
     return user_str;
 }
