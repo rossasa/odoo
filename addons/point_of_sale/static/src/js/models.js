@@ -616,7 +616,9 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
             ids:    function(self){ return [self.pricelist.currency_id[0]]; },
             loaded: function(self, currencies){
                 self.currency = currencies[0];
-                if (self.currency.rounding > 0) {
+                if (self.currency.rounding > 10) {
+                    self.currency.decimals = 0;
+                } else if (self.currency.rounding > 0) {
                     self.currency.decimals = Math.ceil(Math.log(1.0 / self.currency.rounding) / Math.log(10));
                 } else {
                     self.currency.decimals = 0;

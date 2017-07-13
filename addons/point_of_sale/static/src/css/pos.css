@@ -852,7 +852,7 @@ td {
     border-radius: 2px;
     font-weight: bold;
 }
-/*.pos .product .code-tag {
+.pos .product .code-tag {
     position: absolute;
     top: 20px;
     right: 2px;
@@ -862,7 +862,7 @@ td {
     background: #7f82ac;
     padding: 2px 5px;
     border-radius: 2px;
-}*/
+}
 
 
 .pos .product .product-name {

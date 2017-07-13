@@ -1049,7 +1049,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                     var street = partner.address;
                     var phone = partner.phone;
                 }
-                next_number = order.pos.config.ticket_next_number;
+                next_number = string_pad(order.pos.config.ticket_padding, order.pos.config.ticket_next_number - 1, "0", "left");
                 prefix = order.pos.config.ticket_prefix.replace("%(year)s", year);
                 var name = prefix+next_number;
             } else {
@@ -1065,7 +1065,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                 }
                 var street = partner.address;
                 var phone = partner.phone;
-                next_number = order.pos.config.ticket_next_number;
+                next_number = string_pad(order.pos.config.ticket_padding, order.pos.config.ticket_next_number - 1, "0", "left");
                 prefix = order.pos.config.ticket_prefix.replace("%(year)s", year);
                 var name = prefix+next_number;
             }

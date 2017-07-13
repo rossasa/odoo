@@ -769,11 +769,11 @@ color #0072C5
                         <t t-esc="widget.format_currency(product.price,'Product Price')+'/'+widget.pos.units_by_id[product.uom_id[0]].name"/>
                     </span>
                 </t>
-                <!--t t-if="product.default_code">
+                <t t-if="product.default_code">
                     <span class="code-tag">
                         Codigo: <t t-esc="product.default_code"/>
                     </span>
-                </t-->
+                </t>
             </div>
             <div class="product-name">
                 <t t-esc="product.display_name"/>
