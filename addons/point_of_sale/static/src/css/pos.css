@@ -175,7 +175,7 @@ td {
 }
 /* firefox seems to ignore the relative positionning of the subwindow-container
  * putting this inside subwindow-container fixes it.
- */ 
+ */
 .pos .subwindow .subwindow-container-fix{
     height: 100%;
     position: relative;
@@ -431,7 +431,7 @@ td {
 /*  c) The notifications indicator */
 
 .pos .oe_status{
-    float:right; 
+    float:right;
     color: rgba(255,255,255,0.4);
     padding: 14px;
     line-height: 20px;
@@ -554,9 +554,9 @@ td {
     color: #555555;
     font-size: 14px;
 }
-.pos .paypad button:active, 
-.pos .numpad button:active, 
-.pos .numpad .selected-mode, 
+.pos .paypad button:active,
+.pos .numpad button:active,
+.pos .numpad .selected-mode,
 .pos .popup  button:active{
     border: none;
     color: white;
@@ -799,7 +799,7 @@ td {
     line-height: 14px;
     width: 100%;
     /* for some reason the -90deg orientation doesn't match the -webkit-linear-gradient. It should be 180deg here.
-     * webkit also insists on rendering *both* gradients instead of only the native one. So it doesn't looks right. ugh. 
+     * webkit also insists on rendering *both* gradients instead of only the native one. So it doesn't looks right. ugh.
     background:         linear-gradient(-90deg,rgba(255,255,255,0),rgba(255,255,255,1), rgba(255,255,255,1)); */
     /*background:#FFF;*/
     padding: 3px;
@@ -847,10 +847,23 @@ td {
     vertical-align: top;
     color: white;
     line-height: 13px;
+    background: red;
+    padding: 2px 5px;
+    border-radius: 2px;
+    font-weight: bold;
+}
+/*.pos .product .code-tag {
+    position: absolute;
+    top: 20px;
+    right: 2px;
+    vertical-align: top;
+    color: white;
+    line-height: 13px;
     background: #7f82ac;
     padding: 2px 5px;
     border-radius: 2px;
-}
+}*/
+
 
 .pos .product .product-name {
     position: absolute;
@@ -1148,17 +1161,17 @@ td {
         color: black !important;
     }
     .oe_leftbar,
-    .pos .pos-topheader, 
-    .pos .pos-leftpane, 
+    .pos .pos-topheader,
+    .pos .pos-leftpane,
     .pos .keyboard_frame {
         display: none !important;
     }
     .pos,
     .pos .pos-content,
     .pos .rightpane,
-    .pos .screen, 
-    .pos .window, 
-    .pos .window .subwindow, 
+    .pos .screen,
+    .pos .window,
+    .pos .window .subwindow,
     .pos .subwindow .subwindow-container{
         display: block;
         position: static;
@@ -1679,7 +1692,7 @@ td {
     top: 10px;
     width: 200px;
     font-size: 10px;
-    
+
     background: rgba(0,0,0,0.82);
     color: white;
     padding-bottom: 10px;
