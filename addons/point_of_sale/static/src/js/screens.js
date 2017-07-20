@@ -1322,6 +1322,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                 selectedStatement.card_mode = this.$('#select_card option:selected').val();
                 selectedStatement.ref = '';
             }
+            $('.paypad-button[cash-register-id='+selectedStatement.cashregister.id+']').prop('disabled', true);
         },
         render_paymentline: function(line){
             var el_html  = openerp.qweb.render('Paymentline',{widget: this, line: line});
@@ -1359,6 +1360,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             old_node.parentNode.replaceChild(new_node,old_node);
         },
         remove_paymentline: function(line){
+            $('.paypad-button[cash-register-id='+line.cashregister.id+']').prop('disabled', false);
             line.node.parentNode.removeChild(line.node);
             line.node = undefined;
         },
