@@ -532,6 +532,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             this.product_categories_widget.reset_category();
 
             this.pos_widget.order_widget.set_editable(true);
+            $('.paypad-button').prop('disabled', false);
         },
 
         close: function(){
