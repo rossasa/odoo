@@ -961,9 +961,9 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
 
             this.refresh();
 
-            if (!this.pos.get('selectedOrder')._printed) {
+            /*if (!this.pos.get('selectedOrder')._printed) {
                 this.print();
-            }
+            }*/
 
             //
             // The problem is that in chrome the print() is asynchronous and doesn't
@@ -982,8 +982,8 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             // 2 seconds is the same as the default timeout for sending orders and so the dialog
             // should have appeared before the timeout... so yeah that's not ultra reliable.
 
-            /*I Don't see the need of it anymore
-            finish_button.set_disabled(true);
+            //I Don't see the need of it anymore
+            /*finish_button.set_disabled(true);
             setTimeout(function(){
                 finish_button.set_disabled(false);
             }, 2000);*/
@@ -1017,58 +1017,17 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                 credito = "x";
                 condicion = "Credito";
             }
+            var self = this;
+            order_name = order.export_for_printing().name;
             if(config.to_invoice){
-                var prefix = "factura_";
-                var extension = ".prt";
                 var dotmatrix_model = this.pos.dotmatrix_invoice[0];
-                var partner_name = invoice_data.client;
-                var partner = order.attributes.client;
-                var ruc = partner.ruc;
-                var cedula = partner.cedula;
-                if (!ruc){
-                    ruc = cedula;
-                }
-                var street = partner.address;
-                var phone = partner.phone;
-                next_number = string_pad(order.pos.config.legal_padding,order.pos.config.legal_next_number - 1, "0", "left");
-                prefix = order.pos.config.legal_prefix.replace("%(year)s", year);
-                var name = prefix+next_number;
+                var extension = ".prt";
             } else if (order.payment_term == 1){
-                var prefix = "ticket_";
-                var extension = ".prl";
                 var dotmatrix_model = this.pos.dotmatrix_invoice[1];
-                var partner_name = invoice_data.client;
-                var partner = order.attributes.client;
-                var ruc = false;
-                var cedula = false;
-                if (partner) {
-                    ruc = partner.ruc;
-                    cedula = partner.cedula;
-                    if (!ruc){
-                        ruc = cedula;
-                    }
-                    var street = partner.address;
-                    var phone = partner.phone;
-                }
-                next_number = string_pad(order.pos.config.ticket_padding, order.pos.config.ticket_next_number - 1, "0", "left");
-                prefix = order.pos.config.ticket_prefix.replace("%(year)s", year);
-                var name = prefix+next_number;
-            } else {
-                var prefix = "ticket_";
                 var extension = ".prl";
+            } else {
                 var dotmatrix_model = this.pos.dotmatrix_invoice[2];
-                var partner_name = invoice_data.client;
-                var partner = order.attributes.client;
-                var ruc = partner.ruc;
-                var cedula = partner.cedula;
-                if (!ruc){
-                    ruc = cedula;
-                }
-                var street = partner.address;
-                var phone = partner.phone;
-                next_number = string_pad(order.pos.config.ticket_padding, order.pos.config.ticket_next_number - 1, "0", "left");
-                prefix = order.pos.config.ticket_prefix.replace("%(year)s", year);
-                var name = prefix+next_number;
+                var extension = ".prl";
             }
             if (dotmatrix_model){
                 var max_lines = dotmatrix_model.qty_lines;
@@ -1090,9 +1049,33 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                 gross = invoice_data.subtotal;
                 amount_in_word_line = NumeroALetras(invoice_data.subtotal);
                 amount_tax = invoice_data.total_tax;
-                invoice = eval(dotmatrix_model.content).replace("false", "");
-                var blob = new Blob([invoice], {type: "text/plain;charset=utf-8"});
-                saveAs(blob, prefix+next_number+extension);
+                var partner = order.attributes.client;
+                if (partner){
+                    var ruc = partner.ruc;
+                    var cedula = partner.cedula;
+                    if (!ruc){
+                        ruc = cedula;
+                    }
+                    var street = partner.address;
+                    var phone = partner.phone;
+                    var partner_name = invoice_data.client;
+                } else {
+                    var ruc = "";
+                    var cedula = "";
+                    var street = "";
+                    var phone = "";
+                    var partner_name =  "Desconocido";
+                }
+                setTimeout(function(){
+                    new instance.web.Model('pos.config').call(
+                        'get_invoice_number',[1, order_name]
+                    ).then(function(invoice_number){
+                        var name = invoice_number
+                        invoice = eval(dotmatrix_model.content).replace("false", "");
+                        var blob = new Blob([invoice], {type: "text/plain;charset=utf-8"});
+                        saveAs(blob, invoice_number+extension);
+                    })
+                }, 500);
             }
         },
         finishOrder: function() {
