@@ -1247,10 +1247,12 @@ class account_voucher(osv.osv):
                 amount_original_cc = currency_obj.compute(cr, uid, current_currency, company_currency, line.amount_original, context=ctx)
                 amount_original = (line.move_line_id.credit or line.move_line_id.debit)
                 currency_rate_difference = amount_paid_rate*(amount_original - amount_original_cc)
-                if currency_rate_difference < 0:
+                if voucher.type == 'payment':
+                    currency_rate_difference = -currency_rate_difference
+                '''if currency_rate_difference < 0:
                     currency_rate_difference = 0
                 elif voucher.type == 'payment':
-                    currency_rate_difference = -currency_rate_difference
+                    currency_rate_difference = -currency_rate_difference'''
             # UNTIL HERE
             move_line = {
                 'journal_id': voucher.journal_id.id,
