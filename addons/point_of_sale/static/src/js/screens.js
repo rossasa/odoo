@@ -512,6 +512,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                     if(product.to_weight && self.pos.config.iface_electronic_scale){
                         self.pos_widget.screen_selector.set_current_screen('scale',{product: product});
                     }else{
+                        $('.searchbox input').val("");
                         self.pos.get('selectedOrder').addProduct(product);
                     }
                 },
@@ -961,9 +962,9 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
 
             this.refresh();
 
-            if (!this.pos.get('selectedOrder')._printed) {
+            /*if (!this.pos.get('selectedOrder')._printed) {
                 this.print();
-            }
+            }*/
 
             //
             // The problem is that in chrome the print() is asynchronous and doesn't
