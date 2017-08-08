@@ -962,9 +962,9 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
 
             this.refresh();
 
-            /*if (!this.pos.get('selectedOrder')._printed) {
+            if (!this.pos.get('selectedOrder')._printed && config.to_invoice) {
                 this.print();
-            }*/
+            }
 
             //
             // The problem is that in chrome the print() is asynchronous and doesn't
@@ -1242,9 +1242,9 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             var lines = order.get('paymentLines').models.slice(0);
             for(var i = 0; i < lines.length; i++){
                 var line = lines[i];
-                if(line.get_amount() === 0){
+                //if(line.get_amount() === 0){
                     order.removePaymentline(line);
-                }
+                //}
             }
         },
         back: function() {
