@@ -1018,6 +1018,17 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                 credito = "x";
                 condicion = "Credito";
             }
+            var discount_amount = 0;
+            var lines_length = order.attributes.orderLines.length;
+            price_list_id = parseInt(this.pos.config.pricelist_id[0]);
+            for(var line=0; line<lines_length;line++){
+                this_line = order.attributes.orderLines.models[line]
+                line_price = this_line.price;
+                line_pricelist = this.pos.pricelist_engine.compute_price(
+                    this.pos.db, this_line.product, false, 1, price_list_id);
+                line_discount = (line_pricelist - line_price)*this_line.quantity;
+                discount_amount = discount_amount + line_discount;
+            }
             if(config.to_invoice){
                 var prefix = "factura_";
                 var extension = ".prt";
