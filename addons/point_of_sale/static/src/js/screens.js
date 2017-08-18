@@ -512,7 +512,6 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                     if(product.to_weight && self.pos.config.iface_electronic_scale){
                         self.pos_widget.screen_selector.set_current_screen('scale',{product: product});
                     }else{
-                        $('.searchbox input').val("");
                         self.pos.get('selectedOrder').addProduct(product);
                     }
                 },
@@ -947,6 +946,16 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
         show: function(){
             this._super();
             var self = this;
+            this.hotkey_handler = function(event){
+                if(event.which === 13){
+                    var current_screen = self.pos.pos_widget.screen_selector.get_current_screen();
+                    if (current_screen == 'receipt'){
+                        self.finishOrder();
+                    }
+                }
+            };
+
+            $('body').on('keyup',this.hotkey_handler);
 
             var print_button = this.add_action_button({
                     label: _t('Print'),
@@ -1180,10 +1189,10 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             };
 
             this.hotkey_handler = function(event){
-                if(event.which === 13){
+                if(event.which === 119){
                     self.validate_order();
-                }else if(event.which === 27){
-                    self.back();
+                }else if(event.which === 120){
+                    self.validate_order({invoice: true});
                 }
             };
 

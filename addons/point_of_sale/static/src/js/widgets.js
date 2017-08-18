@@ -140,6 +140,19 @@ function openerp_pos_widgets(instance, module){ //module is instance.point_of_sa
             var self = this;
             this._super();
 
+            //This bloque is to select the payment with enter
+            this.hotkey_handler = function(event){
+                if(event.which === 13){
+                    if (self.pos.get('selectedOrder').get('screen') === 'receipt'){  //TODO Why ?
+                        console.warn('TODO should not get there...?');
+                        return;
+                    }
+                    self.pos.get('selectedOrder').addPaymentline(self.cashregister);
+                    self.pos_widget.screen_selector.set_current_screen('payment');
+                }
+            };
+            this.$el.on('keyup',this.hotkey_handler);
+
             this.$el.click(function(){
                 if (self.pos.get('selectedOrder').get('screen') === 'receipt'){  //TODO Why ?
                     console.warn('TODO should not get there...?');
@@ -600,7 +613,8 @@ function openerp_pos_widgets(instance, module){ //module is instance.point_of_sa
             this.product_list_widget.set_product_list(products);
             var input = this.el.querySelector('.searchbox input');
                 input.value = '';
-                input.focus();
+                input.blur();
+            $('.selected .info #quantity').addClass('mode-selected');
         },
         perform_search: function(category, query, buy_result){
             if(query){
