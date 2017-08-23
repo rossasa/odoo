@@ -1189,10 +1189,14 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             };
 
             this.hotkey_handler = function(event){
-                if(event.which === 119){
-                    self.validate_order();
+                if(event.which === 113){
+                    if (!self.pos_widget.action_bar.button_list[1].disabled){
+                        self.validate_order();
+                    }
                 }else if(event.which === 120){
-                    self.validate_order({invoice: true});
+                    if (!self.pos_widget.action_bar.button_list[1].disabled){
+                        self.validate_order({invoice: true});
+                    }
                 }
             };
 
@@ -1215,7 +1219,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                 });
 
             this.add_action_button({
-                    label: _t('Ticket'),
+                    label: _t('Ticket [F2]'),
                     name: 'validation',
                     icon: '/point_of_sale/static/src/img/icons/png48/validate.png',
                     click: function(){
@@ -1225,7 +1229,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
 
             if( this.pos.config.iface_invoicing ){
                 this.add_action_button({
-                        label: _t('Factura'),
+                        label: _t('Factura [F9]'),
                         name: 'invoice',
                         icon: '/point_of_sale/static/src/img/icons/png48/invoice.png',
                         click: function(){

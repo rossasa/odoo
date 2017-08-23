@@ -574,6 +574,7 @@ class pos_order(osv.osv):
             'lines':        ui_order['lines'],
             'pos_reference':ui_order['name'],
             'partner_id':   ui_order['partner_id'] or False,
+            'note':         ui_order['note'] or False,
         }
 
     def _payment_fields(self, cr, uid, ui_paymentline, context=None):
@@ -617,7 +618,6 @@ class pos_order(osv.osv):
             session_id = self._get_valid_session(cr, uid, order, context=context)
             session = self.pool.get('pos.session').browse(cr, uid, session_id, context=context)
             order['pos_session_id'] = session_id
-
         order_id = self.create(cr, uid, self._order_fields(cr, uid, order, context=context),context)
         journal_ids = set()
         for payments in order['statement_ids']:

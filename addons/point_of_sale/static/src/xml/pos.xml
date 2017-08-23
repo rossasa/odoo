@@ -152,7 +152,13 @@ color #0072C5
 
     <t t-name="NumpadWidget">
         <div class="numpad">
-            <button class="input-button number-char">1</button>
+            <div width="200px">Buscar Productos - [ESPACIO]</div><br/>
+            <div width="200px">Selecionar Cliente - [INSERT]</div><br/>
+            <div width="200px">Volver Atras - [ESC]</div><br/>
+            <div width="200px">Navegacion - [TAB]</div><br/>
+            <div width="200px">Seleccionar Linea - [ARRIBA]/[ABAJO]</div><br/>
+            <div width="200px">Seleccionar Precio o Cantidad - [ISQUIERO]/[DERECHO]</div><br/>
+            <!--button class="input-button number-char">1</button>
             <button class="input-button number-char">2</button>
             <button class="input-button number-char">3</button>
             <button class="mode-button" data-mode='quantity'>Qty</button>
@@ -173,7 +179,7 @@ color #0072C5
             <button class="input-button numpad-backspace">
                 <img src="/point_of_sale/static/src/img/backspace.png" width="24" height="21" />
             </button>
-            <br />
+            <br /-->
         </div>
     </t>
 
@@ -296,8 +302,8 @@ color #0072C5
     <t t-name="ClientLine">
         <tr class='client-line' t-att-data-id='partner.id'>
             <td><t t-esc='partner.name' /></td>
-            <td><t t-esc='partner.address' /></td>
-            <td><t t-esc='partner.phone or partner.mobile or ""' /></td>
+            <!--td><t t-esc='partner.address' /></td>
+            <td><t t-esc='partner.phone or partner.mobile or ""' /></td-->
             <td><t t-esc='partner.ruc or ""'/></td>
             <td><t t-esc='partner.cedula or ""'/></td>
         </tr>
@@ -460,8 +466,8 @@ color #0072C5
                                         <thead>
                                             <tr>
                                                 <th>Name</th>
-                                                <th>Address</th>
-                                                <th>Phone</th>
+                                                <!--th>Address</th>
+                                                <th>Phone</th-->
                                                 <th>RUC</th>
                                                 <th>Cedula</th>
                                             </tr>
