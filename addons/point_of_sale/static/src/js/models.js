@@ -652,7 +652,7 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
         },{
             model:  'account.bank.statement',
             fields: ['account_id','currency','journal_id','state','name','user_id','pos_session_id'],
-            domain: function(self){ return [['state', 'in', ['open', 'draft']]]; },
+            domain: function(self){ return [['state', 'in', ['open', 'draft']], ['journal_id', '=', self.pos_session.journal_ids]]; },
             loaded: function(self, bankstatements, tmp){
                 self.bankstatements = bankstatements;
 
