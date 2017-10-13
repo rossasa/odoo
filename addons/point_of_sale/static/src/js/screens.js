@@ -1028,6 +1028,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                 condicion = "Credito";
             }
             var discount_amount = 0;
+            var original_price = 0;
             var lines_length = order.attributes.orderLines.length;
             price_list_id = parseInt(this.pos.config.pricelist_id[0]);
             for(var line=0; line<lines_length;line++){
@@ -1036,7 +1037,15 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                 line_pricelist = this.pos.pricelist_engine.compute_price(
                     this.pos.db, this_line.product, false, 1, price_list_id);
                 line_discount = (line_pricelist - line_price)*this_line.quantity;
-                discount_amount = discount_amount + line_discount;
+                original_price = original_price + line_pricelist*this_line.quantity;
+                if(line_discount > 0){
+                    discount_amount = discount_amount + line_discount;
+                }
+            }
+            if (discount_amount > 0){
+                discount_percent = 100*discount_amount/original_price;
+            } else {
+                discount_percent = 0;
             }
             if(config.to_invoice){
                 var prefix = "factura_";
@@ -1097,6 +1106,19 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                 var lines = "";
                 for (var item in invoice_data.orderlines) {
                     var line = invoice_data.orderlines[item];
+                    space = "";
+                    //IVA Exento
+                    if(order.attributes.orderLines.models[item].product.taxes_id==4){
+                        space = "        ";
+                    }
+                    //IVA 5%
+                    if(order.attributes.orderLines.models[item].product.taxes_id==1){
+                        space = "                    ";
+                    }
+                    //IVA 10%
+                    if(order.attributes.orderLines.models[item].product.taxes_id==5){
+                        space = "                                        ";
+                    }
                     default_code = order.attributes.orderLines.models[item].product.default_code;
                     line_eval = eval(dotmatrix_model.line)
                     lines = lines+line_eval;
@@ -1110,7 +1132,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                 }
                 gross = invoice_data.subtotal;
                 amount_in_word_line = NumeroALetras(invoice_data.subtotal);
-                amount_tax = invoice_data.total_tax;
+                amount_tax = invoice_data.total_tax.toString().split(".")[0];
                 invoice = eval(dotmatrix_model.content).replace("false", "");
                 var blob = new Blob([invoice], {type: "text/plain;charset=utf-8"});
                 saveAs(blob, prefix+next_number+extension);
