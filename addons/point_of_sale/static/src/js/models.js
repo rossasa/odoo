@@ -1,11 +1,11 @@
-function string_pad(qty, user_str, complete=" ", order="right")
+function string_pad(qty, user_str, align="left", complete=" ")
 {
     if (!user_str){
         user_str = "";
     }
     user_str = user_str.toString()
     while(user_str.length<qty){
-        if (order == "right"){
+        if (align == "left"){
             user_str = user_str + complete;
         } else {
             user_str = complete + user_str;

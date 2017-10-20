@@ -1060,7 +1060,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                 }
                 var street = partner.address;
                 var phone = partner.phone;
-                next_number = string_pad(order.pos.config.legal_padding,order.pos.config.legal_next_number - 1, "0", "left");
+                next_number = string_pad(order.pos.config.legal_padding,order.pos.config.legal_next_number - 1, "right", "0");
                 prefix = order.pos.config.legal_prefix.replace("%(year)s", year);
                 var name = prefix+next_number;
             } else if (order.payment_term == 1){
@@ -1080,7 +1080,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                     var street = partner.address;
                     var phone = partner.phone;
                 }
-                next_number = string_pad(order.pos.config.ticket_padding, order.pos.config.ticket_next_number - 1, "0", "left");
+                next_number = string_pad(order.pos.config.ticket_padding, order.pos.config.ticket_next_number - 1, "right", "0");
                 prefix = order.pos.config.ticket_prefix.replace("%(year)s", year);
                 var name = prefix+next_number;
             } else {
@@ -1096,7 +1096,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                 }
                 var street = partner.address;
                 var phone = partner.phone;
-                next_number = string_pad(order.pos.config.ticket_padding, order.pos.config.ticket_next_number - 1, "0", "left");
+                next_number = string_pad(order.pos.config.ticket_padding, order.pos.config.ticket_next_number - 1, "right", "0");
                 prefix = order.pos.config.ticket_prefix.replace("%(year)s", year);
                 var name = prefix+next_number;
             }
@@ -1104,20 +1104,28 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                 var max_lines = dotmatrix_model.qty_lines;
                 var lines_count = 0;
                 var lines = "";
+                var subtotal_10 = 0;
+                var subtotal_05 = 0;
+                var subtotal_00 = 0;
                 for (var item in invoice_data.orderlines) {
                     var line = invoice_data.orderlines[item];
-                    space = "";
+                    line_amount_00 = 0;
+                    line_amount_05 = 0;
+                    line_amount_10 = 0;
                     //IVA Exento
                     if(order.attributes.orderLines.models[item].product.taxes_id==4){
-                        space = "        ";
+                        line_amount_00 = line.price_with_tax;
+                        subtotal_00 = subtotal_00 + line.price_with_tax;
                     }
                     //IVA 5%
                     if(order.attributes.orderLines.models[item].product.taxes_id==1){
-                        space = "                    ";
+                        line_amount_05 = line.price_with_tax;
+                        subtotal_05 = subtotal_05 + line.price_with_tax;
                     }
                     //IVA 10%
                     if(order.attributes.orderLines.models[item].product.taxes_id==5){
-                        space = "                                        ";
+                        line_amount_10 = line.price_with_tax;
+                        subtotal_10 = subtotal_10 + line.price_with_tax;
                     }
                     default_code = order.attributes.orderLines.models[item].product.default_code;
                     line_eval = eval(dotmatrix_model.line)
