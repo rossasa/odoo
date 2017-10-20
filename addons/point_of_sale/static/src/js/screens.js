@@ -1107,6 +1107,8 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                 var subtotal_10 = 0;
                 var subtotal_05 = 0;
                 var subtotal_00 = 0;
+                var iva_10 = 0;
+                var iva_05 = 0;
                 for (var item in invoice_data.orderlines) {
                     var line = invoice_data.orderlines[item];
                     line_amount_00 = 0;
@@ -1121,11 +1123,13 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                     if(order.attributes.orderLines.models[item].product.taxes_id==1){
                         line_amount_05 = line.price_with_tax;
                         subtotal_05 = subtotal_05 + line.price_with_tax;
+                        iva_05 = iva_05 + line.tax;
                     }
                     //IVA 10%
                     if(order.attributes.orderLines.models[item].product.taxes_id==5){
                         line_amount_10 = line.price_with_tax;
                         subtotal_10 = subtotal_10 + line.price_with_tax;
+                        iva_10 = iva_10 + line.tax;
                     }
                     default_code = order.attributes.orderLines.models[item].product.default_code;
                     line_eval = eval(dotmatrix_model.line)
@@ -1140,7 +1144,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                 }
                 gross = invoice_data.subtotal;
                 amount_in_word_line = NumeroALetras(invoice_data.subtotal);
-                amount_tax = invoice_data.total_tax.toString().split(".")[0];
+                amount_tax = invoice_data.total_tax;
                 invoice = eval(dotmatrix_model.content).replace("false", "");
                 var blob = new Blob([invoice], {type: "text/plain;charset=utf-8"});
                 saveAs(blob, prefix+next_number+extension);
