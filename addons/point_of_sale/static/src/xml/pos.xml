@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- vim:fdl=1:
-color #0072C5
 -->
 <templates id="template" xml:space="preserve">
 
@@ -8,7 +7,7 @@ color #0072C5
         <div class="pos">
             <div class="pos-topheader">
                 <div class="pos-branding">
-                    <img class="pos-logo" src="/web/binary/company_logo" />
+                    <img class="pos-logo" src="/point_of_sale/static/src/img/logo.png" />
                     <span class="placeholder-UsernameWidget"></span>
                 </div>
                 <div class="pos-rightheader">
@@ -93,8 +92,8 @@ color #0072C5
                     <img src='/point_of_sale/static/src/img/pos_screenshot.jpg' />
                     <p>
                         The Point of Sale is not supported by Microsoft Internet Explorer. Please use
-                        a modern browser like <a href="http://www.mozilla.org/firefox/" target="_blank">Mozilla Firefox</a>
-                        or <a href="http://www.google.com/chrome" target="_blank">Google Chrome</a>.
+                        a modern browser like <a href="http://www.mozilla.org/firefox/" target="_blank">Mozilla Firefox</a> 
+                        or <a href="http://www.google.com/chrome" target="_blank">Google Chrome</a>. 
                     </p>
                 </div>
             </div>
@@ -152,13 +151,7 @@ color #0072C5
 
     <t t-name="NumpadWidget">
         <div class="numpad">
-            <div width="200px">Buscar Productos - [ESPACIO]</div><br/>
-            <div width="200px">Selecionar Cliente - [INSERT]</div><br/>
-            <div width="200px">Volver Atras - [ESC]</div><br/>
-            <div width="200px">Navegacion - [TAB]</div><br/>
-            <div width="200px">Seleccionar Linea - [ARRIBA]/[ABAJO]</div><br/>
-            <div width="200px">Seleccionar Precio o Cantidad - [ISQUIERO]/[DERECHO]</div><br/>
-            <!--button class="input-button number-char">1</button>
+            <button class="input-button number-char">1</button>
             <button class="input-button number-char">2</button>
             <button class="input-button number-char">3</button>
             <button class="mode-button" data-mode='quantity'>Qty</button>
@@ -179,7 +172,7 @@ color #0072C5
             <button class="input-button numpad-backspace">
                 <img src="/point_of_sale/static/src/img/backspace.png" width="24" height="21" />
             </button>
-            <br /-->
+            <br />
         </div>
     </t>
 
@@ -245,12 +238,6 @@ color #0072C5
     <t t-name="ProductScreenWidget">
         <div class="product-screen screen">
             <table class="layout-table">
-                <tr >
-                    <td>
-                        <div class="selection-area">
-                        </div>
-                    </td>
-                </tr>
 
                 <tr class="header-row">
                     <td class="header-cell">
@@ -302,10 +289,8 @@ color #0072C5
     <t t-name="ClientLine">
         <tr class='client-line' t-att-data-id='partner.id'>
             <td><t t-esc='partner.name' /></td>
-            <!--td><t t-esc='partner.address' /></td>
-            <td><t t-esc='partner.phone or partner.mobile or ""' /></td-->
-            <td><t t-esc='partner.ruc or ""'/></td>
-            <td><t t-esc='partner.cedula or ""'/></td>
+            <td><t t-esc='partner.address' /></td>
+            <td><t t-esc='partner.phone or partner.mobile or ""' /></td>
         </tr>
     </t>
 
@@ -318,9 +303,9 @@ color #0072C5
                 <t t-if='partner.id'>
                     <img t-att-src='widget.partner_icon_url(partner.id)' />
                 </t>
-                <input type='file' class='image-uploader'></input>
+                <input type='file' class='image-uploader'></input>   
             </div>
-            <input id="partner_name" class='detail client-name' name='name' t-att-value='partner.name' placeholder='Name'></input>
+            <input class='detail client-name' name='name' t-att-value='partner.name' placeholder='Name'></input>
             <div class='edit-buttons'>
                 <div class='button undo'><i class='fa fa-undo' /></div>
                 <div class='button save'><i class='fa fa-floppy-o' /></div>
@@ -341,7 +326,7 @@ color #0072C5
                     </div>
                     <div class='client-detail'>
                         <span class='label'>Country</span>
-                        <select class='detail client-address-country' name='country_id'>
+                        <select class='detail client-address-country needsclick' name='country_id'>
                             <option value=''>None</option>
                             <t t-foreach='widget.pos.countries' t-as='country'>
                                 <option t-att-value='country.id' t-att-selected="partner.country_id ? ((country.id === partner.country_id[0]) ? true : undefined) : undefined">
@@ -365,12 +350,8 @@ color #0072C5
                         <input class='detail barcode'       name='ean13'    t-att-value='partner.ean13 || ""'></input>
                     </div>
                     <div class='client-detail'>
-                        <span class='label'>RUC</span>
-                        <input id='ruc' class='detail vat'           name='ruc'     t-att-value='partner.ruc || ""'></input>
-                    </div>
-                    <div class='client-detail'>
-                        <span class='label'>Cedula</span>
-                        <input id='cedula' class='detail vat'           name='cedula'     t-att-value='partner.cedula || ""'></input>
+                        <span class='label'>Tax ID</span>
+                        <input class='detail vat'           name='vat'     t-att-value='partner.vat || ""'></input>
                     </div>
                 </div>
             </div>
@@ -417,10 +398,10 @@ color #0072C5
                     </div>
                     <div class='client-detail'>
                         <span class='label'>Tax ID</span>
-                        <t t-if='partner.ruc'>
-                            <span id='ruca' class='detail vat'><t t-esc='partner.ruc'/></span>
+                        <t t-if='partner.vat'>
+                            <span class='detail vat'><t t-esc='partner.vat'/></span>
                         </t>
-                        <t t-if='!partner.ruc'>
+                        <t t-if='!partner.vat'>
                             <span class='detail vat empty'>N/A</span>
                         </t>
                     </div>
@@ -466,10 +447,8 @@ color #0072C5
                                         <thead>
                                             <tr>
                                                 <th>Name</th>
-                                                <!--th>Address</th>
-                                                <th>Phone</th-->
-                                                <th>RUC</th>
-                                                <th>Cedula</th>
+                                                <th>Address</th>
+                                                <th>Phone</th>
                                             </tr>
                                         </thead>
                                         <tbody class='client-list-contents'>
@@ -484,7 +463,7 @@ color #0072C5
         </div>
     </t>
 
-
+        
 
     <t t-name="PaymentScreenWidget">
         <div class="payment-screen screen touch-scrollable">
@@ -585,9 +564,9 @@ color #0072C5
                                     <t t-esc='line.quantity' />
                                 </value>
                                 <t t-if='line.unit_name !== "Unit(s)"'>
-                                    <t t-esc='line.unit_name' />
+                                    <t t-esc='line.unit_name' /> 
                                 </t>
-                                x
+                                x 
                                 <value value-decimals='2'>
                                     <t t-esc='line.price' />
                                 </value>
@@ -631,14 +610,14 @@ color #0072C5
                     <right><value><t t-esc='line.amount'/></value></right>
                 </line>
             </t>
-            <br/>
+            <br/> 
 
             <line size='double-height'>
                 <left><pre>        CHANGE</pre></left>
                 <right><value><t t-esc='receipt.change' /></value></right>
             </line>
             <br/>
-
+            
             <!-- Extra Payment Info -->
 
             <t t-if='receipt.total_discount'>
@@ -728,10 +707,10 @@ color #0072C5
                 <p class="comment"><t t-esc=" widget.comment || '' "/></p>
                 <div class="footer">
                     <div class="button confirm">
-                        Confirm
+                        Confirm 
                     </div>
                     <div class="button cancel">
-                        Cancel
+                        Cancel 
                     </div>
                 </div>
             </div>
@@ -764,7 +743,7 @@ color #0072C5
     <t t-name="Product">
         <span class='product' t-att-data-product-id="product.id">
             <div class="product-img">
-                <img t-att-src='image_url' />
+                <img t-att-src='image_url' /> 
                 <t t-if="!product.to_weight">
                     <span class="price-tag">
                         <t t-esc="widget.format_currency(product.price,'Product Price')"/>
@@ -773,11 +752,6 @@ color #0072C5
                 <t t-if="product.to_weight">
                     <span class="price-tag">
                         <t t-esc="widget.format_currency(product.price,'Product Price')+'/'+widget.pos.units_by_id[product.uom_id[0]].name"/>
-                    </span>
-                </t>
-                <t t-if="product.default_code">
-                    <span class="code-tag">
-                        Codigo: <t t-esc="product.default_code"/>
                     </span>
                 </t>
             </div>
@@ -798,22 +772,20 @@ color #0072C5
             <ul class="info-list">
                 <t t-if="line.get_quantity_str() !== '1' || line.selected ">
                     <li class="info">
-                        <em id="quantity">
+                        <em>
                             <t t-esc="line.get_quantity_str()" />
                         </em>
                         <t t-esc="line.get_unit().name" />
                         at
-                        <span id="price">
-                            <t t-esc="widget.format_currency(line.get_unit_price(),'Product Price')" />
-                        </span>
+                        <t t-esc="widget.format_currency(line.get_unit_price(),'Product Price')" />
                         /
                         <t t-esc="line.get_unit().name" />
                     </li>
                 </t>
                 <t t-if="line.get_discount_str() !== '0'">
                     <li class="info">
-                        With a
-                        <em id="discount">
+                        With a 
+                        <em>
                             <t t-esc="line.get_discount_str()" />%
                         </em>
                         discount
@@ -898,8 +870,6 @@ color #0072C5
 
     <t t-name="Paymentline">
         <div t-attf-class="paymentline #{line.selected ? 'selected' : ''}">
-
-
             <div class='paymentline-name'>
                 <t t-esc="line.name"/>
             </div>
@@ -910,16 +880,6 @@ color #0072C5
             <span  class='paymentline-delete'>
                 <img src="/point_of_sale/static/src/img/search_reset.gif" />
             </span>
-            <div t-if="line.cashregister.journal.payment_subtype=='receive_card'">
-                <div>
-                    <select id="select_card">
-                        <option value="credit">Credito</option>
-                        <option value="debit">Debito</option>
-                    </select>
-                    Referencia <input id='ref'/>
-
-                </div>
-            </div>
         </div>
     </t>
 
@@ -970,7 +930,7 @@ color #0072C5
 
     <t t-name="PosTicket">
         <div class="pos-sale-ticket">
-
+            
             <div class="pos-center-align"><t t-esc="new Date().toString(Date.CultureInfo.formatPatterns.shortDate + ' ' +
                 Date.CultureInfo.formatPatterns.longTime)"/> <t t-esc="order.get('name')"/></div>
             <br />
@@ -1060,17 +1020,6 @@ color #0072C5
                     <t t-esc="widget.pos.config.receipt_footer" />
                 </div>
             </t>
-            <t t-if="order.payment_term != 1">
-                <br/>
-                <br/>
-                <span>Pagaré a la orden de <t t-esc="widget.pos.company.name"/> la suma de <t t-esc="widget.format_currency(order.getTotalTaxIncluded())"/> de acuerdo al la condición de pago "<t t-esc="order.payment_term_name"/>"</span>
-                <br/>
-                <br/>
-                <br/>
-                Firma:__________________________________<br/>
-                Nombre: <t t-esc="order.attributes.client.name"/><br/>
-                Documento: RUC: <t t-esc="order.attributes.client.ruc"/> CI: <t t-esc="order.attributes.client.cedula"/><br/>
-            </t>
         </div>
     </t>
 
@@ -1098,7 +1047,7 @@ color #0072C5
         </li>
     </t>
 
-    <!-- Onscreen Keyboard :
+    <!-- Onscreen Keyboard : 
          http://net.tutsplus.com/tutorials/javascript-ajax/creating-a-keyboard-with-css-and-jquery/ -->
     <t t-name="OnscreenKeyboardFull">
         <div class="keyboard_frame">

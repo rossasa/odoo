@@ -1,4 +1,4 @@
-function openerp_pos_db(instance, module){
+function openerp_pos_db(instance, module){ 
 
     /* The PosDB holds reference to data that is either
      * - static: does not change between pos reloads
@@ -39,8 +39,8 @@ function openerp_pos_db(instance, module){
             this.packagings_by_ean13 = {};
         },
         /* returns the category object from its id. If you pass a list of id as parameters, you get
-         * a list of category objects.
-         */
+         * a list of category objects. 
+         */  
         get_category_by_id: function(categ_id){
             if(categ_id instanceof Array){
                 var list = [];
@@ -57,7 +57,7 @@ function openerp_pos_db(instance, module){
                 return this.category_by_id[categ_id];
             }
         },
-        /* returns a list of the category's child categories ids, or an empty list
+        /* returns a list of the category's child categories ids, or an empty list 
          * if a category has no childs */
         get_category_childs_ids: function(categ_id){
             return this.category_childs[categ_id] || [];
@@ -73,7 +73,7 @@ function openerp_pos_db(instance, module){
             return this.category_parent[categ_id] || this.root_category_id;
         },
         /* adds categories definitions to the database. categories is a list of categories objects as
-         * returned by the openerp server. Categories must be inserted before the products or the
+         * returned by the openerp server. Categories must be inserted before the products or the 
          * product/ categories association may (will) not work properly */
         add_categories: function(categories){
             var self = this;
@@ -182,7 +182,7 @@ function openerp_pos_db(instance, module){
                     if( this.category_search_string[ancestor] === undefined){
                         this.category_search_string[ancestor] = '';
                     }
-                    this.category_search_string[ancestor] += search_string;
+                    this.category_search_string[ancestor] += search_string; 
                 }
                 this.product_by_id[product.id] = product;
                 if(product.ean13){
@@ -223,12 +223,6 @@ function openerp_pos_db(instance, module){
             if(partner.email){
                 str += '|' + partner.email;
             }
-            if(partner.ruc){
-                str += '|' + partner.ruc;
-            }
-            if(partner.cedula){
-                str += '|' + partner.cedula;
-            }
             str = '' + partner.id + ':' + str.replace(':','') + '\n';
             return str;
         },
@@ -238,16 +232,16 @@ function openerp_pos_db(instance, module){
             for(var i = 0, len = partners.length; i < len; i++){
                 var partner = partners[i];
 
-                if (    this.partner_write_date &&
+                if (    this.partner_write_date && 
                         this.partner_by_id[partner.id] &&
                         new Date(this.partner_write_date).getTime() + 1000 >=
                         new Date(partner.write_date).getTime() ) {
                     // FIXME: The write_date is stored with milisec precision in the database
                     // but the dates we get back are only precise to the second. This means when
                     // you read partners modified strictly after time X, you get back partners that were
-                    // modified X - 1 sec ago.
+                    // modified X - 1 sec ago. 
                     continue;
-                } else if ( new_write_date < partner.write_date ) {
+                } else if ( new_write_date < partner.write_date ) { 
                     new_write_date  = partner.write_date;
                 }
                 if (!this.partner_by_id[partner.id]) {
@@ -261,7 +255,7 @@ function openerp_pos_db(instance, module){
             this.partner_write_date = new_write_date || this.partner_write_date;
 
             if (updated_count) {
-                // If there were updates, we need to completely
+                // If there were updates, we need to completely 
                 // rebuild the search string and the ean13 indexing
 
                 this.partner_search_string = "";
@@ -273,9 +267,9 @@ function openerp_pos_db(instance, module){
                     if(partner.ean13){
                         this.partner_by_ean13[partner.ean13] = partner;
                     }
-                    partner.address = (partner.street || '') +', '+
+                    partner.address = (partner.street || '') +', '+ 
                                       (partner.zip || '')    +' '+
-                                      (partner.city || '')   +', '+
+                                      (partner.city || '')   +', '+ 
                                       (partner.country_id[1] || '');
                     this.partner_search_string += this._partner_search_string(partner);
                 }
@@ -363,7 +357,7 @@ function openerp_pos_db(instance, module){
         },
         /* returns a list of products with :
          * - a category that is or is a child of category_id,
-         * - a name, package or ean13 containing the query (case insensitive)
+         * - a name, package or ean13 containing the query (case insensitive) 
          */
         search_product_in_category: function(category_id, query){
             try {

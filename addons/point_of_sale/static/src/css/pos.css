@@ -82,7 +82,7 @@ td {
     margin: 0;
     background-color: #f0eeee;
     font-family: "Lato","Lucida Grande", Helvetica, Verdana, Arial;
-    color: #0072C5;
+    color: #555555;
     font-size: 12px;
     position: absolute;
     left: 0;
@@ -175,7 +175,7 @@ td {
 }
 /* firefox seems to ignore the relative positionning of the subwindow-container
  * putting this inside subwindow-container fixes it.
- */
+ */ 
 .pos .subwindow .subwindow-container-fix{
     height: 100%;
     position: relative;
@@ -265,12 +265,7 @@ td {
     margin:0;
     padding:0;
     color: gray;
-    background: #35393B;
-}
-
-.selection-area {
-    height: 35px;
-    background: #0072C5;
+    background: #393939;
 }
 
 /*  a) The left part of the top-bar */
@@ -284,21 +279,17 @@ td {
     height:100%;
     margin:0;
     padding:0;
-    border-right: 1px solid #0072C5;
+    border-right: 1px solid #373737;
     text-align:left;
     line-height:100%;
     vertical-align: middle;
 }
 .pos .pos-logo {
-    height: 70px;
-    margin-left: 12px;
-    position: fixed;
-    z-index:10;
+    height: 35px;
+    margin-left: 7px;
     margin-top: 2px;
-    border-radius: 5px;
-    background-color: white;
-    vertical-align: middle;
-}
+    vertical-align:middle;
+} 
 .pos .pos-branding .username{
     float:right;
     color:#DDD;
@@ -306,7 +297,6 @@ td {
     margin-right:32px;
     line-height: 48px;
     font-style:italic;
-    font-size: 25px;
 }
 
 /*  b) The right part of the top-bar */
@@ -342,7 +332,6 @@ td {
 }
 .pos .order-button.selected{
     font-weight: 900;
-    font-size: 20px;
     background: #EEEEEE;
     color: rgb(75,75,75);
     height: 45px;
@@ -431,7 +420,7 @@ td {
 /*  c) The notifications indicator */
 
 .pos .oe_status{
-    float:right;
+    float:right; 
     color: rgba(255,255,255,0.4);
     padding: 14px;
     line-height: 20px;
@@ -469,8 +458,7 @@ td {
     position: absolute;
     top: 48px;
     bottom: 0;
-    background: #35393B;
-
+    background: #F0EEEE;
 }
 
 /*  ********* The leftpane contains the order, numpad and paypad ********* */
@@ -554,9 +542,9 @@ td {
     color: #555555;
     font-size: 14px;
 }
-.pos .paypad button:active,
-.pos .numpad button:active,
-.pos .numpad .selected-mode,
+.pos .paypad button:active, 
+.pos .numpad button:active, 
+.pos .numpad .selected-mode, 
 .pos .popup  button:active{
     border: none;
     color: white;
@@ -585,8 +573,6 @@ td {
     font-size: 14px;
 }
 
-
-
 /*  ********* The right pane contains the screens and headers ********* */
 
 .pos .rightpane {
@@ -603,10 +589,8 @@ td {
 .pos .rightpane-header {
     padding: 0;
     height: 48px;
-    border-bottom: 1px solid #D3D3D3;
-    border-top: 1px solid lightgrey;
-    /*background: #0072C5;*/
-    margin-top:30px;
+    border-bottom: 1px solid #c7c7c7;
+    background: #d3d3d3;
     text-align: center;
 }
 
@@ -652,7 +636,6 @@ td {
     line-height: 48px;
     height: 48px;
     min-width: 48px;
-    background-color: #d3d3d3;
 }
 .pos .breadcrumb:last-child {
     padding-right: 3px;
@@ -799,7 +782,7 @@ td {
     line-height: 14px;
     width: 100%;
     /* for some reason the -90deg orientation doesn't match the -webkit-linear-gradient. It should be 180deg here.
-     * webkit also insists on rendering *both* gradients instead of only the native one. So it doesn't looks right. ugh.
+     * webkit also insists on rendering *both* gradients instead of only the native one. So it doesn't looks right. ugh. 
     background:         linear-gradient(-90deg,rgba(255,255,255,0),rgba(255,255,255,1), rgba(255,255,255,1)); */
     /*background:#FFF;*/
     padding: 3px;
@@ -847,23 +830,10 @@ td {
     vertical-align: top;
     color: white;
     line-height: 13px;
-    background: red;
-    padding: 2px 5px;
-    border-radius: 2px;
-    font-weight: bold;
-}
-.pos .product .code-tag {
-    position: absolute;
-    top: 20px;
-    right: 2px;
-    vertical-align: top;
-    color: white;
-    line-height: 13px;
     background: #7f82ac;
     padding: 2px 5px;
     border-radius: 2px;
 }
-
 
 .pos .product .product-name {
     position: absolute;
@@ -990,7 +960,6 @@ td {
     position: absolute;
     right: 0%; top: 65px; bottom: 0px;
     left: 0%;
-    background-color: #FFFFFF;
 }
 
 /* a) Layout for the Product Screen */
@@ -1161,17 +1130,17 @@ td {
         color: black !important;
     }
     .oe_leftbar,
-    .pos .pos-topheader,
-    .pos .pos-leftpane,
+    .pos .pos-topheader, 
+    .pos .pos-leftpane, 
     .pos .keyboard_frame {
         display: none !important;
     }
     .pos,
     .pos .pos-content,
     .pos .rightpane,
-    .pos .screen,
-    .pos .window,
-    .pos .window .subwindow,
+    .pos .screen, 
+    .pos .window, 
+    .pos .window .subwindow, 
     .pos .subwindow .subwindow-container{
         display: block;
         position: static;
@@ -1344,8 +1313,7 @@ td {
 .pos .clientlist-screen .edit-buttons .button{
     display: inline-block;
     margin-left: 16px;
-    color: rgb(0, 114, 197);
-    background-color: #E6E6E6;
+    color: rgb(128,128,128);
     cursor: pointer;
     font-size: 36px;
 }
@@ -1363,7 +1331,6 @@ td {
 }
 .pos .clientlist-screen .client-detail{
     line-height: 24px;
-    display: inline-grid;
 }
 .pos .clientlist-screen .client-detail > .label{
     font-weight: bold;
@@ -1505,13 +1472,6 @@ td {
 
 /*  ********* The OrderLineWidget  ********* */
 
-.pos .mode-selected {
-    background-color: #0072C5;
-    color: white;
-    border-radius: 3px;
-    font-weight: bold;
-}
-
 .pos .order .orderline{
     width:100%;
     margin:0px;
@@ -1540,7 +1500,7 @@ td {
 }
 
 .pos .order .orderline.selected{
-    background: rgba(0, 142, 189, 0.2);
+    background: rgba(140,143,183,0.2);
     -webkit-transition: background 250ms ease-in-out;
        -moz-transition: background 250ms ease-in-out;
             transition: background 250ms ease-in-out;
@@ -1564,7 +1524,7 @@ td {
     margin-left:10px;
 }
 .pos .order .orderline .info-list em{
-    /*color: #777;*/
+    color: #777;
     font-weight: bold;
     font-style:normal;
 }
@@ -1632,7 +1592,6 @@ td {
     padding-left:3px;
     padding-right:3px;
     overflow:hidden;
-    background-color: #35393B;
 }
 
 .pos .pos-actionbar .button{
@@ -1692,7 +1651,7 @@ td {
     top: 10px;
     width: 200px;
     font-size: 10px;
-
+    
     background: rgba(0,0,0,0.82);
     color: white;
     padding-bottom: 10px;
@@ -1924,9 +1883,4 @@ td {
 }
 .pos .not-supported-browser img{
     border-collapse: separate;
-}
-
-select:focus {
-    background-color: red;
-    color: white;
 }

@@ -1,16 +1,16 @@
 
 // this file contains the screens definitions. Screens are the
-// content of the right pane of the pos, containing the main functionalities.
+// content of the right pane of the pos, containing the main functionalities. 
 // screens are contained in the PosWidget, in pos_widget.js
 // all screens are present in the dom at all time, but only one is shown at the
-// same time.
+// same time. 
 //
 // transition between screens is made possible by the use of the screen_selector,
 // which is responsible of hiding and showing the screens, as well as maintaining
 // the state of the screens between different orders.
 //
 // all screens inherit from ScreenWidget. the only addition from the base widgets
-// are show() and hide() which shows and hides the screen but are also used to
+// are show() and hide() which shows and hides the screen but are also used to 
 // bind and unbind actions on widgets and devices. The screen_selector guarantees
 // that only one screen is shown at the same time and that show() is called after all
 // hide()s
@@ -35,12 +35,12 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
 
             this.current_mode = options.default_mode || 'cashier';
 
-            this.current_screen = null;
+            this.current_screen = null; 
 
             for(screen_name in this.screen_set){
                 this.screen_set[screen_name].hide();
             }
-
+            
             for(popup_name in this.popup_set){
                 this.popup_set[popup_name].hide();
             }
@@ -73,10 +73,10 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
         load_saved_screen:  function(){
             this.close_popup();
             var selectedOrder = this.pos.get('selectedOrder');
-            // FIXME : this changing screen behaviour is sometimes confusing ...
+            // FIXME : this changing screen behaviour is sometimes confusing ... 
             this.set_current_screen(selectedOrder.get_screen_data('screen') || this.default_screen,null,'refresh');
             //this.set_current_screen(this.default_screen,null,'refresh');
-
+            
         },
         set_user_mode: function(user_mode){
             if(user_mode !== this.current_mode){
@@ -138,7 +138,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
 
     module.ScreenWidget = module.PosBaseWidget.extend({
 
-        show_numpad:     true,
+        show_numpad:     true,  
         show_leftpane:   true,
 
         init: function(parent,options){
@@ -154,12 +154,12 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
 
         hotkeys_handlers: {},
 
-        // what happens when a product is scanned :
-        // it will add the product to the order and go to barcode_product_screen.
+        // what happens when a product is scanned : 
+        // it will add the product to the order and go to barcode_product_screen. 
         barcode_product_action: function(code){
             var self = this;
             if(self.pos.scan_product(code)){
-                if(self.barcode_product_screen){
+                if(self.barcode_product_screen){ 
                     self.pos_widget.screen_selector.set_current_screen(self.barcode_product_screen);
                 }
             }else{
@@ -168,16 +168,14 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
         },
 
         // what happens when a cashier id barcode is scanned.
-        // the default behavior is the following :
+        // the default behavior is the following : 
         // - if there's a user with a matching ean, put it as the active 'cashier', go to cashier mode, and return true
-        // - else : do nothing and return false. You probably want to extend this to show and appropriate error popup...
+        // - else : do nothing and return false. You probably want to extend this to show and appropriate error popup... 
         barcode_cashier_action: function(code){
             var users = this.pos.users;
             for(var i = 0, len = users.length; i < len; i++){
                 if(users[i].ean13 === code.code){
                     this.pos.cashier = users[i];
-                    this.pos.user = users[i];
-                    $('#seller_id').val(users[i].id);
                     this.pos_widget.username.refresh();
                     return true;
                 }
@@ -185,11 +183,11 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             this.pos_widget.screen_selector.show_popup('error-barcode',code.code);
             return false;
         },
-
+        
         // what happens when a client id barcode is scanned.
-        // the default behavior is the following :
+        // the default behavior is the following : 
         // - if there's a user with a matching ean, put it as the active 'client' and return true
-        // - else : return false.
+        // - else : return false. 
         barcode_client_action: function(code){
             var partner = this.pos.db.get_partner_by_ean13(code.code);
             if(partner){
@@ -200,7 +198,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             this.pos_widget.screen_selector.show_popup('error-barcode',code.code);
             return false;
         },
-
+        
         // what happens when a discount barcode is scanned : the default behavior
         // is to set the discount on the last order.
         barcode_discount_action: function(code){
@@ -249,7 +247,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             }else{
                 this.hide_action_bar();
             }
-
+            
             var self = this;
 
             this.pos_widget.set_numpad_visible(this.show_numpad);
@@ -287,7 +285,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
         // we need this because some screens re-render themselves when they are hidden
         // (due to some events, or magic, or both...)  we must make sure they remain hidden.
         // the good solution would probably be to make them not re-render themselves when they
-        // are hidden.
+        // are hidden. 
         renderElement: function(){
             this._super();
             if(this.hidden){
@@ -307,7 +305,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
         /* called before hide, when a popup is closed */
         close: function(){
         },
-        /* hides the popup. keep in mind that this is called in the initialization pass of the
+        /* hides the popup. keep in mind that this is called in the initialization pass of the 
          * pos instantiation, so you don't want to do anything fancy in here */
         hide: function(){
             if(this.$el){
@@ -367,7 +365,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             this.message = options.message || '';
             this.comment = options.comment || '';
             this.renderElement();
-
+            
             this.$('.button.cancel').click(function(){
                 self.pos_widget.screen_selector.close_popup();
                 if( options.cancel ){
@@ -507,6 +505,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
 
         start: function(){ //FIXME this should work as renderElement... but then the categories aren't properly set. explore why
             var self = this;
+
             this.product_list_widget = new module.ProductListWidget(this,{
                 click_product_action: function(product){
                     if(product.to_weight && self.pos.config.iface_electronic_scale){
@@ -532,7 +531,6 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             this.product_categories_widget.reset_category();
 
             this.pos_widget.order_widget.set_editable(true);
-            $('.paypad-button').prop('disabled', false);
         },
 
         close: function(){
@@ -553,7 +551,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             this._super(parent, options);
         },
 
-        show_leftpane: true,
+        show_leftpane: false,
 
         auto_back: true,
 
@@ -583,7 +581,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
 
             var partners = this.pos.db.get_partners_sorted(1000);
             this.render_list(partners);
-
+            
             this.reload_partners();
 
             if( this.old_client ){
@@ -730,7 +728,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
         // save was successfull.
         save_client_details: function(partner) {
             var self = this;
-
+            
             var fields = {}
             this.$('.client-details-contents .detail').each(function(idx,el){
                 fields[el.name] = el.value;
@@ -742,14 +740,14 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                 });
                 return;
             }
-
+            
             if (this.uploaded_picture) {
                 fields.image = this.uploaded_picture;
             }
 
             fields.id           = partner.id || false;
             fields.country_id   = fields.country_id || false;
-            fields.ean13        = fields.ean13 ? this.pos.barcode_reader.sanitize_ean(fields.ean13) : false;
+            fields.ean13        = fields.ean13 ? this.pos.barcode_reader.sanitize_ean(fields.ean13) : false; 
 
             new instance.web.Model('res.partner').call('create_from_ui',[fields]).then(function(partner_id){
                 self.saved_client_details(partner_id);
@@ -761,7 +759,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                 });
             });
         },
-
+        
         // what happens when we've just pushed modifications for a partner of id partner_id
         saved_client_details: function(partner_id){
             var self = this;
@@ -773,7 +771,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                     self.display_client_details('show',partner);
                 } else {
                     // should never happen, because create_from_ui must return the id of the partner it
-                    // has created, and reload_partner() must have loaded the newly created partner.
+                    // has created, and reload_partner() must have loaded the newly created partner. 
                     self.display_client_details('hide');
                 }
             });
@@ -818,7 +816,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                 });
                 return;
             }
-
+            
             var reader = new FileReader();
             reader.onload = function(event){
                 var dataurl = event.target.result;
@@ -835,13 +833,13 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             reader.readAsDataURL(file);
         },
 
-        // This fetches partner changes on the server, and in case of changes,
+        // This fetches partner changes on the server, and in case of changes, 
         // rerenders the affected views
         reload_partners: function(){
             var self = this;
             return this.pos.load_new_partners().then(function(){
                 self.render_list(self.pos.db.get_partners_sorted(1000));
-
+                
                 // update the currently assigned client if it has been changed in db.
                 var curr_client = self.pos.get_order().get_client();
                 if (curr_client) {
@@ -862,9 +860,9 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             var scroll   = parent.scrollTop();
             var height   = contents.height();
 
-            contents.off('click','.button.edit');
-            contents.off('click','.button.save');
-            contents.off('click','.button.undo');
+            contents.off('click','.button.edit'); 
+            contents.off('click','.button.save'); 
+            contents.off('click','.button.undo'); 
             contents.on('click','.button.edit',function(){ self.edit_client_details(partner); });
             contents.on('click','.button.save',function(){ self.save_client_details(partner); });
             contents.on('click','.button.undo',function(){ self.undo_client_details(partner); });
@@ -894,20 +892,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                 contents.empty();
                 contents.append($(QWeb.render('ClientDetailsEdit',{widget:this,partner:partner})));
                 this.toggle_save_button();
-                this.$('#ruc').on('change',function(res){
-                    new_ruc = $('#ruc').val().split('-');
-                    dv=new_ruc[1];
-                    ruc=new_ruc[0];
-                    new instance.web.Model("ruc.list").get_func('search_read')([['ruc', '=', ruc]],['name']).pipe(
-                        function(resto){
-                            if(res[0]){
-                                name_set = resto[0].name.split(', ');
-                                name = name_set[1]+" "+name_set[0];
-                                $('#partner_name').val(name);
-                            }
-                        }
-                    );
-                });
+
                 contents.find('.image-uploader').on('change',function(event){
                     self.load_image_file(event.target.files[0],function(res){
                         if (res) {
@@ -941,21 +926,11 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
         template: 'ReceiptScreenWidget',
 
         show_numpad:     false,
-        show_leftpane:   true,
+        show_leftpane:   false,
 
         show: function(){
             this._super();
             var self = this;
-            this.hotkey_handler = function(event){
-                if(event.which === 13){
-                    var current_screen = self.pos.pos_widget.screen_selector.get_current_screen();
-                    if (current_screen == 'receipt'){
-                        self.finishOrder();
-                    }
-                }
-            };
-
-            $('body').on('keyup',this.hotkey_handler);
 
             var print_button = this.add_action_button({
                     label: _t('Print'),
@@ -971,184 +946,35 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
 
             this.refresh();
 
-            if (!this.pos.get('selectedOrder')._printed && config.to_invoice) {
+            if (!this.pos.get('selectedOrder')._printed) {
                 this.print();
             }
 
             //
             // The problem is that in chrome the print() is asynchronous and doesn't
             // execute until all rpc are finished. So it conflicts with the rpc used
-            // to send the orders to the backend, and the user is able to go to the next
-            // screen before the printing dialog is opened. The problem is that what's
+            // to send the orders to the backend, and the user is able to go to the next 
+            // screen before the printing dialog is opened. The problem is that what's 
             // printed is whatever is in the page when the dialog is opened and not when it's called,
-            // and so you end up printing the product list instead of the receipt...
+            // and so you end up printing the product list instead of the receipt... 
             //
             // Fixing this would need a re-architecturing
             // of the code to postpone sending of orders after printing.
             //
             // But since the print dialog also blocks the other asynchronous calls, the
-            // button enabling in the setTimeout() is blocked until the printing dialog is
+            // button enabling in the setTimeout() is blocked until the printing dialog is 
             // closed. But the timeout has to be big enough or else it doesn't work
             // 2 seconds is the same as the default timeout for sending orders and so the dialog
-            // should have appeared before the timeout... so yeah that's not ultra reliable.
+            // should have appeared before the timeout... so yeah that's not ultra reliable. 
 
-            /*I Don't see the need of it anymore
-            finish_button.set_disabled(true);
+            finish_button.set_disabled(true);   
             setTimeout(function(){
                 finish_button.set_disabled(false);
-            }, 2000);*/
+            }, 2000);
         },
         print: function() {
-            order = this.pos.get('selectedOrder')
-            order._printed = true;
-            var months = new Array();
-            months[0] = "Enero";
-            months[1] = "Febrero";
-            months[2] = "Marzo";
-            months[3] = "Abril";
-            months[4] = "Mayo";
-            months[5] = "Junio";
-            months[6] = "Julio";
-            months[7] = "Agosto";
-            months[8] = "Septiembre";
-            months[9] = "Octubre";
-            months[10] = "Noviembre";
-            months[11] = "Dicimbre";
-            invoice_data = order.export_for_printing();
-            day = invoice_data.date.date;
-            month = months[invoice_data.date.month];
-            year = invoice_data.date.year;
-            if(order.payment_term == 1){
-                contado = "x";
-                credito = "";
-                condicion = "Contado";
-            } else {
-                contado = "";
-                credito = "x";
-                condicion = "Credito";
-            }
-            var discount_amount = 0;
-            var original_price = 0;
-            var lines_length = order.attributes.orderLines.length;
-            price_list_id = parseInt(this.pos.config.pricelist_id[0]);
-            for(var line=0; line<lines_length;line++){
-                this_line = order.attributes.orderLines.models[line]
-                line_price = this_line.price;
-                line_pricelist = this.pos.pricelist_engine.compute_price(
-                    this.pos.db, this_line.product, false, 1, price_list_id);
-                line_discount = (line_pricelist - line_price)*this_line.quantity;
-                original_price = original_price + line_pricelist*this_line.quantity;
-                if(line_discount > 0){
-                    discount_amount = discount_amount + line_discount;
-                }
-            }
-            if (discount_amount > 0){
-                discount_percent = 100*discount_amount/original_price;
-            } else {
-                discount_percent = 0;
-            }
-            if(config.to_invoice){
-                var prefix = "factura_";
-                var extension = ".prt";
-                var dotmatrix_model = this.pos.dotmatrix_invoice[0];
-                var partner_name = invoice_data.client;
-                var partner = order.attributes.client;
-                var ruc = partner.ruc;
-                var cedula = partner.cedula;
-                if (!ruc){
-                    ruc = cedula;
-                }
-                var street = partner.address;
-                var phone = partner.phone;
-                next_number = string_pad(order.pos.config.legal_padding,order.pos.config.legal_next_number - 1, "right", "0");
-                prefix = order.pos.config.legal_prefix.replace("%(year)s", year);
-                var name = prefix+next_number;
-            } else if (order.payment_term == 1){
-                var prefix = "ticket_";
-                var extension = ".prl";
-                var dotmatrix_model = this.pos.dotmatrix_invoice[1];
-                var partner_name = invoice_data.client;
-                var partner = order.attributes.client;
-                var ruc = false;
-                var cedula = false;
-                if (partner) {
-                    ruc = partner.ruc;
-                    cedula = partner.cedula;
-                    if (!ruc){
-                        ruc = cedula;
-                    }
-                    var street = partner.address;
-                    var phone = partner.phone;
-                }
-                next_number = string_pad(order.pos.config.ticket_padding, order.pos.config.ticket_next_number - 1, "right", "0");
-                prefix = order.pos.config.ticket_prefix.replace("%(year)s", year);
-                var name = prefix+next_number;
-            } else {
-                var prefix = "ticket_";
-                var extension = ".prl";
-                var dotmatrix_model = this.pos.dotmatrix_invoice[2];
-                var partner_name = invoice_data.client;
-                var partner = order.attributes.client;
-                var ruc = partner.ruc;
-                var cedula = partner.cedula;
-                if (!ruc){
-                    ruc = cedula;
-                }
-                var street = partner.address;
-                var phone = partner.phone;
-                next_number = string_pad(order.pos.config.ticket_padding, order.pos.config.ticket_next_number - 1, "right", "0");
-                prefix = order.pos.config.ticket_prefix.replace("%(year)s", year);
-                var name = prefix+next_number;
-            }
-            if (dotmatrix_model){
-                var max_lines = dotmatrix_model.qty_lines;
-                var lines_count = 0;
-                var lines = "";
-                var subtotal_10 = 0;
-                var subtotal_05 = 0;
-                var subtotal_00 = 0;
-                var iva_10 = 0;
-                var iva_05 = 0;
-                for (var item in invoice_data.orderlines) {
-                    var line = invoice_data.orderlines[item];
-                    line_amount_00 = 0;
-                    line_amount_05 = 0;
-                    line_amount_10 = 0;
-                    //IVA Exento
-                    if(order.attributes.orderLines.models[item].product.taxes_id==4){
-                        line_amount_00 = line.price_with_tax;
-                        subtotal_00 = subtotal_00 + line.price_with_tax;
-                    }
-                    //IVA 5%
-                    if(order.attributes.orderLines.models[item].product.taxes_id==1){
-                        line_amount_05 = line.price_with_tax;
-                        subtotal_05 = subtotal_05 + line.price_with_tax;
-                        iva_05 = iva_05 + line.tax;
-                    }
-                    //IVA 10%
-                    if(order.attributes.orderLines.models[item].product.taxes_id==5){
-                        line_amount_10 = line.price_with_tax;
-                        subtotal_10 = subtotal_10 + line.price_with_tax;
-                        iva_10 = iva_10 + line.tax;
-                    }
-                    default_code = order.attributes.orderLines.models[item].product.default_code;
-                    line_eval = eval(dotmatrix_model.line)
-                    lines = lines+line_eval;
-                    lines_count = lines_count + 1;
-                }
-                if(config.to_invoice){
-                    while(lines_count < max_lines){
-                        lines = lines+"\n";
-                        lines_count = lines_count + 1;
-                    }
-                }
-                gross = invoice_data.subtotal;
-                amount_in_word_line = NumeroALetras(invoice_data.subtotal);
-                amount_tax = invoice_data.total_tax;
-                invoice = eval(dotmatrix_model.content).replace("false", "");
-                var blob = new Blob([invoice], {type: "text/plain;charset=utf-8"});
-                saveAs(blob, prefix+next_number+extension);
-            }
+            this.pos.get('selectedOrder')._printed = true;
+            window.print();
         },
         finishOrder: function() {
             this.pos.get('selectedOrder').destroy();
@@ -1190,7 +1016,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                     node = node.parentNode;
                 }
                 if(node){
-                    self.pos.get('selectedOrder').removePaymentline(node.line)
+                    self.pos.get('selectedOrder').removePaymentline(node.line)   
                 }
                 event.stopPropagation();
             };
@@ -1223,14 +1049,10 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             };
 
             this.hotkey_handler = function(event){
-                if(event.which === 113){
-                    if (!self.pos_widget.action_bar.button_list[1].disabled){
-                        self.validate_order();
-                    }
-                }else if(event.which === 120){
-                    if (!self.pos_widget.action_bar.button_list[1].disabled){
-                        self.validate_order({invoice: true});
-                    }
+                if(event.which === 13){
+                    self.validate_order();
+                }else if(event.which === 27){
+                    self.back();
                 }
             };
 
@@ -1238,32 +1060,32 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
         show: function(){
             this._super();
             var self = this;
-
+            
             this.enable_numpad();
             this.focus_selected_line();
-
+            
             document.body.addEventListener('keyup', this.hotkey_handler);
 
             this.add_action_button({
                     label: _t('Back'),
                     icon: '/point_of_sale/static/src/img/icons/png48/go-previous.png',
-                    click: function(){
+                    click: function(){  
                         self.back();
                     },
                 });
 
             this.add_action_button({
-                    label: _t('Ticket [F2]'),
+                    label: _t('Validate'),
                     name: 'validation',
                     icon: '/point_of_sale/static/src/img/icons/png48/validate.png',
                     click: function(){
                         self.validate_order();
                     },
                 });
-
+           
             if( this.pos.config.iface_invoicing ){
                 this.add_action_button({
-                        label: _t('Factura [F9]'),
+                        label: _t('Invoice'),
                         name: 'invoice',
                         icon: '/point_of_sale/static/src/img/icons/png48/invoice.png',
                         click: function(){
@@ -1284,11 +1106,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             }
 
             this.update_payment_summary();
-            selectedOrder = this.pos.get('selectedOrder');
-            if (selectedOrder.payment_term && selectedOrder.payment_term != 1){
-                self.pos_widget.action_bar.set_button_disabled('validation',false);
-                self.pos_widget.action_bar.set_button_disabled('invoice',false);
-            }
+
         },
         close: function(){
             this._super();
@@ -1298,11 +1116,11 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
         remove_empty_lines: function(){
             var order = this.pos.get('selectedOrder');
             var lines = order.get('paymentLines').models.slice(0);
-            for(var i = 0; i < lines.length; i++){
+            for(var i = 0; i < lines.length; i++){ 
                 var line = lines[i];
-                //if(line.get_amount() === 0){
+                if(line.get_amount() === 0){
                     order.removePaymentline(line);
-                //}
+                }
             }
         },
         back: function() {
@@ -1373,16 +1191,10 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
         add_paymentline: function(line) {
             var list_container = this.el.querySelector('.payment-lines');
                 list_container.appendChild(this.render_paymentline(line));
-
+            
             if(this.numpad_state){
                 this.numpad_state.reset();
             }
-            selectedStatement = line;
-            if (selectedStatement.cashregister.journal.payment_subtype){
-                selectedStatement.card_mode = this.$('#select_card option:selected').val();
-                selectedStatement.ref = '';
-            }
-            $('.paypad-button[cash-register-id='+selectedStatement.cashregister.id+']').prop('disabled', true);
         },
         render_paymentline: function(line){
             var el_html  = openerp.qweb.render('Paymentline',{widget: this, line: line});
@@ -1391,23 +1203,12 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             var el_node  = document.createElement('tbody');
                 el_node.innerHTML = el_html;
                 el_node = el_node.childNodes[0];
-                line.card_mode = $('#select_card').val()
                 el_node.line = line;
                 el_node.querySelector('.paymentline-delete')
                     .addEventListener('click', this.line_delete_handler);
                 el_node.addEventListener('click', this.line_click_handler);
                 el_node.querySelector('input')
                     .addEventListener('keyup', this.line_change_handler);
-                if (line.cashregister.journal.payment_subtype == 'receive_card'){
-                    el_node.querySelector('#select_card')
-                    .addEventListener('change',function(){
-                        line.card_mode = $('#select_card').val()
-                    });
-                    el_node.querySelector('#ref')
-                    .addEventListener('change',function(){
-                        line.ref = $('#ref').val()
-                    });
-                }
 
             line.node = el_node;
 
@@ -1416,11 +1217,10 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
         rerender_paymentline: function(line){
             var old_node = line.node;
             var new_node = this.render_paymentline(line);
-
+            
             old_node.parentNode.replaceChild(new_node,old_node);
         },
         remove_paymentline: function(line){
-            $('.paypad-button[cash-register-id='+line.cashregister.id+']').prop('disabled', false);
             line.node.parentNode.removeChild(line.node);
             line.node = undefined;
         },
@@ -1433,7 +1233,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             for(var i = 0; i < paymentlines.length; i++){
                 list_container.appendChild(this.render_paymentline(paymentlines[i]));
             }
-
+            
             this.update_payment_summary();
         },
         update_payment_summary: function() {
@@ -1446,45 +1246,11 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             this.$('.payment-due-total').html(this.format_currency(dueTotal));
             this.$('.payment-paid-total').html(this.format_currency(paidTotal));
             this.$('.payment-remaining').html(this.format_currency(remaining));
-            rate_pyg = 1;
-            rate_usd = 1;
-            rate_brl = 1;
-            for (var number in this.pos.journals){
-                journal = this.pos.journals[number]
-                if (journal.currency && journal.currency[1] == 'USD'){
-                    rate_usd = journal.currency_rate;
-                }
-            }
-            for (var number in this.pos.journals){
-                journal = this.pos.journals[number]
-                if (journal.currency && journal.currency[1] == 'BRL'){
-                    rate_brl = journal.currency_rate;
-                }
-            }
-            teste =     "<span class='left-block'>"+
-                            "Vuelto Guarani:"+
-                        "</span>"+
-                        "<span class='right-block payment-change'>"+
-                        this.format_currency(change)+
-                        "</span>"+
-                        "<span class='left-block'>"+
-                            "Vuelto Dolar:"+
-                        "</span>"+
-                        "<span class='right-block payment-change'>"+
-                        this.format_currency(change*rate_usd)+
-                        "</span>"+
-                        "<span class='left-block'>"+
-                            "Vuelto Real:"+
-                        "</span>"+
-                        "<span class='right-block payment-change'>"+
-                        this.format_currency(change*rate_brl)+
-                        "</span>"
-
-            this.$('.bigger').html(teste);
+            this.$('.payment-change').html(this.format_currency(change));
             if(currentOrder.selected_orderline === undefined){
-                remaining = 1;  // What is this ?
+                remaining = 1;  // What is this ? 
             }
-
+                
             if(this.pos_widget.action_bar){
                 this.pos_widget.action_bar.set_button_disabled('validation', !this.is_paid());
                 this.pos_widget.action_bar.set_button_disabled('invoice', !this.is_paid());
@@ -1492,9 +1258,8 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
         },
         is_paid: function(){
             var currentOrder = this.pos.get('selectedOrder');
-            round_limit = this.pos.config.round_limit
-            return (currentOrder.getTotalTaxIncluded() < round_limit
-                   || currentOrder.getPaidTotal() + round_limit >= currentOrder.getTotalTaxIncluded());
+            return (currentOrder.getTotalTaxIncluded() < 0.000001 
+                   || currentOrder.getPaidTotal() + 0.000001 >= currentOrder.getTotalTaxIncluded());
 
         },
         validate_order: function(options) {
@@ -1520,18 +1285,11 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                     });
                     return;
                 }
-                if (plines[i].get_type() === 'bank' && $('#ref').val() == '') {
-                    this.pos_widget.screen_selector.show_popup('error',{
-                        'message': _t('Sem Referencia'),
-                        'comment': _t('Debes completar la referencia.'),
-                    });
-                    return;
-                }
             }
 
-            /*if(!this.is_paid()){
+            if(!this.is_paid()){
                 return;
-            }*/
+            }
 
             // The exact amount must be paid if there is no cash payment method defined.
             if (Math.abs(currentOrder.getTotalTaxIncluded() - currentOrder.getPaidTotal()) > 0.00001) {
@@ -1551,46 +1309,50 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             if (this.pos.config.iface_cashdrawer) {
                     this.pos.proxy.open_cashbox();
             }
-            config = {timeout:30000, to_invoice:false}
-            if(options.invoice || currentOrder.payment_term != "1"){
-                if(!currentOrder.get_client()){
-                    //setTimeout(function(){
-                    //Show the client Screen instead of show an error message
-                    var ss = self.pos.pos_widget.screen_selector;
-                    ss.set_current_screen('clientlist');
-                    //}, 30);
-                    //self.pos_widget.screen_selector.show_popup('error',{
-                    //    message: _t('An anonymous order cannot be invoiced'),
-                    //    comment: _t('Please select a client for this order. This can be done by clicking the order tab'),
-                    //});
-                    return;
-                }
-                if(!currentOrder.get_client().ruc && !currentOrder.get_client().cedula){
-                    this.pos_widget.screen_selector.show_popup('error',{
-                        'message': _t('Cliente sin RUC o Cedula'),
-                        'comment': _t('El RUC o Cedula del cliente no estan definidos, para hacer factura legal hay que informar el RUC o Cedula en el catastro del cliente'),
-                    });
-                    return;
-                }
-                if (options.invoice){
-                    config.to_invoice = true
-                    currentOrder.to_invoice = true
-                }
-                currentOrder.journal_id = currentOrder.pos.config.legal_journal_id[0]
 
-            }
-            this.pos.push_order(currentOrder, config)
-            if(this.pos.config.iface_print_via_proxy){
-                var receipt = currentOrder.export_for_printing();
-                this.pos.proxy.print_receipt(QWeb.render('XmlReceipt',{
-                    receipt: receipt, widget: self,
-                }));
-                this.pos.get('selectedOrder').destroy();    //finish order and go back to scan screen
+            if(options.invoice){
+                // deactivate the validation button while we try to send the order
+                this.pos_widget.action_bar.set_button_disabled('validation',true);
+                this.pos_widget.action_bar.set_button_disabled('invoice',true);
+
+                var invoiced = this.pos.push_and_invoice_order(currentOrder);
+
+                invoiced.fail(function(error){
+                    if(error === 'error-no-client'){
+                        self.pos_widget.screen_selector.show_popup('error',{
+                            message: _t('An anonymous order cannot be invoiced'),
+                            comment: _t('Please select a client for this order. This can be done by clicking the order tab'),
+                        });
+                    }else{
+                        self.pos_widget.screen_selector.show_popup('error',{
+                            message: _t('The order could not be sent'),
+                            comment: _t('Check your internet connection and try again.'),
+                        });
+                    }
+                    self.pos_widget.action_bar.set_button_disabled('validation',false);
+                    self.pos_widget.action_bar.set_button_disabled('invoice',false);
+                });
+
+                invoiced.done(function(){
+                    self.pos_widget.action_bar.set_button_disabled('validation',false);
+                    self.pos_widget.action_bar.set_button_disabled('invoice',false);
+                    self.pos.get('selectedOrder').destroy();
+                });
+
             }else{
-                this.pos_widget.screen_selector.set_current_screen(this.next_screen);
+                this.pos.push_order(currentOrder) 
+                if(this.pos.config.iface_print_via_proxy){
+                    var receipt = currentOrder.export_for_printing();
+                    this.pos.proxy.print_receipt(QWeb.render('XmlReceipt',{
+                        receipt: receipt, widget: self,
+                    }));
+                    this.pos.get('selectedOrder').destroy();    //finish order and go back to scan screen
+                }else{
+                    this.pos_widget.screen_selector.set_current_screen(this.next_screen);
+                }
             }
 
-            // hide onscreen (iOS) keyboard
+            // hide onscreen (iOS) keyboard 
             setTimeout(function(){
                 document.activeElement.blur();
                 $("input").blur();
@@ -1605,7 +1367,7 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
                 this.numpad_state.bind('set_value',   this.set_value, this);
                 this.numpad_state.bind('change:mode', this.set_mode_back_to_payment, this);
             }
-
+                    
         },
         disable_numpad: function(){
             if(this.numpad_state){

@@ -1,376 +1,17 @@
-function string_pad(qty, user_str, align="left", complete=" ")
-{
-    if (!user_str){
-        user_str = "";
-    }
-    user_str = user_str.toString()
-    while(user_str.length<qty){
-        if (align == "left"){
-            user_str = user_str + complete;
-        } else {
-            user_str = complete + user_str;
-        }
-    }
-    return user_str;
-}
-function Unidades(num){
-
-    switch(num)
-    {
-        case 1: return "UN";
-        case 2: return "DOS";
-        case 3: return "TRES";
-        case 4: return "CUATRO";
-        case 5: return "CINCO";
-        case 6: return "SEIS";
-        case 7: return "SIETE";
-        case 8: return "OCHO";
-        case 9: return "NUEVE";
-    }
-
-    return "";
-}//Unidades()
-
-function Decenas(num){
-
-    decena = Math.floor(num/10);
-    unidad = num - (decena * 10);
-
-    switch(decena)
-    {
-        case 1:
-            switch(unidad)
-            {
-                case 0: return "DIEZ";
-                case 1: return "ONCE";
-                case 2: return "DOCE";
-                case 3: return "TRECE";
-                case 4: return "CATORCE";
-                case 5: return "QUINCE";
-                default: return "DIECI" + Unidades(unidad);
-            }
-            break;
-        case 2:
-            switch(unidad)
-            {
-                case 0: return "VEINTE";
-                default: return "VEINTI" + Unidades(unidad);
-            }
-            break;
-        case 3: return DecenasY("TREINTA", unidad);
-        case 4: return DecenasY("CUARENTA", unidad);
-        case 5: return DecenasY("CINCUENTA", unidad);
-        case 6: return DecenasY("SESENTA", unidad);
-        case 7: return DecenasY("SETENTA", unidad);
-        case 8: return DecenasY("OCHENTA", unidad);
-        case 9: return DecenasY("NOVENTA", unidad);
-        case 0: return Unidades(unidad);
-    }
-}//Unidades()
-
-function DecenasY(strSin, numUnidades) {
-    if (numUnidades > 0)
-    return strSin + " Y " + Unidades(numUnidades);
-
-    return strSin;
-}//DecenasY()
-
-function Centenas(num) {
-    centenas = Math.floor(num / 100);
-    decenas = num - (centenas * 100);
-
-    switch(centenas)
-    {
-        case 1:
-            if (decenas > 0)
-                return "CIENTO " + Decenas(decenas);
-            return "CIEN";
-        case 2: return "DOSCIENTOS " + Decenas(decenas);
-        case 3: return "TRESCIENTOS " + Decenas(decenas);
-        case 4: return "CUATROCIENTOS " + Decenas(decenas);
-        case 5: return "QUINIENTOS " + Decenas(decenas);
-        case 6: return "SEISCIENTOS " + Decenas(decenas);
-        case 7: return "SETECIENTOS " + Decenas(decenas);
-        case 8: return "OCHOCIENTOS " + Decenas(decenas);
-        case 9: return "NOVECIENTOS " + Decenas(decenas);
-    }
-
-    return Decenas(decenas);
-}//Centenas()
-
-function Seccion(num, divisor, strSingular, strPlural) {
-    cientos = Math.floor(num / divisor);
-    resto = num - (cientos * divisor);
-
-    letras = "";
-
-    if (cientos > 0)
-        if (cientos > 1)
-            letras = Centenas(cientos) + " " + strPlural;
-        else
-            letras = strSingular;
-
-    if (resto > 0)
-        letras += "";
-
-    return letras;
-}//Seccion()
-
-function Miles(num) {
-    divisor = 1000;
-    cientos = Math.floor(num / divisor);
-    resto = num - (cientos * divisor);
-
-    strMiles = Seccion(num, divisor, "UN MIL", "MIL");
-    strCentenas = Centenas(resto);
-
-    if(strMiles === "")
-        return strCentenas;
-
-    return strMiles + " " + strCentenas;
-}//Miles()
-
-function Millones(num) {
-    divisor = 1000000;
-    cientos = Math.floor(num / divisor);
-    resto = num - (cientos * divisor);
-
-    strMillones = Seccion(num, divisor, "UN MILLON DE", "MILLONES DE");
-    strMiles = Miles(resto);
-
-    if(strMillones === "")
-        return strMiles;
-
-    return strMillones + " " + strMiles;
-}//Millones()
-
-function NumeroALetras(num) {
-    var data = {
-        numero: num,
-        enteros: Math.floor(num),
-        centavos: (((Math.round(num * 100)) - (Math.floor(num) * 100))),
-        letrasCentavos: "",
-        letrasMonedaPlural: 'GUARANIES',//"PESOS", 'Dólares', 'Bolívares', 'etcs'
-        letrasMonedaSingular: 'GUARANI', //"PESO", 'Dólar', 'Bolivar', 'etc'
-
-        letrasMonedaCentavoPlural: "CENTAVOS",
-        letrasMonedaCentavoSingular: "CENTAVO"
-    };
-
-    if (data.centavos > 0) {
-        data.letrasCentavos = "CON " + (function (){
-            if (data.centavos == 1)
-                return Millones(data.centavos) + " " + data.letrasMonedaCentavoSingular;
-            else
-                return Millones(data.centavos) + " " + data.letrasMonedaCentavoPlural;
-            })();
-    }
-
-    if(data.enteros === 0)
-        return "CERO " + data.letrasMonedaPlural + " " + data.letrasCentavos;
-    if (data.enteros == 1)
-        return Millones(data.enteros) + " " + data.letrasMonedaSingular + " " + data.letrasCentavos;
-    else
-        return Millones(data.enteros) + " " + data.letrasMonedaPlural + " " + data.letrasCentavos;
-}//NumeroALetras()
-
-var saveAs = saveAs || (function(view) {
-	"use strict";
-	// IE <10 is explicitly unsupported
-	if (typeof view === "undefined" || typeof navigator !== "undefined" && /MSIE [1-9]\./.test(navigator.userAgent)) {
-		return;
-	}
-	var
-		  doc = view.document
-		  // only get URL when necessary in case Blob.js hasn't overridden it yet
-		, get_URL = function() {
-			return view.URL || view.webkitURL || view;
-		}
-		, save_link = doc.createElementNS("http://www.w3.org/1999/xhtml", "a")
-		, can_use_save_link = "download" in save_link
-		, click = function(node) {
-			var event = new MouseEvent("click");
-			node.dispatchEvent(event);
-		}
-		, is_safari = /constructor/i.test(view.HTMLElement) || view.safari
-		, is_chrome_ios =/CriOS\/[\d]+/.test(navigator.userAgent)
-		, throw_outside = function(ex) {
-			(view.setImmediate || view.setTimeout)(function() {
-				throw ex;
-			}, 0);
-		}
-		, force_saveable_type = "application/octet-stream"
-		// the Blob API is fundamentally broken as there is no "downloadfinished" event to subscribe to
-		, arbitrary_revoke_timeout = 1000 * 40 // in ms
-		, revoke = function(file) {
-			var revoker = function() {
-				if (typeof file === "string") { // file is an object URL
-					get_URL().revokeObjectURL(file);
-				} else { // file is a File
-					file.remove();
-				}
-			};
-			setTimeout(revoker, arbitrary_revoke_timeout);
-		}
-		, dispatch = function(filesaver, event_types, event) {
-			event_types = [].concat(event_types);
-			var i = event_types.length;
-			while (i--) {
-				var listener = filesaver["on" + event_types[i]];
-				if (typeof listener === "function") {
-					try {
-						listener.call(filesaver, event || filesaver);
-					} catch (ex) {
-						throw_outside(ex);
-					}
-				}
-			}
-		}
-		, auto_bom = function(blob) {
-			// prepend BOM for UTF-8 XML and text/* types (including HTML)
-			// note: your browser will automatically convert UTF-16 U+FEFF to EF BB BF
-			if (/^\s*(?:text\/\S*|application\/xml|\S*\/\S*\+xml)\s*;.*charset\s*=\s*utf-8/i.test(blob.type)) {
-				return new Blob([String.fromCharCode(0xFEFF), blob], {type: blob.type});
-			}
-			return blob;
-		}
-		, FileSaver = function(blob, name, no_auto_bom) {
-			if (!no_auto_bom) {
-				blob = auto_bom(blob);
-			}
-			// First try a.download, then web filesystem, then object URLs
-			var
-				  filesaver = this
-				, type = blob.type
-				, force = type === force_saveable_type
-				, object_url
-				, dispatch_all = function() {
-					dispatch(filesaver, "writestart progress write writeend".split(" "));
-				}
-				// on any filesys errors revert to saving with object URLs
-				, fs_error = function() {
-					if ((is_chrome_ios || (force && is_safari)) && view.FileReader) {
-						// Safari doesn't allow downloading of blob urls
-						var reader = new FileReader();
-						reader.onloadend = function() {
-							var url = is_chrome_ios ? reader.result : reader.result.replace(/^data:[^;]*;/, 'data:attachment/file;');
-							var popup = view.open(url, '_blank');
-							if(!popup) view.location.href = url;
-							url=undefined; // release reference before dispatching
-							filesaver.readyState = filesaver.DONE;
-							dispatch_all();
-						};
-						reader.readAsDataURL(blob);
-						filesaver.readyState = filesaver.INIT;
-						return;
-					}
-					// don't create more object URLs than needed
-					if (!object_url) {
-						object_url = get_URL().createObjectURL(blob);
-					}
-					if (force) {
-						view.location.href = object_url;
-					} else {
-						var opened = view.open(object_url, "_blank");
-						if (!opened) {
-							// Apple does not allow window.open, see https://developer.apple.com/library/safari/documentation/Tools/Conceptual/SafariExtensionGuide/WorkingwithWindowsandTabs/WorkingwithWindowsandTabs.html
-							view.location.href = object_url;
-						}
-					}
-					filesaver.readyState = filesaver.DONE;
-					dispatch_all();
-					revoke(object_url);
-				}
-			;
-			filesaver.readyState = filesaver.INIT;
-
-			if (can_use_save_link) {
-				object_url = get_URL().createObjectURL(blob);
-				setTimeout(function() {
-					save_link.href = object_url;
-					save_link.download = name;
-					click(save_link);
-					dispatch_all();
-					revoke(object_url);
-					filesaver.readyState = filesaver.DONE;
-				});
-				return;
-			}
-
-			fs_error();
-		}
-		, FS_proto = FileSaver.prototype
-		, saveAs = function(blob, name, no_auto_bom) {
-			return new FileSaver(blob, name || blob.name || "download", no_auto_bom);
-		}
-	;
-	// IE 10+ (native saveAs)
-	if (typeof navigator !== "undefined" && navigator.msSaveOrOpenBlob) {
-		return function(blob, name, no_auto_bom) {
-			name = name || blob.name || "download";
-
-			if (!no_auto_bom) {
-				blob = auto_bom(blob);
-			}
-			return navigator.msSaveOrOpenBlob(blob, name);
-		};
-	}
-
-	FS_proto.abort = function(){};
-	FS_proto.readyState = FS_proto.INIT = 0;
-	FS_proto.WRITING = 1;
-	FS_proto.DONE = 2;
-
-	FS_proto.error =
-	FS_proto.onwritestart =
-	FS_proto.onprogress =
-	FS_proto.onwrite =
-	FS_proto.onabort =
-	FS_proto.onerror =
-	FS_proto.onwriteend =
-		null;
-
-	return saveAs;
-}(
-	   typeof self !== "undefined" && self
-	|| typeof window !== "undefined" && window
-	|| this.content
-));
-
-
-// `self` is undefined in Firefox for Android content script context
-// while `this` is nsIContentFrameMessageManager
-// with an attribute `content` that corresponds to the window
-
-if (typeof module !== "undefined" && module.exports) {
-  module.exports.saveAs = saveAs;
-} else if ((typeof define !== "undefined" && define !== null) && (define.amd !== null)) {
-  define("FileSaver.js", function() {
-    return saveAs;
-  });
-}
-
-
-
-
-
-
 function openerp_pos_models(instance, module){ //module is instance.point_of_sale
     var QWeb = instance.web.qweb;
 	var _t = instance.web._t;
 
     var round_di = instance.web.round_decimals;
     var round_pr = instance.web.round_precision
-
-
-
+    
     // The PosModel contains the Point Of Sale's representation of the backend.
-    // Since the PoS must work in standalone ( Without connection to the server )
-    // it must contains a representation of the server's PoS backend.
+    // Since the PoS must work in standalone ( Without connection to the server ) 
+    // it must contains a representation of the server's PoS backend. 
     // (taxes, product list, configuration options, etc.)  this representation
-    // is fetched and stored by the PosModel at the initialisation.
-    // this is done asynchronously, a ready deferred alows the GUI to wait interactively
-    // for the loading to be completed
+    // is fetched and stored by the PosModel at the initialisation. 
+    // this is done asynchronously, a ready deferred alows the GUI to wait interactively 
+    // for the loading to be completed 
     // There is a single instance of the PosModel for each Front-End instance, it is usually called
     // 'pos' and is available to all widgets extending PosWidget.
 
@@ -378,7 +19,7 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
         initialize: function(session, attributes) {
             Backbone.Model.prototype.initialize.call(this, attributes);
             var  self = this;
-            this.session = session;
+            this.session = session;                 
             this.flush_mutex = new $.Mutex();                   // used to make sure the orders are sent to the server once at time
             this.pos_widget = attributes.pos_widget;
 
@@ -386,8 +27,8 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
             this.barcode_reader = new module.BarcodeReader({'pos': this, proxy:this.proxy, patterns: {}});  // used to read barcodes
             this.proxy_queue = new module.JobQueue();           // used to prevent parallels communications to the proxy
             this.db = new module.PosDB();                       // a local database used to search trough products and categories & store pending orders
-            this.debug = jQuery.deparam(jQuery.param.querystring()).debug !== undefined;    //debug mode
-
+            this.debug = jQuery.deparam(jQuery.param.querystring()).debug !== undefined;    //debug mode 
+            
             // Business data; loaded from the server at launch
             this.accounting_precision = 2; //TODO
             this.company_logo = null;
@@ -412,7 +53,7 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
 
             // these dynamic attributes can be watched for change by other models or widgets
             this.set({
-                'synch':            { state:'connected', pending:0 },
+                'synch':            { state:'connected', pending:0 }, 
                 'orders':           new module.OrderCollection(),
                 'selectedOrder':    null,
             });
@@ -426,20 +67,20 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
                 },3000);
             });
 
-            this.get('orders').bind('remove', function(order,_unused_,options){
-                self.on_removed_order(order,options.index,options.reason);
+            this.get('orders').bind('remove', function(order,_unused_,options){ 
+                self.on_removed_order(order,options.index,options.reason); 
             });
-
+            
             // We fetch the backend data on the server asynchronously. this is done only when the pos user interface is launched,
-            // Any change on this data made on the server is thus not reflected on the point of sale until it is relaunched.
-            // when all the data has loaded, we compute some stuff, and declare the Pos ready to be used.
+            // Any change on this data made on the server is thus not reflected on the point of sale until it is relaunched. 
+            // when all the data has loaded, we compute some stuff, and declare the Pos ready to be used. 
             this.ready = this.load_server_data()
                 .then(function(){
                     if(self.config.use_proxy){
                         return self.connect_to_proxy();
                     }
                 });
-
+            
         },
 
         // releases ressources holds by the model at the end of life of the posmodel
@@ -460,7 +101,7 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
                 });
             this.proxy.autoconnect({
                     force_ip: self.config.proxy_ip || undefined,
-                    progress: function(prog){
+                    progress: function(prog){ 
                         self.pos_widget.loading_progress(prog);
                     },
                 }).then(function(){
@@ -475,7 +116,7 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
 
         // helper function to load data from the server. Obsolete use the models loader below.
         fetch: function(model, fields, domain, ctx){
-            this._load_progress = (this._load_progress || 0) + 0.05;
+            this._load_progress = (this._load_progress || 0) + 0.05; 
             this.pos_widget.loading_message(_t('Loading')+' '+model,this._load_progress);
             return new instance.web.Model(model).query(fields).filter(domain).context(ctx).all()
         },
@@ -483,18 +124,18 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
         // Server side model loaders. This is the list of the models that need to be loaded from
         // the server. The models are loaded one by one by this list's order. The 'loaded' callback
         // is used to store the data in the appropriate place once it has been loaded. This callback
-        // can return a deferred that will pause the loading of the next module.
+        // can return a deferred that will pause the loading of the next module. 
         // a shared temporary dictionary is available for loaders to communicate private variables
-        // used during loading such as object ids, etc.
+        // used during loading such as object ids, etc. 
         models: [
         {
             model:  'res.users',
             fields: ['name','company_id'],
             ids:    function(self){ return [self.session.uid]; },
             loaded: function(self,users){ self.user = users[0]; },
-        },{
+        },{ 
             model:  'res.company',
-            fields: [ 'currency_id', 'email', 'website', 'company_registry', 'ruc', 'cedula', 'name', 'phone', 'partner_id' , 'country_id', 'tax_calculation_rounding_method'],
+            fields: [ 'currency_id', 'email', 'website', 'company_registry', 'vat', 'name', 'phone', 'partner_id' , 'country_id', 'tax_calculation_rounding_method'],
             ids:    function(self){ return [self.user.company_id[0]] },
             loaded: function(self,companies){ self.company = companies[0]; },
         },{
@@ -506,7 +147,7 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
                     self.dp[dps[i].name] = dps[i].digits;
                 }
             },
-        },{
+        },{ 
             model:  'product.uom',
             fields: [],
             domain: null,
@@ -528,7 +169,7 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
             loaded: function(self,users){ self.users = users; },
         },{
             model:  'res.partner',
-            fields: ['name','street','city','state_id','country_id','ruc','phone','cedula','zip','mobile','email','ean13','write_date'],
+            fields: ['name','street','city','state_id','country_id','vat','phone','zip','mobile','email','ean13','write_date'],
             domain: [['customer','=',true]],
             loaded: function(self,partners){
                 self.partners = partners;
@@ -568,7 +209,7 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
             fields: ['id', 'journal_ids','name','user_id','config_id','start_at','stop_at','sequence_number','login_number'],
             domain: function(self){ return [['state','=','opened'],['user_id','=',self.session.uid]]; },
             loaded: function(self,pos_sessions){
-                self.pos_session = pos_sessions[0];
+                self.pos_session = pos_sessions[0]; 
 
                 var orders = self.db.get_orders();
                 for (var i = 0; i < orders.length; i++) {
@@ -581,12 +222,12 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
             domain: function(self){ return [['id','=', self.pos_session.config_id[0]]]; },
             loaded: function(self,configs){
                 self.config = configs[0];
-                self.config.use_proxy = self.config.iface_payment_terminal ||
+                self.config.use_proxy = self.config.iface_payment_terminal || 
                                         self.config.iface_electronic_scale ||
                                         self.config.iface_print_via_proxy  ||
                                         self.config.iface_scan_via_proxy   ||
                                         self.config.iface_cashdrawer;
-
+                
                 self.barcode_reader.add_barcode_patterns({
                     'product':  self.config.barcode_product,
                     'cashier':  self.config.barcode_cashier,
@@ -616,9 +257,7 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
             ids:    function(self){ return [self.pricelist.currency_id[0]]; },
             loaded: function(self, currencies){
                 self.currency = currencies[0];
-                if (self.currency.rounding > 10) {
-                    self.currency.decimals = 0;
-                } else if (self.currency.rounding > 0) {
+                if (self.currency.rounding > 0) {
                     self.currency.decimals = Math.ceil(Math.log(1.0 / self.currency.rounding) / Math.log(10));
                 } else {
                     self.currency.decimals = 0;
@@ -629,7 +268,7 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
             model: 'product.packaging',
             fields: ['ean','product_tmpl_id'],
             domain: null,
-            loaded: function(self, packagings){
+            loaded: function(self, packagings){ 
                 self.db.add_packagings(packagings);
             },
         },{
@@ -641,7 +280,7 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
             },
         },{
             model:  'product.product',
-            fields: ['display_name', 'list_price','price','pos_categ_id', 'taxes_id', 'ean13', 'default_code',
+            fields: ['display_name', 'list_price','price','pos_categ_id', 'taxes_id', 'ean13', 'default_code', 
                      'to_weight', 'uom_id', 'uos_id', 'uos_coeff', 'mes_type', 'description_sale', 'description',
                      'product_tmpl_id'],
             domain: [['sale_ok','=',true],['available_in_pos','=',true]],
@@ -652,7 +291,7 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
         },{
             model:  'account.bank.statement',
             fields: ['account_id','currency','journal_id','state','name','user_id','pos_session_id'],
-            domain: function(self){ return [['state', 'in', ['open', 'draft']], ['journal_id', '=', self.pos_session.journal_ids]]; },
+            domain: function(self){ return [['state', '=', 'open'],['pos_session_id', '=', self.pos_session.id]]; },
             loaded: function(self, bankstatements, tmp){
                 self.bankstatements = bankstatements;
 
@@ -668,7 +307,7 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
             loaded: function(self, journals){
                 self.journals = journals;
 
-                // associate the bank statements with their journals.
+                // associate the bank statements with their journals. 
                 var bankstatements = self.bankstatements;
                 for(var i = 0, ilen = bankstatements.length; i < ilen; i++){
                     for(var j = 0, jlen = journals.length; j < jlen; j++){
@@ -686,7 +325,7 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
 
                 // Waiting for fonts to be loaded to prevent receipt printing
                 // from printing empty receipt while loading Inconsolata
-                // ( The font used for the receipt )
+                // ( The font used for the receipt ) 
                 waitForWebfonts(['Lato','Inconsolata'], function(){
                     fonts_loaded.resolve();
                 });
@@ -737,7 +376,7 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
         },
         ],
 
-        // loads all the needed data on the sever. returns a deferred indicating when all the data has loaded.
+        // loads all the needed data on the sever. returns a deferred indicating when all the data has loaded. 
         load_server_data: function(){
             var self = this;
             var loaded = new $.Deferred();
@@ -753,10 +392,10 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
                     self.pos_widget.loading_message(_t('Loading')+' '+(model.label || model.model || ''), progress);
                     var fields =  typeof model.fields === 'function'  ? model.fields(self,tmp)  : model.fields;
                     var domain =  typeof model.domain === 'function'  ? model.domain(self,tmp)  : model.domain;
-                    var context = typeof model.context === 'function' ? model.context(self,tmp) : model.context;
+                    var context = typeof model.context === 'function' ? model.context(self,tmp) : model.context; 
                     var ids     = typeof model.ids === 'function'     ? model.ids(self,tmp) : model.ids;
                     progress += progress_step;
-
+                    
 
                     if( model.model ){
                         if (model.ids) {
@@ -814,7 +453,7 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
                     } else {
                         def.reject();
                     }
-                }, function(err,event){ event.preventDefault(); def.reject(); });
+                }, function(err,event){ event.preventDefault(); def.reject(); });    
             return def;
         },
 
@@ -825,7 +464,7 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
                 // when we intentionally remove an unfinished order, and there is another existing one
                 this.set({'selectedOrder' : this.get('orders').at(index) || this.get('orders').last()});
             }else{
-                // when the order was automatically removed after completion,
+                // when the order was automatically removed after completion, 
                 // or when we intentionally delete the only concurrent order
                 this.add_new_order();
             }
@@ -847,25 +486,20 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
             this.get('selectedOrder').destroy({'reason':'abandon'});
         },
 
-        // saves the order locally and try to send it to the backend.
+        // saves the order locally and try to send it to the backend. 
         // it returns a deferred that succeeds after having tried to send the order and all the other pending orders.
-        push_order: function(order, config) {
+        push_order: function(order) {
             var self = this;
+
             if(order){
                 this.proxy.log('push_order',order.export_as_JSON());
                 this.db.add_order(order.export_as_JSON());
-                order.to_invoice = config.to_invoice
-                if (order.to_invoice){
-                    order.pos.config.legal_next_number = order.pos.config.legal_next_number + 1;
-                } else {
-                    order.pos.config.ticket_next_number = order.pos.config.ticket_next_number + 1;
-                }
             }
-
+            
             var pushed = new $.Deferred();
 
             this.flush_mutex.exec(function(){
-                var flushed = self._flush_orders(self.db.get_orders(), config);
+                var flushed = self._flush_orders(self.db.get_orders());
 
                 flushed.always(function(ids){
                     pushed.resolve();
@@ -880,34 +514,61 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
         // error-no-client: the order must have an associated partner_id. You can retry to make an invoice once
         //     this error is solved
         // error-transfer: there was a connection error during the transfer. You can retry to make the invoice once
-        //     the network connection is up
+        //     the network connection is up 
 
-        /*push_and_make_promissory: function(order) {
+        push_and_invoice_order: function(order){
             var self = this;
+            var invoiced = new $.Deferred(); 
 
-            if(order){
-                this.proxy.log('push_order',order.export_as_JSON());
-                this.db.add_order(order.export_as_JSON());
+            if(!order.get_client()){
+                invoiced.reject('error-no-client');
+                return invoiced;
             }
 
-            var pushed = new $.Deferred();
+            var order_id = this.db.add_order(order.export_as_JSON());
 
             this.flush_mutex.exec(function(){
-                var flushed = self._flush_orders(self.db.get_orders(),{timeout:30000, promissory:true});
+                var done = new $.Deferred(); // holds the mutex
 
-                flushed.always(function(ids){
-                    pushed.resolve();
+                // send the order to the server
+                // we have a 30 seconds timeout on this push.
+                // FIXME: if the server takes more than 30 seconds to accept the order,
+                // the client will believe it wasn't successfully sent, and very bad
+                // things will happen as a duplicate will be sent next time
+                // so we must make sure the server detects and ignores duplicated orders
+
+                var transfer = self._flush_orders([self.db.get_order(order_id)], {timeout:30000, to_invoice:true});
+                
+                transfer.fail(function(){
+                    invoiced.reject('error-transfer');
+                    done.reject();
                 });
+
+                // on success, get the order id generated by the server
+                transfer.pipe(function(order_server_id){    
+
+                    // generate the pdf and download it
+                    self.pos_widget.do_action('point_of_sale.pos_invoice_report',{additional_context:{ 
+                        active_ids:order_server_id,
+                    }});
+
+                    invoiced.resolve();
+                    done.resolve();
+                });
+
+                return done;
+
             });
-            return pushed;
-        },*/
+
+            return invoiced;
+        },
 
         // wrapper around the _save_to_server that updates the synch status widget
         _flush_orders: function(orders, options) {
             var self = this;
 
-
             this.set('synch',{ state: 'connecting', pending: orders.length});
+
             return self._save_to_server(orders, options).done(function (server_ids) {
                 var pending = self.db.get_orders().length;
 
@@ -931,6 +592,7 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
                 result.resolve([]);
                 return result;
             }
+                
             options = options || {};
 
             var self = this;
@@ -997,7 +659,7 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
     var orderline_id = 1;
 
     // An orderline represent one element of the content of a client's shopping cart.
-    // An orderline contains a product, its quantity, its price, discount. etc.
+    // An orderline contains a product, its quantity, its price, discount. etc. 
     // An Order contains zero or more Orderlines.
     module.Orderline = Backbone.Model.extend({
         initialize: function(attr,options){
@@ -1010,7 +672,7 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
             this.discountStr = '0';
             this.type = 'unit';
             this.selected = false;
-            this.id       = orderline_id++;
+            this.id       = orderline_id++; 
         },
         clone: function(){
             var orderline = new module.Orderline({},{
@@ -1043,8 +705,8 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
         get_product_type: function(){
             return this.type;
         },
-        // sets the quantity of the product. The quantity will be rounded according to the
-        // product's unity of measure properties. Quantities greater than zero will not get
+        // sets the quantity of the product. The quantity will be rounded according to the 
+        // product's unity of measure properties. Quantities greater than zero will not get 
         // rounded to zero
         set_quantity: function(quantity){
             if(quantity === 'remove'){
@@ -1068,7 +730,6 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
                 }
             }
             this.trigger('change',this);
-            $('.selected .info #quantity').addClass('mode-selected');
         },
         // return the quantity of product
         get_quantity: function(){
@@ -1123,20 +784,7 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
                 return false;
             }else if(this.price !== orderline.price){
                 return false;
-            }else{
-                return true;
-            }
-        },
-        can_be_merged_without_price: function(orderline){
-            if( this.get_product().id !== orderline.get_product().id){    //only orderline of the same product can be merged
-                return false;
-            }else if(!this.get_unit() || !this.get_unit().groupable){
-                return false;
-            }else if(this.get_product_type() !== orderline.get_product_type()){
-                return false;
-            }else if(this.get_discount() > 0){             // we don't merge discounted orderlines
-                return false;
-            }else{
+            }else{ 
                 return true;
             }
         },
@@ -1173,7 +821,9 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
             this.trigger('change',this);
         },
         get_unit_price: function(){
-            return round_di(this.price || 0, this.pos.dp['Product Price'])
+            var digits = this.pos.dp['Product Price'];
+            // round and truncate to mimic _sybmbol_set behavior
+            return parseFloat(round_di(this.price || 0, digits).toFixed(digits));
         },
         get_base_price:    function(){
             var rounding = this.pos.currency.rounding;
@@ -1343,8 +993,6 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
         export_as_JSON: function(){
             return {
                 name: instance.web.datetime_to_str(new Date()),
-                card_mode: this.card_mode,
-                reference: this.ref,
                 statement_id: this.cashregister.id,
                 account_id: this.cashregister.account_id[0],
                 journal_id: this.cashregister.journal_id[0],
@@ -1363,16 +1011,16 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
     module.PaymentlineCollection = Backbone.Collection.extend({
         model: module.Paymentline,
     });
+    
 
-
-    // An order more or less represents the content of a client's shopping cart (the OrderLines)
-    // plus the associated payment information (the Paymentlines)
+    // An order more or less represents the content of a client's shopping cart (the OrderLines) 
+    // plus the associated payment information (the Paymentlines) 
     // there is always an active ('selected') order in the Pos, a new one is created
     // automaticaly once an order is completed and sent to the server.
     module.Order = Backbone.Model.extend({
         initialize: function(attributes){
             Backbone.Model.prototype.initialize.apply(this, arguments);
-            this.pos = attributes.pos;
+            this.pos = attributes.pos; 
             this.sequence_number = this.pos.pos_session.sequence_number++;
             this.uid =     this.generateUniqueId();
             this.set({
@@ -1394,7 +1042,7 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
         },
         // Generates a public identification number for the order.
         // The generated number must be unique and sequential. They are made 12 digit long
-        // to fit into EAN-13 barcodes, should it be needed
+        // to fit into EAN-13 barcodes, should it be needed 
         generateUniqueId: function() {
             function zero_pad(num,size){
                 var s = ""+num;
@@ -1414,7 +1062,6 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
             line.order = this;
             this.get('orderLines').add(line);
             this.selectLine(this.getLastOrderline());
-            $('.selected .info #quantity').addClass('mode-selected');
         },
         addProduct: function(product, options){
             if(this._printed){
@@ -1444,7 +1091,6 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
                 this.get('orderLines').add(line);
             }
             this.selectLine(this.getLastOrderline());
-            $('.selected .info #quantity').addClass('mode-selected');
         },
         removeOrderline: function( line ){
             this.get('orderLines').remove(line);
@@ -1516,7 +1162,7 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
                     }
                 }
             });
-
+            
             for(var id in details){
                 if(details.hasOwnProperty(id)){
                     fulldetails.push({amount: details[id], tax: this.pos.taxes_by_id[id], name: this.pos.taxes_by_id[id].name});
@@ -1531,14 +1177,7 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
             }), 0), this.pos.currency.rounding);
         },
         getChange: function() {
-            //Avoid make payments for credit orders
-            var change = this.getPaidTotal() - this.getTotalTaxIncluded();
-            if(change > 0){
-                return change;
-            } else {
-                return 0;
-            }
-            //return this.getPaidTotal() - this.getTotalTaxIncluded();
+            return this.getPaidTotal() - this.getTotalTaxIncluded();
         },
         getDueLeft: function() {
             return this.getTotalTaxIncluded() - this.getPaidTotal();
@@ -1616,21 +1255,21 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
                     money: 2,
                     quantity: 3,
                 },
-                date: {
-                    year: date.getFullYear(),
-                    month: date.getMonth(),
-                    date: date.getDate(),       // day of the month
-                    day: date.getDay(),         // day of the week
-                    hour: date.getHours(),
+                date: { 
+                    year: date.getFullYear(), 
+                    month: date.getMonth(), 
+                    date: date.getDate(),       // day of the month 
+                    day: date.getDay(),         // day of the week 
+                    hour: date.getHours(), 
                     minute: date.getMinutes() ,
                     isostring: date.toISOString(),
                     localestring: date.toLocaleString(),
-                },
+                }, 
                 company:{
                     email: company.email,
                     website: company.website,
                     company_registry: company.company_registry,
-                    contact_address: company.partner_id[1],
+                    contact_address: company.partner_id[1], 
                     vat: company.vat,
                     name: company.name,
                     phone: company.phone,
@@ -1751,7 +1390,7 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
             var oldBuffer;
             oldBuffer = this.get('buffer');
             this.set({
-                buffer: oldBuffer[0] === '-' ? oldBuffer.substr(1) : "-" + oldBuffer
+                buffer: oldBuffer[0] === '-' ? oldBuffer.substr(1) : "-" + oldBuffer 
             });
             this.trigger('set_value',this.get('buffer'));
         },
@@ -1760,30 +1399,12 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
                 buffer: "0",
                 mode: newMode
             });
-            if ( newMode == "quantity" ){
-                $('.selected .info #price').removeClass('mode-selected');
-                $('.selected .info #discount').removeClass('mode-selected');
-                $('.selected .info #quantity').addClass('mode-selected');
-            }
-            if ( newMode == "price" ){
-                $('.selected .info #quantity').removeClass('mode-selected');
-                $('.selected .info #discount').removeClass('mode-selected');
-                $('.selected .info #price').addClass('mode-selected');
-            }
-            if ( newMode == "discount" ){
-                $('.selected .info #quantity').removeClass('mode-selected');
-                $('.selected .info #price').removeClass('mode-selected');
-                $('.selected .info #discount').addClass('mode-selected');
-            }
         },
         reset: function() {
             this.set({
                 buffer: "0",
                 mode: "quantity"
             });
-            $('.selected .info #price').removeClass('mode-selected');
-            $('.selected .info #discount').removeClass('mode-selected');
-            $('.selected .info #quantity').addClass('mode-selected');
         },
         resetValue: function(){
             this.set({buffer:'0'});
