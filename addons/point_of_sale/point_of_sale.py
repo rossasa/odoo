@@ -124,7 +124,7 @@ class pos_config(osv.osv):
         return True
 
     _constraints = [
-        (_check_cash_control, "You cannot have two cash controls in one Point Of Sale !", ['journal_ids']),
+        #(_check_cash_control, "You cannot have two cash controls in one Point Of Sale !", ['journal_ids']),
         (_check_company_location, "The company of the stock location is different than the one of point of sale", ['company_id', 'stock_location_id']),
         (_check_company_journal, "The company of the sale journal is different than the one of point of sale", ['company_id', 'journal_id']),
         (_check_company_payment, "The company of a payment method is different than the one of point of sale", ['company_id', 'journal_ids']),
