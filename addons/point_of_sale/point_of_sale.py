@@ -241,7 +241,12 @@ class pos_session(osv.osv):
 
     def _compute_cash_all(self, cr, uid, ids, fieldnames, args, context=None):
         result = dict()
-
+        company_currency = self.pool.get('res.users').browse(cr, uid, uid, context=context).company_id.currency_id.id
+        guarani = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'base', 'PYG')[1]
+        if company_currency == guarani:
+            guarani_id = False
+        else:
+            guarani_id = 166
         for record in self.browse(cr, uid, ids, context=context):
             result[record.id] = {
                 'cash_journal_id' : False,
@@ -251,8 +256,10 @@ class pos_session(osv.osv):
             for st in record.statement_ids:
                 if st.journal_id.cash_control == True:
                     result[record.id]['cash_control'] = True
-                    result[record.id]['cash_journal_id'] = st.journal_id.id
-                    result[record.id]['cash_register_id'] = st.id
+                    result[record.id]['cash_control'] = True
+                    if st.journal_id.currency.id == guarani_id and st.journal_id.type == 'cash':
+                         result[record.id]['cash_journal_id'] = st.journal_id.id
+                         result[record.id]['cash_register_id'] = st.id
 
         return result
 
