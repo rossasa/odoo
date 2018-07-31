@@ -366,15 +366,7 @@
             <ul class="dropdown-menu">
                 <li><a href="#" data-menu="settings">Preferences</a></li>
                 <li>
-                    <a href="#" data-menu="about">Sistema
-                        <bold style="font-weight:bold">
-                            <font color="#E50B09">S</font>
-                            <font color="#F68804">o</font>
-                            <font color="#F7E502">c</font>
-                            <font color="#A0EE04">i</font>
-                            <font color="#04A309">a</font>
-                            <font color="#0A63BD">l</font>
-                        </bold>
+                    <a href="#" data-menu="about">Sobre el Sistema
                     </a>
                 </li>
                 <li><a href="#" data-menu="logout">Log out</a></li>
@@ -392,20 +384,13 @@
             <div class="row">
                 <div class="col-sm-offset-2 col-md-offset-2 col-sm-8 col-md-8 user-details">
                     <div class="user-image">
-                        <img src="/web/static/src/img/logo2.png" alt="Social" title="Social" class="img-circle"
+                        <img src="/web/static/src/img/logo2.png?2" alt="Educasys" title="Educasys" class="img-circle"
                              style="border-radius: 0px"/>
                     </div>
                     <div class="user-info-block">
                         <div class="user-heading">
                             <br/><span class="help-block"></span><br/>
-                            <h3>Sistema
-                                <font color="#E50B09">S</font>
-                                <font color="#F68804">o</font>
-                                <font color="#F7E502">c</font>
-                                <font color="#A0EE04">i</font>
-                                <font color="#04A309">a</font>
-                                <font color="#0A63BD">l</font>
-                                Version 1.0
+                            <h3>Educasys - Version 1.0
                             </h3>
                         </div>
 
@@ -434,36 +419,35 @@
                         <div class="user-body">
                             <div class="tab-content">
                                 <div id="settings" class="tab-pane active">
-                                    <h4>Copyright © Rossa S.A. Todos los derechos reservados.</h4>
-                                    <p>El Sistema Social es una producto de <a target="_blank" href="http://www.rossa.com.py" style="text-decoration: underline;">Rossa S.A.</a></p>
-                                    <p>Para mas informaciones visite <a target="_blank" href="http://sistema.social" style="text-decoration: underline;">sistema.social</a></p>
-                                    <h4>Rossa S.A.</h4>
+                                    <h4>Copyright © EDYDSI S.A. Todos los derechos reservados.</h4>
+                                    <p>Para mas informaciones visite <a target="_blank" href="http://www.edydsi.com" style="text-decoration: underline;">EDYDSI</a></p>
+                                    <h4>EDYDSI S.A.</h4>
                                     <p>
-                                        Av. 14 de mayo<br/>
-                                        Santa Rita - Alto Parana <br/>
+                                        Bruno Guggiari #2063 -Edificio A+<br/>
+                                        Lambaré <br/>
                                         Paraguay
                                     </p>
                                 </div>
                                 <div id="email" class="tab-pane">
-                                    <h4>Rossa S.A.</h4>
+                                    <h4>EDYDSI S.A.</h4>
                                     <p>
-                                        Av. 14 de mayo<br/>
-                                        Santa Rita - Alto Parana <br/>
+                                        Bruno Guggiari #2063 -Edificio A+<br/>
+                                        Lambaré <br/>
                                         Paraguay
                                     </p>
                                     <!-- TODO - ALIAS contactus -->
-                                    <a class='btn btn-link' href='https://www.rossa.com.py'>Our website</a>
+                                    <a class='btn btn-link' href='https://www.edydsi.com'>Our website</a>
                                 </div>
                                 <div id="events" class="tab-pane">
-                                    <h4>Discover Events of Rossa around the world...</h4>
-                                    <a class='btn btn-link' href='https://www.rossa.com.py/event'> Our next Events</a>
+                                    <h4>Discover Events of EDYDSI around the world...</h4>
+                                    <a class='btn btn-link' href='https://www.edydsi.com/event'> Our next Events</a>
                                 </div>
                                 <div id="social" class="tab-pane">
                                     <h4>Follow Us...</h4>
-                                    <a href="https://www.rossa.com.py/web/about/facebook"><i class="fa fa-facebook-square fa-3x social-fb"></i></a>
-                                    <a href="https://www.rossa.com.py/web/about/twitter"><i class="fa fa-twitter-square fa-3x social-tw"></i></a>
-                                    <a href="https://www.rossa.com.py/web/about/googleplus"><i class="fa fa-google-plus-square fa-3x social-gp"></i></a>
-                                    <a href="https://www.rossa.com.py/web/about/linkedin"><i class="fa fa-linkedin-square fa-3x social-lk"></i></a>
+                                    <a href="https://www.edydsi.com/web/about/facebook"><i class="fa fa-facebook-square fa-3x social-fb"></i></a>
+                                    <a href="https://www.edydsi.com/web/about/twitter"><i class="fa fa-twitter-square fa-3x social-tw"></i></a>
+                                    <a href="https://www.edydsi.com/web/about/googleplus"><i class="fa fa-google-plus-square fa-3x social-gp"></i></a>
+                                    <a href="https://www.edydsi.com/web/about/linkedin"><i class="fa fa-linkedin-square fa-3x social-lk"></i></a>
                                 </div>
                             </div>
                         </div>

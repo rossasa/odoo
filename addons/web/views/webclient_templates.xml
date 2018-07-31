@@ -170,13 +170,8 @@
                 </div>
             </div>
             <div class="oe_footer" style="background:black">
-                <a style="font-weight:bold; color: black" href="http://www.sistema.social">
-                    <font color="#E50B09">S</font>
-                    <font color="#F68804">o</font>
-                    <font color="#F7E502">c</font>
-                    <font color="#A0EE04">i</font>
-                    <font color="#04A309">a</font>
-                    <font color="#0A63BD">l</font>
+                <a style="font-weight:bold; color: black" href="http://www.edydsi.com/">
+                    <font color="#ec350c">EDYDSI</font>
                 </a>
             </div>
         </template>
@@ -269,13 +264,8 @@
                             <a class="oe_login_manage_db" t-attf-href="/web/database/manager{{ '?debug' if debug else '' }}">Manage Databases</a>
                             <span class="oe_footer_seperator"> | </span>
                         </t>
-                        <a style="font-weight:bold; color: black" href="http://www.sistema.social">
-                            <font color="#E50B09">S</font>
-                            <font color="#F68804">o</font>
-                            <font color="#F7E502">c</font>
-                            <font color="#A0EE04">i</font>
-                            <font color="#04A309">a</font>
-                            <font color="#0A63BD">l</font>
+                        <a style="font-weight:bold; color: black" href="http://www.edydsi.com/">
+                            <font color="#ec350c">EDYDSI</font>
                         </a>
                     </div>
                 </div>
